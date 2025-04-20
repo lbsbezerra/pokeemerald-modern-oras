@@ -8,8 +8,6 @@
 #include "rtc.h"
 #include "script.h"
 #include "task.h"
-#include "pokemon_storage_system.h"
-#include "load_save.h"
 
 static u32 GetMirageRnd(void)
 {
@@ -41,43 +39,16 @@ void UpdateMirageRnd(u16 days)
     SetMirageRnd(rnd);
 }
 
-bool32 IsMirageIslandPresent(void)
+bool8 IsMirageIslandPresent(void)
 {
-    u32 hi = gSaveBlock1Ptr->vars[VAR_MIRAGE_RND_H - VARS_START];
-    u32 lo = gSaveBlock1Ptr->vars[VAR_MIRAGE_RND_L - VARS_START];
-    u32 rnd = ((hi << 16) | lo) >> 16;
-    bool32 species;
-    u32 personality;
-    int i, j;
-    struct Pokemon * curMon = &gPlayerParty[0];
-    struct Pokemon * partyEnd = &gPlayerParty[PARTY_SIZE];
+    u16 rnd = GetMirageRnd() >> 16;
+    int i;
 
     for (i = 0; i < PARTY_SIZE; i++)
-        if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL) == SPECIES_MEW)
+        if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) && (GetMonData(&gPlayerParty[i], MON_DATA_PERSONALITY) & 0xFFFF) == rnd)
             return TRUE;
-
-    do
-    {
-        species = curMon->box.hasSpecies;
-        if (!species) 
-            break;
-        personality = curMon->box.personality & 0xFFFF;
-        if (personality == rnd)
+        else if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL) == SPECIES_MEW)
             return TRUE;
-    } while (++curMon < partyEnd);
-
-    struct BoxPokemon * curBoxMon = &gPokemonStoragePtr->boxes[0];
-    struct BoxPokemon * boxMonEnd = &gPokemonStoragePtr->boxes[TOTAL_BOXES_COUNT * IN_BOX_COUNT];
-
-    do {
-        species = curBoxMon->hasSpecies;
-        if (species) {
-            personality = curBoxMon->personality & 0xffff;
-            if (personality == rnd) {
-                return TRUE;
-            }
-        }
-    } while (++curBoxMon < boxMonEnd);
 
     return FALSE;
 }
