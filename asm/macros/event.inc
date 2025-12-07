@@ -1793,6 +1793,16 @@
 	_dynmultichoice \left, \top, \ignoreBPress, \maxBeforeScroll, \shouldSort, \initialSelected, \callbacks, NULL
 	.endm
 
+	@ Returns 1 if randomizer is active
+	.macro checkrandomizer
+	.byte 0xea
+	.endm
+
+	@ Returns 1 if nuzlocke is active
+	.macro checknuzlocke
+	.byte 0xeb
+	.endm
+
 
 @ Supplementary
 
@@ -2022,4 +2032,12 @@
 	setvar VAR_0x8000, \texttype
 	setvar VAR_0x8001, \stringvarnumber
 	special BufferUnitSystemText
+	.endm
+
+	@ hide any follower pokemon if present,
+	@ putting them into their pokeball;
+	@ by default waits for their movement to finish
+	.macro hidefollower wait=1
+	callfunc ScrFunc_hidefollower
+	.2byte \wait
 	.endm

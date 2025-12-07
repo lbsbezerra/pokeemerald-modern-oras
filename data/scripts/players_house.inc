@@ -324,6 +324,32 @@ PlayersHouse_1F_EventScript_Mom::
 	release
 	end
 
+PlayersHouse_1F_EventScript_Mom_OutfitBox::
+	goto_if_unset FLAG_OUTFIT_BOX_OBTAINED, PlayersHouse_1F_EventScript_Mom_GiveOutfitBox
+	goto_if_set FLAG_OUTFIT_BOX_OBTAINED, PlayersHouse_1F_EventScript_MomHealsParty_AfterOutfitBox
+	end
+
+PlayersHouse_1F_EventScript_Mom_GiveOutfitBox::
+	msgbox PlayersHouse_1F_Mom_OutfitBox_Text, MSGBOX_DEFAULT
+	closemessage
+	setflag FLAG_OUTFIT_BOX_OBTAINED
+	giveitem ITEM_OAKS_PARCEL
+	msgbox PlayersHouse_1F_Mom_OutfitBox_Text_HowToUse, MSGBOX_DEFAULT
+	closemessage
+	end
+
+PlayersHouse_1F_Mom_OutfitBox_Text:
+	.string "MOM: Oh! I just realized I haven't\n"
+	.string "given you the OUTFIT BOX yet.\p"
+	.string "Here you go, dear!$"
+
+PlayersHouse_1F_Mom_OutfitBox_Text_HowToUse:
+	.string "MOM: Now you can change your clothes\n"
+	.string "whenever you like.\p"
+	.string "Just remember, you need to use the\n"
+	.string "OUTFIT BOX from your BAG.\p"
+	.string "Take care, honey!$"
+
 PlayersHouse_1F_EventScript_DontPushYourselfTooHard::
 	msgbox PlayersHouse_1F_Text_DontPushYourselfTooHard, MSGBOX_DEFAULT
 	release
@@ -358,6 +384,10 @@ PlayersHouse_1F_EventScript_TryGiveAmuletCoin::
 	end
 
 PlayersHouse_1F_EventScript_MomHealsParty::
+	goto_if_set FLAG_RESCUED_BIRCH, PlayersHouse_1F_EventScript_Mom_OutfitBox
+	end
+
+PlayersHouse_1F_EventScript_MomHealsParty_AfterOutfitBox::
 	specialvar VAR_RESULT, IsPokecenterChallengeActivated
 	goto_if_eq VAR_RESULT, TRUE, PlayersHouse_1F_EventScript_MomHealsParty_PokecenterChallenge
 	msgbox PlayersHouse_1F_Text_YouShouldRestABit, MSGBOX_DEFAULT

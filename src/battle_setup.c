@@ -623,8 +623,10 @@ void BattleSetup_StartLegendaryBattle(void)
         CreateBattleStartTask(B_TRANSITION_BLUR, MUS_DP_VS_LEGEND);
         break;
     case SPECIES_MEW:
-    case SPECIES_MEWTWO:
         CreateBattleStartTask(B_TRANSITION_GRID_SQUARES, MUS_VS_MEW);
+        break;
+    case SPECIES_MEWTWO:
+        CreateBattleStartTask(B_TRANSITION_GRID_SQUARES, MUS_RG_VS_MEWTWO);
         break;
     case SPECIES_CELEBI:
     case SPECIES_JIRACHI:
@@ -632,7 +634,15 @@ void BattleSetup_StartLegendaryBattle(void)
         break;
     case SPECIES_LATIOS:
     case SPECIES_LATIAS:
-        CreateBattleStartTask(B_TRANSITION_GRID_SQUARES, MUS_RG_VS_LEGEND);
+        CreateBattleStartTask(B_TRANSITION_GRID_SQUARES, MUS_BW_VS_LEGEND);
+        break;
+    case SPECIES_ARCEUS:
+        gBattleTypeFlags |= BATTLE_TYPE_GROUDON;
+        CreateBattleStartTask(B_TRANSITION_BLUR, MUS_HG_VS_ARCEUS);
+        break;
+    case SPECIES_TEST:
+        gBattleTypeFlags |= BATTLE_TYPE_GROUDON;
+        CreateBattleStartTask(B_TRANSITION_BLACKHOLE_PULSATE, MUS_BW_VS_IRIS);
         break;
     }
 
@@ -990,21 +1000,21 @@ static u8 GetTrainerBattleTransition(void)
 
     if (gTrainers[gTrainerBattleOpponent_A].trainerClass == TRAINER_CLASS_ELITE_FOUR)
     {
-        if (gTrainerBattleOpponent_A == TRAINER_SIDNEY)
+        if (gTrainerBattleOpponent_A == TRAINER_SIDNEY
+           || gTrainerBattleOpponent_A == TRAINER_SIDNEY_2_SINGLE
+           || gTrainerBattleOpponent_A == TRAINER_SIDNEY_2_DOUBLE)
             return B_TRANSITION_SIDNEY;
-        if (gTrainerBattleOpponent_A == TRAINER_PHOEBE)
+        if (gTrainerBattleOpponent_A == TRAINER_PHOEBE
+           || gTrainerBattleOpponent_A == TRAINER_PHOEBE_2_SINGLE
+           || gTrainerBattleOpponent_A == TRAINER_PHOEBE_2_DOUBLE)
             return B_TRANSITION_PHOEBE;
-        if (gTrainerBattleOpponent_A == TRAINER_GLACIA)
+        if (gTrainerBattleOpponent_A == TRAINER_GLACIA
+           || gTrainerBattleOpponent_A == TRAINER_GLACIA_2_SINGLE
+           || gTrainerBattleOpponent_A == TRAINER_GLACIA_2_DOUBLE)
             return B_TRANSITION_GLACIA;
-        if (gTrainerBattleOpponent_A == TRAINER_DRAKE)
-            return B_TRANSITION_DRAKE;
-        if (gTrainerBattleOpponent_A == TRAINER_SIDNEY2)
-            return B_TRANSITION_SIDNEY;
-        if (gTrainerBattleOpponent_A == TRAINER_PHOEBE2)
-            return B_TRANSITION_PHOEBE;
-        if (gTrainerBattleOpponent_A == TRAINER_GLACIA2)
-            return B_TRANSITION_GLACIA;
-        if (gTrainerBattleOpponent_A == TRAINER_DRAKE2)
+        if (gTrainerBattleOpponent_A == TRAINER_DRAKE
+           || gTrainerBattleOpponent_A == TRAINER_DRAKE_2_SINGLE
+           || gTrainerBattleOpponent_A == TRAINER_DRAKE_2_DOUBLE)
             return B_TRANSITION_DRAKE;
         return B_TRANSITION_CHAMPION;
     }

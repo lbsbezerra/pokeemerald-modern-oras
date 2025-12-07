@@ -569,7 +569,7 @@
 #define TRAINER_CATHERINE_5                 565
 #define TRAINER_JULIO                       566
 #define TRAINER_GRUNT_SEAFLOOR_CAVERN_5     567
-#define TRAINER_STEVEN2                     568
+#define TRAINER_STEVEN_2_SINGLE             568 // Steven's Rematch (Singles, only happens if using one Pokémon)
 #define TRAINER_GRUNT_MT_PYRE_4             569
 #define TRAINER_GRUNT_JAGGED_PASS           570
 #define TRAINER_MARC                        571
@@ -852,19 +852,19 @@
 #define TRAINER_MARIELA                     848
 #define TRAINER_ALVARO                      849
 #define TRAINER_EVERETT                     850
-#define TRAINER_RED                         851
-#define TRAINER_LEAF                        852
-#define TRAINER_BRENDAN_PLACEHOLDER         853
-#define TRAINER_MAY_PLACEHOLDER             854
-#define TRAINER_CHANSEY1                    855 //857
-#define TRAINER_WALLACE2                    856 //858
-#define TRAINER_CHANSEY3                    857 //859
-#define TRAINER_CHANSEY4                    858 //85A
-#define TRAINER_CHANSEY5                    859 //85B
-#define TRAINER_SIDNEY2                     860 //85C
-#define TRAINER_PHOEBE2                     861 //85D
-#define TRAINER_GLACIA2                     862 //85E
-#define TRAINER_DRAKE2                      863 //85F
+#define TRAINER_RED                         851 //Unused
+#define TRAINER_STEVEN_2_DOUBLE             852 //854, Steven's Rematch (Doubles, default)
+#define TRAINER_WALLACE_2_DOUBLE            853 //855, Wallace Rematch (Doubles)
+#define TRAINER_DRAKE_2_DOUBLE              854 //856, Drake Rematch (Doubles)
+#define TRAINER_SIDNEY_2_DOUBLE             855 //857, Sidney Rematch (Doubles)
+#define TRAINER_WALLACE_2_SINGLE            856 //858, Wallace Rematch (Singles)
+#define TRAINER_PHOEBE_2_DOUBLE             857 //859, Phoebe Rematch (Doubles)
+#define TRAINER_GLACIA_2_DOUBLE             858 //85A, Glacia Rematch (Doubles)
+#define TRAINER_NURSE                       859 //85B, Exp. Nurse in HyperTraining Gym
+#define TRAINER_SIDNEY_2_SINGLE             860 //85C, Sidney Rematch (Singles)
+#define TRAINER_PHOEBE_2_SINGLE             861 //85D, Phoebe Rematch (Singles)
+#define TRAINER_GLACIA_2_SINGLE             862 //85E, Glacia Rematch (Singles)
+#define TRAINER_DRAKE_2_SINGLE              863 //85F, Drake Rematch (Singles)
 
 // NOTE: Because each Trainer uses a flag to determine when they are defeated, there is only space for 9 additional trainers before trainer flag space overflows
 //       More space can be made by shifting flags around in constants/flags.h or changing how trainer flags are handled

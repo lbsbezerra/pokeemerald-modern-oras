@@ -16,6 +16,7 @@ extern const u8 gText_ExpandedPlaceholder_Kyogre[];
 extern const u8 gText_ExpandedPlaceholder_Groudon[];
 extern const u8 gText_ExpandedPlaceholder_Brendan[];
 extern const u8 gText_ExpandedPlaceholder_May[];
+extern const u8 gText_RivalName[];
 
 extern const u8 gText_FromSpace[];
 
@@ -360,7 +361,9 @@ extern const u8 gText_Birch_AndYouAre[];
 extern const u8 gText_Birch_BoyOrGirl[];
 extern const u8 gText_Birch_Difficulty[];
 extern const u8 gText_Birch_LockDifficulty[];
-extern const u8 gText_Birch_Challenge[];
+extern const u8 gText_Birch_ChallengeEasy[];
+extern const u8 gText_Birch_ChallengeNormal[];
+extern const u8 gText_Birch_ChallengeHard[];
 extern const u8 gText_Birch_WhatsYourName[];
 extern const u8 gText_Birch_SoItsPlayer[];
 extern const u8 gText_Birch_YourePlayer[];
@@ -537,6 +540,7 @@ extern const u8 gText_SpDef[];
 extern const u8 gText_Speed[];
 extern const u8 gText_Dash[];
 extern const u8 gText_Plus[];
+extern const u8 gText_StatEditor[];
 
 //Pokédex text
 extern const u8 gText_CryOf[];
@@ -648,7 +652,8 @@ extern const u8 gText_EVO_LEVEL_FEMALE[];
 extern const u8 gText_EVO_LEVEL_MALE[];
 extern const u8 gText_EVO_LEVEL_NIGHT[];
 extern const u8 gText_EVO_LEVEL_DAY[];
-extern const u8 gText_EVO_LEVEL_DUSK[];
+extern const u8 gText_EVO_LEVEL_TIME_MALE[];
+extern const u8 gText_EVO_LEVEL_TIME_FEMALE[];
 extern const u8 gText_EVO_ITEM_HOLD_DAY[];
 extern const u8 gText_EVO_ITEM_HOLD_NIGHT[];
 extern const u8 gText_EVO_ITEM_HOLD[];
@@ -1179,6 +1184,7 @@ extern const u8 gText_HallOfFame[];
 extern const u8 gText_LogOff[];
 extern const u8 gText_LanettesPC[];
 extern const u8 gText_SomeonesPC[];
+extern const u8 gText_Challenges[];
 extern const u8 gText_PlayersPC[];
 extern const u8 gText_WhichPCShouldBeAccessed[];
 
@@ -1352,6 +1358,9 @@ extern const u8 gText_TM24AndPrice[];
 extern const u8 gText_TM13AndPrice[];
 extern const u8 gText_50CoinsAndPrice[];
 extern const u8 gText_500CoinsAndPrice[];
+extern const u8 gText_1000CoinsAndPrice[];
+extern const u8 gText_2500CoinsAndPrice[];
+extern const u8 gText_5000CoinsAndPrice[];
 extern const u8 gText_Excellent2[];
 extern const u8 gText_NotSoGood[];
 extern const u8 gText_LilycoveCity[];
@@ -2163,7 +2172,7 @@ extern const u8 gText_ItemIsNowHeld[];
 extern const u8 gText_ChangedToNewItem[];
 extern const u8 gText_MailCantBeStored[];
 extern const u8 gText_NuzlockeFainted[];
-extern const u8 gText_DeadPokemon[];
+extern const u8 gText_FaintedForever[];
 extern const u8 gPCText_Cancel[];
 extern const u8 gPCText_Store[];
 extern const u8 gPCText_Withdraw[];
@@ -3192,6 +3201,10 @@ extern const u8 gText_infiniteRepelOn[];
 extern const u8 gText_infiniteRepelOff[];
 extern const u8 gText_infiniteCandies[];
 extern const u8 gText_HealingHeart[];
+extern const u8 gText_OutfitBox_RS[];
+extern const u8 gText_OutfitBox_Em[];
+extern const u8 gText_OutfitBox_CantUse[];
+extern const u8 gText_OutfitBox_CantUseBikeSurfUnderwater[];
 
 //tx_randomizer_and_challenges
 extern const u8 gText_NuzlockeCantThrowPokeBallRoute[];

@@ -60,9 +60,34 @@ EverGrandeCity_ChampionsRoom_EventScript_Wallace::
 	end
 
 EverGrandeCity_ChampionsRoom_EventScript_WallaceRematch::
-	playbgm MUS_ENCOUNTER_CHAMPION, FALSE
+	getpartysize
+	goto_if_eq VAR_RESULT, 1, EverGrandeCity_ChampionsRoom_EventScript_WallaceRematch_ForceSingles
+	msgbox EverGrandeCity_ChampionsRoom_Text_DoublesOrSingles, MSGBOX_DEFAULT
+	goto EverGrandeCity_ChampionsRoom_EventScript_WallaceRematch_ChooseFormat
+	end
+
+EverGrandeCity_ChampionsRoom_EventScript_WallaceRematch_ChooseFormat::
+	dynmultichoice 20, 8, FALSE, 2, 0, DYN_MULTICHOICE_CB_NONE, EverGrandeCity_SidneysRoom_Text_Doubles, EverGrandeCity_SidneysRoom_Text_Singles
+	switch VAR_RESULT
+	case 0, EverGrandeCity_ChampionsRoom_EventScript_WallaceRematch_Doubles
+	case 1, EverGrandeCity_ChampionsRoom_EventScript_WallaceRematch_Singles
+	case MULTI_B_PRESSED, EverGrandeCity_ChampionsRoom_EventScript_WallaceRematch_ChooseFormat
+	end
+
+EverGrandeCity_ChampionsRoom_EventScript_WallaceRematch_Doubles::
 	msgbox EverGrandeCity_ChampionsRoom_Text_IntroSpeech2, MSGBOX_DEFAULT
-	trainerbattle_no_intro TRAINER_WALLACE2, EverGrandeCity_ChampionsRoom_Text_Defeat2
+	trainerbattle_no_intro TRAINER_WALLACE_2_DOUBLE, EverGrandeCity_ChampionsRoom_Text_Defeat2
+	goto EverGrandeCity_ChampionsRoom_EventScript_Defeated2
+	end
+
+EverGrandeCity_ChampionsRoom_EventScript_WallaceRematch_ForceSingles::
+	msgbox EverGrandeCity_ChampionsRoom_Text_IntroSpeech2_NoDoubleOrSingles, MSGBOX_DEFAULT
+	goto EverGrandeCity_ChampionsRoom_EventScript_WallaceRematch_Singles
+	end
+
+EverGrandeCity_ChampionsRoom_EventScript_WallaceRematch_Singles::
+	msgbox EverGrandeCity_ChampionsRoom_Text_IntroSpeech2, MSGBOX_DEFAULT
+	trainerbattle_no_intro TRAINER_WALLACE_2_SINGLE, EverGrandeCity_ChampionsRoom_Text_Defeat2
 	goto EverGrandeCity_ChampionsRoom_EventScript_Defeated2
 	end
 
@@ -303,7 +328,7 @@ EverGrandeCity_ChampionsRoom_Text_IntroSpeech:
 	.string "their POKéMON in HOENN?\p"
 	.string "Show me right here and now!$"
 
-EverGrandeCity_ChampionsRoom_Text_IntroSpeech2:
+EverGrandeCity_ChampionsRoom_Text_DoublesOrSingles::
 	.string "WALLACE: Welcome, {PLAYER}{KUN}.\n"
 	.string "It's really nice to have you back.\p"
 	.string "At first glance, you feel like\n"
@@ -312,8 +337,24 @@ EverGrandeCity_ChampionsRoom_Text_IntroSpeech2:
 	.string "That gaze you're giving me…\p"
 	.string "Alright, I see that you are already\n"
 	.string "prepared for this battle.\p"
-	.string "Let's see if you can\n"
-	.string "dance at my rhythm.\p"
+	.string "As Champion, I grant you a choice.\n"
+	.string "You may choose our BATTLE format.\p"
+	.string "DOUBLE or SINGLE - neither will lessen\n"
+	.string "the challenge. Which will it be?$"
+
+EverGrandeCity_ChampionsRoom_Text_IntroSpeech2_NoDoubleOrSingles::
+	.string "WALLACE: Welcome, {PLAYER}{KUN}.\n"
+	.string "It's really nice to have you back.\p"
+	.string "At first glance, you feel like\n"
+	.string "somebody else. Did you get stronger?\p"
+	.string "Yes… Yes, you did. Oh…\n"
+	.string "That gaze you're giving me…\p"
+	.string "Alright, I see that you are already\n"
+	.string "prepared for this battle.$"
+
+EverGrandeCity_ChampionsRoom_Text_IntroSpeech2:
+	.string "Let's see if you can dance at\n"
+	.string "my rhythm.\p"
 	.string "Show me that you are the strongest\n"
 	.string "POKéMON trainer in HOENN!$"
 
@@ -365,24 +406,24 @@ EverGrandeCity_ChampionsRoom_Text_PostBattleSpeech2:
 	.string "If you weren't already!$"
 
 EverGrandeCity_ChampionsRoom_Text_MayAdvice:
-	.string "MAY: {PLAYER}{KUN}!\p"
+	.string "{RIVAL}: {PLAYER}{KUN}!\p"
 	.string "Here's some advice before you challenge\n"
 	.string "the CHAMPION…$"
 
 EverGrandeCity_ChampionsRoom_Text_MayItsAlreadyOver:
-	.string "MAY: Huh?\n"
+	.string "{RIVAL}: Huh?\n"
 	.string "What, what, what?\p"
 	.string "{PLAYER}{KUN}…\n"
 	.string "Could it be that…\l"
 	.string "It's already over?$"
 
 EverGrandeCity_ChampionsRoom_Text_BrendanAdvice:
-	.string "BRENDAN: {PLAYER}!\p"
+	.string "{RIVAL}: {PLAYER}!\p"
 	.string "How would you like some advice before\n"
 	.string "you challenge the CHAMPION?…$"
 
 EverGrandeCity_ChampionsRoom_Text_BrendanYouveWon:
-	.string "BRENDAN: {PLAYER}…\p"
+	.string "{RIVAL}: {PLAYER}…\p"
 	.string "Are you trying to tell me…\n"
 	.string "You've beaten the CHAMPION?$"
 
@@ -421,7 +462,7 @@ EverGrandeCity_ChampionsRoom_Text_WallaceWaitOutside:
 	.string "PROF. BIRCH.$"
 
 EverGrandeCity_ChampionsRoom_Text_MayCongratulations:
-	.string "MAY: Groan…\p"
+	.string "{RIVAL}: Groan…\p"
 	.string "… … … … … … … …\n"
 	.string "… … … … … … … …\p"
 	.string "I'm just joking! That's okay!\n"
@@ -430,7 +471,7 @@ EverGrandeCity_ChampionsRoom_Text_MayCongratulations:
 	.string "Honestly, congratulations!$"
 
 EverGrandeCity_ChampionsRoom_Text_BrendanCongratulations:
-	.string "BRENDAN: Whaaaat?! … … … … …\n"
+	.string "{RIVAL}: Whaaaat?! … … … … …\n"
 	.string "… … … … … … … …\p"
 	.string "It can't be helped if that's the rule.\p"
 	.string "{PLAYER}, way to go!\n"

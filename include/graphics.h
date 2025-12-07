@@ -3174,6 +3174,45 @@ extern const u32 gMonStillFrontPic_Dudunsparce[];
 extern const u8 gMonIcon_Dudunsparce[];
 extern const u8 gMonFootprint_Dudunsparce[];
 
+extern const u32 gMonFrontPic_Wyrdeer[];
+extern const u32 gMonPalette_Wyrdeer[];
+extern const u32 gMonBackPic_Wyrdeer[];
+extern const u32 gMonShinyPalette_Wyrdeer[];
+extern const u32 gMonStillFrontPic_Wyrdeer[];
+extern const u8 gMonIcon_Wyrdeer[];
+extern const u8 gMonFootprint_Wyrdeer[];
+
+extern const u32 gMonFrontPic_Ursaluna[];
+extern const u32 gMonPalette_Ursaluna[];
+extern const u32 gMonBackPic_Ursaluna[];
+extern const u32 gMonShinyPalette_Ursaluna[];
+extern const u32 gMonStillFrontPic_Ursaluna[];
+extern const u8 gMonIcon_Ursaluna[];
+extern const u8 gMonFootprint_Ursaluna[];
+
+extern const u32 gMonFrontPic_Ursaluna_BloodMoon[];
+extern const u32 gMonPalette_Ursaluna_BloodMoon[];
+extern const u32 gMonBackPic_Ursaluna_BloodMoon[];
+extern const u32 gMonShinyPalette_Ursaluna_BloodMoon[];
+extern const u32 gMonStillFrontPic_Ursaluna_BloodMoon[];
+extern const u8 gMonIcon_Ursaluna_BloodMoon[];
+extern const u8 gMonFootprint_Ursaluna_BloodMoon[];
+
+extern const u32 gMonFrontPic_Kleavor[];
+extern const u32 gMonPalette_Kleavor[];
+extern const u32 gMonBackPic_Kleavor[];
+extern const u32 gMonShinyPalette_Kleavor[];
+extern const u32 gMonStillFrontPic_Kleavor[];
+extern const u8 gMonIcon_Kleavor[];
+extern const u8 gMonFootprint_Kleavor[];
+
+extern const u8 gMonIcon_Test[];
+extern const u32 gMonFrontPic_Test[];
+extern const u32 gMonPalette_Test[];
+extern const u32 gMonBackPic_Test[];
+extern const u32 gMonShinyPalette_Test[];
+extern const u32 gMonStillFrontPic_Test[];
+
 extern const u32 gMonFrontPic_CircledQuestionMark[];
 extern const u32 gMonBackPic_CircledQuestionMark[];
 extern const u32 gMonPalette_CircledQuestionMark[];
@@ -3187,6 +3226,37 @@ extern const u32 gMonPalette_DoubleQuestionMark[];
 extern const u32 gMonShinyPalette_DoubleQuestionMark[];
 extern const u32 gMonStillFrontPic_DoubleQuestionMark[];
 extern const u16 gMonIconPalettes[][16];
+
+//Modern Shinies
+extern const u32 gMonShinyPalette_Modern_Pikachu[];
+extern const u32 gMonShinyPalette_Modern_Pichu[];
+extern const u32 gMonShinyPalette_Modern_Raichu[];
+extern const u32 gMonShinyPalette_Modern_Vaporeon[];
+extern const u32 gMonShinyPalette_Modern_Pikachu[];
+extern const u32 gMonShinyPalette_Modern_Raichu[];
+extern const u32 gMonShinyPalette_Modern_Pichu[];
+extern const u32 gMonShinyPalette_Modern_Vaporeon[];
+extern const u32 gMonShinyPalette_Modern_Jolteon[];
+extern const u32 gMonShinyPalette_Modern_Flareon[];
+extern const u32 gMonShinyPalette_Modern_Regice[];
+extern const u32 gMonShinyPalette_Modern_Heracross[];
+extern const u32 gMonShinyPalette_Modern_Haunter[];
+extern const u32 gMonShinyPalette_Modern_Gengar[];
+extern const u32 gMonShinyPalette_Modern_Scyther[];
+extern const u32 gMonShinyPalette_Modern_Blaziken[];
+extern const u32 gMonShinyPalette_Modern_Xatu[];
+extern const u32 gMonShinyPalette_Modern_Paras[];
+extern const u32 gMonShinyPalette_Modern_Chinchou[];
+extern const u32 gMonShinyPalette_Modern_Zapdos[];
+extern const u32 gMonShinyPalette_Modern_Elekid[];
+extern const u32 gMonShinyPalette_Modern_Farfetchd[];
+extern const u32 gMonShinyPalette_Modern_Lanturn[];
+extern const u32 gMonShinyPalette_Modern_Marowak[];
+extern const u32 gMonShinyPalette_Modern_Phanpy[];
+extern const u32 gMonShinyPalette_Modern_Lapras[];
+extern const u32 gMonShinyPalette_Modern_Tentacool[];
+extern const u32 gMonShinyPalette_Modern_Tentacruel[];
+
 
 // trainer sprites
 extern const u32 gTrainerFrontPic_Hiker[];
@@ -4262,6 +4332,8 @@ extern const u32 gItemIcon_HM[];
 // FireRed/LeafGreen key items
 extern const u32 gItemIcon_OaksParcel[];
 extern const u32 gItemIconPalette_OaksParcel[];
+extern const u32 gItemIcon_OutfitBox[];
+extern const u32 gItemIconPalette_OutfitBox[];
 extern const u32 gItemIcon_PokeFlute[];
 extern const u32 gItemIconPalette_PokeFlute[];
 extern const u32 gItemIcon_SecretKey[];

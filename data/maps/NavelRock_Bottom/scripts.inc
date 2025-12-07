@@ -33,6 +33,7 @@ NavelRock_Bottom_EventScript_Lugia::
 	lock
 	faceplayer
 	waitse
+	playbgm MUS_HG_LUGIA_APPEARS, FALSE
 	delay 20
 	playse SE_THUNDERSTORM_STOP
 	setvar VAR_0x8004, 0  @ vertical pan
@@ -50,7 +51,11 @@ NavelRock_Bottom_EventScript_Lugia::
 	delay 30
 	delay 50
 	waitse
+	setweather WEATHER_DOWNPOUR
+	doweather
 	playmoncry SPECIES_LUGIA, CRY_MODE_ENCOUNTER
+	msgbox Lugia_Text, MSGBOX_NPC
+	closemessage
 	waitmoncry
 	delay 20
 	seteventmon SPECIES_LUGIA, 70
@@ -63,6 +68,8 @@ NavelRock_Bottom_EventScript_Lugia::
 	goto_if_eq VAR_RESULT, B_OUTCOME_RAN, NavelRock_Bottom_EventScript_RanFromLugia
 	goto_if_eq VAR_RESULT, B_OUTCOME_PLAYER_TELEPORTED, NavelRock_Bottom_EventScript_RanFromLugia
 	setflag FLAG_CAUGHT_LUGIA
+	setweather WEATHER_SHADE
+	doweather
 	call_if_set FLAG_EXTRA_LEGENDARIES, NavelRock_Bottom_Enable_Johto_Legendaries
 	release
 	end
@@ -75,9 +82,13 @@ NavelRock_Bottom_Enable_Johto_Legendaries::
 	waitmoncry
 	playmoncry SPECIES_RAIKOU, CRY_MODE_NORMAL
 	waitmoncry
+	msgbox Lugia_Legendaries_Text, MSGBOX_NPC
+	closemessage
 	return
 
 NavelRock_Bottom_EventScript_DefeatedLugia::
+	setweather WEATHER_SHADE
+	doweather
 	setflag FLAG_DEFEATED_LUGIA
 	call_if_set FLAG_EXTRA_LEGENDARIES, NavelRock_Bottom_Enable_Johto_Legendaries
 	setvar VAR_0x8004, SPECIES_LUGIA
@@ -85,6 +96,15 @@ NavelRock_Bottom_EventScript_DefeatedLugia::
 	end
 
 NavelRock_Bottom_EventScript_RanFromLugia::
+	setweather WEATHER_SHADE
+	doweather
 	setvar VAR_0x8004, SPECIES_LUGIA
 	goto Common_EventScript_LegendaryFlewAway
 	end
+
+Lugia_Text:
+	.string "Grooaah!$"
+
+Lugia_Legendaries_Text:
+	.string "Three unknown roars echoed\n"
+	.string "through NAVEL ROCK.$"

@@ -45,6 +45,7 @@
 #include "constants/roulette.h"
 #include "constants/script_menu.h"
 #include "constants/secret_bases.h"
+#include "constants/sliding_puzzles.h"
 #include "constants/songs.h"
 #include "constants/sound.h"
 #include "constants/species.h"
@@ -1106,3 +1107,47 @@ Common_EventScript_LegendaryFlewAway::
 	.include "data/maps/ScorchedSlab_Zapdos/scripts.inc"
 
 	.include "data/maps/ScorchedSlab_Modern/scripts.inc"
+
+	.include "data/maps/OldaleTown_PokemonCenter_3F/scripts.inc"
+
+	.include "data/maps/DewfordTown_PokemonCenter_3F/scripts.inc"
+
+	.include "data/maps/FallarborTown_PokemonCenter_3F/scripts.inc"
+
+	.include "data/maps/LavaridgeTown_PokemonCenter_3F/scripts.inc"
+
+	.include "data/maps/VerdanturfTown_PokemonCenter_3F/scripts.inc"
+
+	.include "data/maps/Pacifidlog_PokemonCenter_3F/scripts.inc"
+
+	.include "data/maps/PetalburgCity_PokemonCenter_3F/scripts.inc"
+
+	.include "data/maps/SlateportCity_PokemonCenter_3F/scripts.inc"
+
+	.include "data/maps/MauvilleCity_PokemonCenter_3F/scripts.inc"
+
+	.include "data/maps/RustboroCity_PokemonCenter_3F/scripts.inc"
+
+	.include "data/maps/FortreeCity_PokemonCenter_3F/scripts.inc"
+
+	.include "data/maps/LilycoveCity_PokemonCenter_3F/scripts.inc"
+
+	.include "data/maps/MossdeepCity_PokemonCenter_3F/scripts.inc"
+
+	.include "data/maps/SootopolisCity_PokemonCenter_3F/scripts.inc"
+
+	.include "data/maps/EverGrandeCity_PokemonCenter_3F/scripts.inc"
+
+	.include "data/maps/BattleFrontier_PokemonCenter_3F/scripts.inc"
+
+	.include "data/maps/EverGrandeCity_PokemonLeague_3F/scripts.inc"
+
+	.include "data/maps/NavelRock_Fork_Open/scripts.inc"
+
+	.include "data/maps/NavelRock_UnownChamber/scripts.inc"
+
+	.include "data/maps/NavelRock_Unown_Room_1/scripts.inc"
+
+	.include "data/maps/NavelRock_Unown_Room_2/scripts.inc"
+
+	.include "data/scripts/test.inc"

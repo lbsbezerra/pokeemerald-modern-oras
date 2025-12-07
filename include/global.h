@@ -568,6 +568,8 @@ struct SaveBlock2
               u16 optionsRunType:3;
               u16 optionsAutorunSurf:1;
               u16 optionsAutorunDive:1;
+              u8 rivalName[PLAYER_NAME_LENGTH + 1];
+              u16 optionsSurfOverworld:1; // whether to use the original Surf blob or dynamic blob (False to use dynamic)
 }; // sizeof=0xF2C
 
 extern struct SaveBlock2 *gSaveBlock2Ptr;
@@ -1151,10 +1153,10 @@ struct SaveBlock1
         u8 tx_Mode_InfiniteTMs:1;
         u8 tx_Mode_PoisonSurvive:1;
         u8 tx_Features_EasierFeebas:1;
-        u8 tx_Features_PkmnDeath:1;
+        u8 tx_Nuzlocke_EasyMode:1;
         u8 tx_Challenges_PCHeal:1;
         u8 tx_Features_RTCType:1;
-        u8 tx_Mode_AlternateSpawns:1;
+        u8 tx_Features_ShinyColors:1;
         u8 tx_Features_LimitDifficulty:1;
         u8 tx_Features_ShinyChance:4;
         u8 tx_Features_WildMonDropItems:1;
@@ -1170,6 +1172,12 @@ struct SaveBlock1
         u8 tx_Mode_Legendary_Abilities:1;
         u8 tx_Mode_New_Legendaries:1;
         u8 tx_Challenges_Expensive:3;
+        u8 tx_Difficulty_EscapeRopeDig:1;
+        u8 tx_Mode_Encounters:2;
+        u8 tx_Features_FrontierBans:1;
+        u8 tx_Difficulty_HardExp:1;
+        u8 tx_Mode_TypeEffectiveness:1;
+        u8 tx_Difficulty_CatchRate:3;
 };
 
 extern struct SaveBlock1* gSaveBlock1Ptr;

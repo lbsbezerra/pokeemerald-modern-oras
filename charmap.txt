@@ -402,6 +402,7 @@ B_TRAINER2_WIN_TEXT = FD 31
 B_PARTNER_CLASS = FD 32
 B_PARTNER_NAME = FD 33
 B_BUFF3 = FD 34
+B_RIVAL_NAME = FD 35
 
 @ indicates the end of a town/city name (before " TOWN" or " CITY")
 NAME_END = FC 00
@@ -1365,6 +1366,8 @@ MUS_HG_OBTAIN_ARCADE_POINTS      = 7F 03
 MUS_HG_OBTAIN_CASTLE_POINTS      = 80 03
 MUS_HG_OBTAIN_B_POINTS           = 81 03
 MUS_HG_WIN_MINIGAME              = 82 03
+MUS_BW_VS_LEGEND                 = 83 04
+MUS_BW_VS_IRIS                   = 84 04
 
 A_BUTTON = F8 00
 B_BUTTON = F8 01

@@ -1,6 +1,8 @@
 .set LOCALID_STEVEN, 1
 
 MeteorFalls_StevensCave_MapScripts::
+	map_script MAP_SCRIPT_ON_RESUME, EncounterTable
+	map_script MAP_SCRIPT_ON_TRANSITION, EncounterTable
 	.byte 0
 
 MeteorFalls_StevensCave_EventScript_Steven::
@@ -37,9 +39,21 @@ MeteorFalls_StevensCave_EventScript_StevenRematch::
 	applymovement LOCALID_STEVEN, Common_Movement_FacePlayer
 	waitmovement 0
 	msgbox MeteorFalls_StevensCave_Text_ShouldKnowHowGoodIAmExpectWorst2, MSGBOX_DEFAULT
+	getpartysize
+	goto_if_eq VAR_RESULT, 1, MeteorFalls_StevensCave_EventScript_StevenRematch_ForceSingles
 	setflag FLAG_SYS_SET_BATTLE_BGM
 	setvar VAR_TEMP_F, MUS_HG_VS_CHAMPION
-	trainerbattle_no_intro TRAINER_STEVEN2, MeteorFalls_StevensCave_Text_StevenDefeat2
+	trainerbattle_no_intro TRAINER_STEVEN_2_DOUBLE, MeteorFalls_StevensCave_Text_StevenDefeat2
+	msgbox MeteorFalls_StevensCave_Text_MyPredictionCameTrue2, MSGBOX_DEFAULT
+	clearflag FLAG_STEVEN_REMATCH
+	goto_if_unset FLAG_ARCEUS_EGG_GIVE MeteorFalls_StevensCave_EventScript_StevenArceusEvent
+	release
+	end
+
+MeteorFalls_StevensCave_EventScript_StevenRematch_ForceSingles::
+	setflag FLAG_SYS_SET_BATTLE_BGM
+	setvar VAR_TEMP_F, MUS_HG_VS_CHAMPION
+	trainerbattle_no_intro TRAINER_STEVEN_2_SINGLE, MeteorFalls_StevensCave_Text_StevenDefeat2
 	msgbox MeteorFalls_StevensCave_Text_MyPredictionCameTrue2, MSGBOX_DEFAULT
 	clearflag FLAG_STEVEN_REMATCH
 	goto_if_unset FLAG_ARCEUS_EGG_GIVE MeteorFalls_StevensCave_EventScript_StevenArceusEvent
@@ -78,12 +92,12 @@ MeteorFalls_StevensCave_EventScript_StevenArceusEventToPC::
 	end
 
 MeteorFalls_StevensCave_Text_ArceusEvent1:
-	.string "And… I would like to give you\n"
-	.string "something I found while digging\l"
-	.string "around. It's a strange egg.\p"
-	.string "I've been carrying it for many\n"
-	.string "weeks but it doesn't hatch.\p"
-	.string "You're a better trainer than me,\n"
+	.string "And… I want to give you something\n"
+	.string "I found while digging here.\p"
+	.string "It's a strange egg.\p"
+	.string "I've carried it for weeks, but\n"
+	.string "it won't hatch.\p"
+	.string "You're a stronger trainer than me,\n"
 	.string "so maybe you can make it hatch.$"
 
 MeteorFalls_StevensCave_Text_ArceusEvent2:

@@ -62,9 +62,6 @@ static bool8 IsAbilityAllowingEncounter(u8 level);
 
 EWRAM_DATA static u8 sWildEncountersDisabled = 0;
 EWRAM_DATA static u32 sFeebasRngValue = 0;
-EWRAM_DATA u8 gChainFishingStreak = 0;
-EWRAM_DATA static u16 sLastFishingSpecies = 0;
-EWRAM_DATA bool8 gIsFishingEncounter = FALSE;   //same as in dizzyegg's item expansion repo
 
 #include "data/wild_encounters.h"
 
@@ -360,8 +357,8 @@ static u16 GetCurrentMapWildMonHeaderId(void)
         if (gWildMonHeaders[i].mapGroup == gSaveBlock1Ptr->location.mapGroup &&
             gWildMonHeaders[i].mapNum == gSaveBlock1Ptr->location.mapNum)
         {
-            if (VarGet(VAR_TIME_BASED_ENCOUNTER) >= 1 && VarGet(VAR_TIME_BASED_ENCOUNTER) <= 4)
-                i += (VarGet(VAR_TIME_BASED_ENCOUNTER) - 1);
+            if (VarGet(VAR_ENCOUNTER_TABLE) >= 1 && VarGet(VAR_ENCOUNTER_TABLE) <= 4)
+                i += (VarGet(VAR_ENCOUNTER_TABLE) - 1);
             if (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(ALTERING_CAVE) &&
                 gSaveBlock1Ptr->location.mapNum == MAP_NUM(ALTERING_CAVE))
             {
@@ -413,20 +410,22 @@ static u8 PickWildMonNature(void)
     }
     // check synchronize for a Pokémon with the same ability
     if (gSaveBlock1Ptr->tx_Mode_Synchronize == 0)
+    {
         if (!GetMonData(&gPlayerParty[0], MON_DATA_SANITY_IS_EGG)
         && GetMonAbility(&gPlayerParty[0]) == ABILITY_SYNCHRONIZE
         && Random() % 2 == 0)
         {
             return GetMonData(&gPlayerParty[0], MON_DATA_PERSONALITY) % NUM_NATURES;
         }
-
+    }
     else if (gSaveBlock1Ptr->tx_Mode_Synchronize == 1)
+    {
         if (!GetMonData(&gPlayerParty[0], MON_DATA_SANITY_IS_EGG)
         && GetMonAbility(&gPlayerParty[0]) == ABILITY_SYNCHRONIZE)
         {
             return GetMonData(&gPlayerParty[0], MON_DATA_PERSONALITY) % NUM_NATURES;
         }
-
+    }
     // random nature
     return Random() % NUM_NATURES;
 }
@@ -844,7 +843,6 @@ void FishingWildEncounter(u8 rod)
 {
     u16 species;
 
-    gIsFishingEncounter = TRUE; //must be set before mon is created
     if (CheckFeebas() == TRUE)
     {
         u8 level = ChooseWildMonLevel(&sWildFeebas);
@@ -856,17 +854,6 @@ void FishingWildEncounter(u8 rod)
     {
         species = GenerateFishingWildMon(gWildMonHeaders[GetCurrentMapWildMonHeaderId()].fishingMonsInfo, rod);
     }
-    if (species == sLastFishingSpecies)
-    {
-        if (gChainFishingStreak < 20)
-            gChainFishingStreak++;
-    }
-    else
-    {
-        gChainFishingStreak = 0;    //reeling in different species resets chain fish counter
-    }
-
-    sLastFishingSpecies = species;
     IncrementGameStat(GAME_STAT_FISHING_ENCOUNTERS);
     SetPokemonAnglerSpecies(species);
     BattleSetup_StartWildBattle();

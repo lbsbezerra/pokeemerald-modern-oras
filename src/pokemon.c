@@ -76,6 +76,7 @@ static void Task_PlayMapChosenOrBattleBGM(u8 taskId);
 static bool8 ShouldGetStatBadgeBoost(u16 flagId, u8 battlerId);
 static u16 GiveMoveToBoxMon(struct BoxPokemon *boxMon, u16 move);
 static bool8 ShouldSkipFriendshipChange(void);
+static u16 GetPreEvolution(u16 species);
 
 EWRAM_DATA static u8 sLearningMoveTableID = 0;
 EWRAM_DATA u8 gPlayerPartyCount = 0;
@@ -563,13 +564,13 @@ static const u16 sSpeciesToHoennPokedexNum[NUM_SPECIES - 1] =
     SPECIES_TO_HOENN(ANNIHILAPE),
     SPECIES_TO_HOENN(FARIGIRAF),
     SPECIES_TO_HOENN(DUDUNSPARCE),
-    //SPECIES_TO_HOENN(UNUSED_SPACE1),
-    //SPECIES_TO_HOENN(UNUSED_SPACE2),
-    //SPECIES_TO_HOENN(UNUSED_SPACE3),
-    //SPECIES_TO_HOENN(UNUSED_SPACE4),
+    SPECIES_TO_HOENN(WYRDEER),
+    SPECIES_TO_HOENN(URSALUNA),
+    SPECIES_TO_HOENN(KLEAVOR),
+    SPECIES_TO_HOENN(URSALUNA_BLOODMOON),
     //SPECIES_TO_HOENN(UNUSED_SPACE5),
     //SPECIES_TO_HOENN(UNUSED_SPACE6),
-    //SPECIES_TO_HOENN(UNUSED_SPACE7),
+    SPECIES_TO_HOENN(TEST),
     //SPECIES_TO_HOENN(UNUSED_SPACE8),
     //SPECIES_TO_HOENN(UNUSED_SPACE9),
     //SPECIES_TO_HOENN(UNUSED_SPACE10),
@@ -1029,13 +1030,13 @@ static const u16 sSpeciesToNationalPokedexNum[NUM_SPECIES - 1] =
     SPECIES_TO_NATIONAL(ANNIHILAPE),
     SPECIES_TO_NATIONAL(FARIGIRAF),
     SPECIES_TO_NATIONAL(DUDUNSPARCE),
-    //SPECIES_TO_NATIONAL(UNUSED_SPACE1),
-    //SPECIES_TO_NATIONAL(UNUSED_SPACE2),
-    //SPECIES_TO_NATIONAL(UNUSED_SPACE3),
-    //SPECIES_TO_NATIONAL(UNUSED_SPACE4),
+    SPECIES_TO_NATIONAL(WYRDEER),
+    SPECIES_TO_NATIONAL(URSALUNA),
+    SPECIES_TO_NATIONAL(KLEAVOR),
+    SPECIES_TO_NATIONAL(URSALUNA_BLOODMOON),
     //SPECIES_TO_NATIONAL(UNUSED_SPACE5),
     //SPECIES_TO_NATIONAL(UNUSED_SPACE6),
-    //SPECIES_TO_NATIONAL(UNUSED_SPACE7),
+    SPECIES_TO_NATIONAL(TEST),
     //SPECIES_TO_NATIONAL(UNUSED_SPACE8),
     //SPECIES_TO_NATIONAL(UNUSED_SPACE9),
     //SPECIES_TO_NATIONAL(UNUSED_SPACE10),
@@ -1496,13 +1497,13 @@ static const u16 sHoennToNationalOrder[NUM_SPECIES - 1] =
     HOENN_TO_NATIONAL(ANNIHILAPE),
     HOENN_TO_NATIONAL(FARIGIRAF),
     HOENN_TO_NATIONAL(DUDUNSPARCE),
-    //HOENN_TO_NATIONAL(UNUSED_SPACE1),
-    //HOENN_TO_NATIONAL(UNUSED_SPACE2),
-    //HOENN_TO_NATIONAL(UNUSED_SPACE3),
-    //HOENN_TO_NATIONAL(UNUSED_SPACE4),
+    HOENN_TO_NATIONAL(WYRDEER),
+    HOENN_TO_NATIONAL(URSALUNA),
+    HOENN_TO_NATIONAL(KLEAVOR),
+    HOENN_TO_NATIONAL(URSALUNA_BLOODMOON),
     //HOENN_TO_NATIONAL(UNUSED_SPACE5),
     //HOENN_TO_NATIONAL(UNUSED_SPACE6),
-    //HOENN_TO_NATIONAL(UNUSED_SPACE7),
+    HOENN_TO_NATIONAL(TEST),
     //HOENN_TO_NATIONAL(UNUSED_SPACE8),
     //HOENN_TO_NATIONAL(UNUSED_SPACE9),
     //HOENN_TO_NATIONAL(UNUSED_SPACE10),
@@ -1948,7 +1949,7 @@ static const u8 sMonFrontAnimIdsTable[NUM_SPECIES - 1] =
     [SPECIES_LATIAS - 1]      = ANIM_SWING_CONCAVE_FAST_SHORT,
     [SPECIES_LATIOS - 1]      = ANIM_V_SHAKE,
     [SPECIES_JIRACHI - 1]     = ANIM_SWING_CONVEX,
-    [SPECIES_DEOXYS - 1]      = ANIM_H_PIVOT,
+    [SPECIES_DEOXYS - 1]      = ANIM_GROW_VIBRATE,
     [SPECIES_CHIMECHO - 1]    = ANIM_H_SLIDE_WOBBLE,
     [SPECIES_ARCEUS - 1]      = ANIM_GROW_VIBRATE,
     [SPECIES_AMBIPOM - 1]     = ANIM_BACK_AND_LUNGE,
@@ -1990,13 +1991,13 @@ static const u8 sMonFrontAnimIdsTable[NUM_SPECIES - 1] =
     [SPECIES_ANNIHILAPE - 1]    = ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL,
     [SPECIES_FARIGIRAF - 1]     = ANIM_V_JUMPS_BIG,
     [SPECIES_DUDUNSPARCE - 1]   = ANIM_V_SQUISH_AND_BOUNCE,
-    [SPECIES_UNUSED_SPACE1 - 1] = ANIM_H_VIBRATE,
-    [SPECIES_UNUSED_SPACE2 - 1] = ANIM_H_VIBRATE,
-    [SPECIES_UNUSED_SPACE3 - 1] = ANIM_H_VIBRATE,
-    [SPECIES_UNUSED_SPACE4 - 1] = ANIM_H_VIBRATE,
+    [SPECIES_WYRDEER - 1]       = ANIM_V_SQUISH_AND_BOUNCE,
+    [SPECIES_URSALUNA - 1]      = ANIM_V_SHAKE,
+    [SPECIES_URSALUNA_BLOODMOON - 1] = ANIM_V_SHAKE,
+    [SPECIES_KLEAVOR - 1]       = ANIM_H_VIBRATE,
     [SPECIES_UNUSED_SPACE5 - 1] = ANIM_H_VIBRATE,
     [SPECIES_UNUSED_SPACE6 - 1] = ANIM_H_VIBRATE,
-    [SPECIES_UNUSED_SPACE7 - 1] = ANIM_H_VIBRATE,
+    [SPECIES_TEST - 1]          = ANIM_ZIGZAG_FAST,
     [SPECIES_UNUSED_SPACE8 - 1] = ANIM_H_VIBRATE,
     [SPECIES_UNUSED_SPACE9 - 1] = ANIM_H_VIBRATE,
     [SPECIES_UNUSED_SPACE10 - 1] = ANIM_H_VIBRATE,
@@ -2206,6 +2207,82 @@ static const struct SpriteTemplate sTrainerBackSpriteTemplates[] =
         .oam = &gOamData_BattleSpritePlayerSide,
         .anims = NULL,
         .images = gTrainerBackPicTable_May,
+        .affineAnims = gAffineAnims_BattleSpritePlayerSide,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
+    },
+    [TRAINER_BACK_PIC_RED] = {
+        .tileTag = TAG_NONE,
+        .paletteTag = 0,
+        .oam = &gOamData_BattleSpritePlayerSide,
+        .anims = NULL,
+        .images = gTrainerBackPicTable_Red,
+        .affineAnims = gAffineAnims_BattleSpritePlayerSide,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
+    },
+    [TRAINER_BACK_PIC_LEAF] = {
+        .tileTag = TAG_NONE,
+        .paletteTag = 0,
+        .oam = &gOamData_BattleSpritePlayerSide,
+        .anims = NULL,
+        .images = gTrainerBackPicTable_Leaf,
+        .affineAnims = gAffineAnims_BattleSpritePlayerSide,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
+    },
+    [TRAINER_BACK_PIC_RUBY_SAPPHIRE_BRENDAN] = {
+        .tileTag = TAG_NONE,
+        .paletteTag = 0,
+        .oam = &gOamData_BattleSpritePlayerSide,
+        .anims = NULL,
+        .images = gTrainerBackPicTable_RubySapphireBrendan,
+        .affineAnims = gAffineAnims_BattleSpritePlayerSide,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
+    },
+    [TRAINER_BACK_PIC_RUBY_SAPPHIRE_MAY] = {
+        .tileTag = TAG_NONE,
+        .paletteTag = 0,
+        .oam = &gOamData_BattleSpritePlayerSide,
+        .anims = NULL,
+        .images = gTrainerBackPicTable_RubySapphireMay,
+        .affineAnims = gAffineAnims_BattleSpritePlayerSide,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
+    },
+    [TRAINER_BACK_PIC_WALLY] = {
+        .tileTag = TAG_NONE,
+        .paletteTag = 0,
+        .oam = &gOamData_BattleSpritePlayerSide,
+        .anims = NULL,
+        .images = gTrainerBackPicTable_Wally,
+        .affineAnims = gAffineAnims_BattleSpritePlayerSide,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
+    },
+    [TRAINER_BACK_PIC_STEVEN] = {
+        .tileTag = TAG_NONE,
+        .paletteTag = 0,
+        .oam = &gOamData_BattleSpritePlayerSide,
+        .anims = NULL,
+        .images = gTrainerBackPicTable_Steven,
+        .affineAnims = gAffineAnims_BattleSpritePlayerSide,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
+    },
+};
+
+static const struct SpriteTemplate sTrainerBackSpriteTemplates_RS[] =
+{
+    [TRAINER_BACK_PIC_BRENDAN] = {
+        .tileTag = TAG_NONE,
+        .paletteTag = 0,
+        .oam = &gOamData_BattleSpritePlayerSide,
+        .anims = NULL,
+        .images = gTrainerBackPicTable_RubySapphireBrendan,
+        .affineAnims = gAffineAnims_BattleSpritePlayerSide,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
+    },
+    [TRAINER_BACK_PIC_MAY] = {
+        .tileTag = TAG_NONE,
+        .paletteTag = 0,
+        .oam = &gOamData_BattleSpritePlayerSide,
+        .anims = NULL,
+        .images = gTrainerBackPicTable_RubySapphireMay,
         .affineAnims = gAffineAnims_BattleSpritePlayerSide,
         .callback = SpriteCB_BattleSpriteStartSlideLeft,
     },
@@ -2841,19 +2918,19 @@ static const u8 gSpeciesMapping[NUM_SPECIES+1] =
     [SPECIES_ANNIHILAPE]        = EVO_TYPE_2,
     [SPECIES_FARIGIRAF - 1]     = EVO_TYPE_1,
     [SPECIES_DUDUNSPARCE - 1]   = EVO_TYPE_1,
-    //[SPECIES_UNUSED_SPACE1 - 1] = EVO_TYPE_LEGENDARY,
-    //[SPECIES_UNUSED_SPACE2 - 1] = EVO_TYPE_LEGENDARY,
-    //[SPECIES_UNUSED_SPACE3 - 1] = EVO_TYPE_LEGENDARY,
-    //[SPECIES_UNUSED_SPACE4 - 1] = EVO_TYPE_LEGENDARY,
+    [SPECIES_WYRDEER - 1]       = EVO_TYPE_1,
+    [SPECIES_URSALUNA - 1]      = EVO_TYPE_2,
+    [SPECIES_URSALUNA_BLOODMOON - 1] = EVO_TYPE_2,
+    [SPECIES_KLEAVOR - 1]       = EVO_TYPE_1,
     //[SPECIES_UNUSED_SPACE5 - 1] = EVO_TYPE_LEGENDARY,
     //[SPECIES_UNUSED_SPACE6 - 1] = EVO_TYPE_LEGENDARY,
-    //[SPECIES_UNUSED_SPACE7 - 1] = EVO_TYPE_LEGENDARY,
+    //[SPECIES_TEST - 1] = EVO_TYPE_LEGENDARY,
     //[SPECIES_UNUSED_SPACE8 - 1] = EVO_TYPE_LEGENDARY,
     //[SPECIES_UNUSED_SPACE9 - 1] = EVO_TYPE_LEGENDARY,
     //[SPECIES_UNUSED_SPACE10 - 1] = EVO_TYPE_LEGENDARY,
-    [SPECIES_DEOXYS_ATTACK]     = EVO_TYPE_LEGENDARY,
-    [SPECIES_DEOXYS_DEFENSE]    = EVO_TYPE_LEGENDARY,
-    [SPECIES_DEOXYS_SPEED]      = EVO_TYPE_LEGENDARY,
+    //[SPECIES_DEOXYS_ATTACK]     = EVO_TYPE_LEGENDARY,
+    //[SPECIES_DEOXYS_DEFENSE]    = EVO_TYPE_LEGENDARY,
+    //[SPECIES_DEOXYS_SPEED]      = EVO_TYPE_LEGENDARY,
 };
 #define RANDOM_SPECIES_COUNT ARRAY_COUNT(sRandomSpecies)
 static const u16 sRandomSpecies[] =
@@ -3294,9 +3371,9 @@ static const u16 sRandomSpecies[] =
     SPECIES_MUNCHLAX          ,
     SPECIES_PORYGON_Z         ,
     SPECIES_PROBOPASS         ,
-    //SPECIES_REGIDRAGO         ,
-    //SPECIES_REGIELEKI         ,
-    //SPECIES_REGIGIGAS         ,
+    //SPECIES_REGIDRAGO       ,
+    //SPECIES_REGIELEKI       ,
+    //SPECIES_REGIGIGAS       ,
     SPECIES_RHYPERIOR         ,
     SPECIES_ROSERADE          ,
     SPECIES_SYLVEON           ,
@@ -3304,23 +3381,23 @@ static const u16 sRandomSpecies[] =
     SPECIES_TOGEKISS          ,
     SPECIES_WEAVILE           ,
     SPECIES_YANMEGA           ,
-    //SPECIES_DEOXYS_ATTACK     ,
-    //SPECIES_DEOXYS_DEFENSE    ,
-    //SPECIES_DEOXYS_SPEED      ,
-    SPECIES_ANNIHILAPE           ,
-    SPECIES_FARIGIRAF           ,
-    SPECIES_DUDUNSPARCE           ,
-    //SPECIES_UNUSED_SPACE1           ,
-    //SPECIES_UNUSED_SPACE2           ,
-    //SPECIES_UNUSED_SPACE3           ,
-    //SPECIES_UNUSED_SPACE4           ,
-    //SPECIES_UNUSED_SPACE5           ,
-    //SPECIES_UNUSED_SPACE6           ,
-    //SPECIES_UNUSED_SPACE7           ,
-    //SPECIES_UNUSED_SPACE8           ,
-    //SPECIES_UNUSED_SPACE9           ,
-    //SPECIES_UNUSED_SPACE10            ,
-    // SPECIES_EGG       ,
+    //SPECIES_DEOXYS_ATTACK   ,
+    //SPECIES_DEOXYS_DEFENSE  ,
+    //SPECIES_DEOXYS_SPEED    ,
+    SPECIES_ANNIHILAPE         ,
+    SPECIES_FARIGIRAF          ,
+    SPECIES_DUDUNSPARCE        ,
+    SPECIES_WYRDEER            ,
+    SPECIES_URSALUNA           ,
+    SPECIES_URSALUNA_BLOODMOON ,
+    SPECIES_KLEAVOR            ,
+    //SPECIES_UNUSED_SPACE5    ,
+    //SPECIES_UNUSED_SPACE6    ,
+    //SPECIES_TEST             ,
+    //SPECIES_UNUSED_SPACE8    ,
+    //SPECIES_UNUSED_SPACE9    ,
+    //SPECIES_UNUSED_SPACE10   ,
+    // SPECIES_EGG             ,
 };
 #define RANDOM_SPECIES_COUNT_LEGENDARY ARRAY_COUNT(sRandomSpeciesLegendary)
 static const u16 sRandomSpeciesLegendary[] =
@@ -3773,20 +3850,20 @@ static const u16 sRandomSpeciesLegendary[] =
     SPECIES_YANMEGA           ,
     SPECIES_ANNIHILAPE           ,
     SPECIES_FARIGIRAF           ,
-    //SPECIES_DUDUNSPARCE           ,
-    //SPECIES_UNUSED_SPACE1           ,
-    //SPECIES_UNUSED_SPACE2           ,
-    //SPECIES_UNUSED_SPACE3           ,
-    //SPECIES_UNUSED_SPACE4           ,
+    SPECIES_DUDUNSPARCE           ,
+    SPECIES_WYRDEER           ,
+    SPECIES_URSALUNA           ,
+    SPECIES_URSALUNA_BLOODMOON           ,
+    SPECIES_KLEAVOR           ,
     //SPECIES_UNUSED_SPACE5           ,
     //SPECIES_UNUSED_SPACE6           ,
-    //SPECIES_UNUSED_SPACE7           ,
+    //SPECIES_TEST           ,
     //SPECIES_UNUSED_SPACE8           ,
     //SPECIES_UNUSED_SPACE9           ,
     //SPECIES_UNUSED_SPACE10            ,
-    SPECIES_DEOXYS_ATTACK     ,
-    SPECIES_DEOXYS_DEFENSE    ,
-    SPECIES_DEOXYS_SPEED      ,
+    //SPECIES_DEOXYS_ATTACK     ,
+    //SPECIES_DEOXYS_DEFENSE    ,
+    //SPECIES_DEOXYS_SPEED      ,
 };
 #define RANDOM_SPECIES_EVO_0_COUNT ARRAY_COUNT(sRandomSpeciesEvo0)
 static const u16 sRandomSpeciesEvo0[] =
@@ -4130,13 +4207,11 @@ static const u16 sRandomSpeciesEvo1[] =
     SPECIES_YANMEGA           ,
     SPECIES_FARIGIRAF         ,
     SPECIES_DUDUNSPARCE       ,
-    //SPECIES_UNUSED_SPACE1           ,
-    //SPECIES_UNUSED_SPACE2           ,
-    //SPECIES_UNUSED_SPACE3           ,
-    //SPECIES_UNUSED_SPACE4           ,
+    SPECIES_WYRDEER           ,
+    SPECIES_KLEAVOR           ,
     //SPECIES_UNUSED_SPACE5           ,
     //SPECIES_UNUSED_SPACE6           ,
-    //SPECIES_UNUSED_SPACE7           ,
+    //SPECIES_TEST           ,
     //SPECIES_UNUSED_SPACE8           ,
     //SPECIES_UNUSED_SPACE9           ,
     //SPECIES_UNUSED_SPACE10            ,
@@ -4204,13 +4279,11 @@ static const u16 sRandomSpeciesEvo2[] =
     SPECIES_ROSERADE          ,
     SPECIES_TOGEKISS          ,
     SPECIES_ANNIHILAPE        ,
-    //SPECIES_UNUSED_SPACE1           ,
-    //SPECIES_UNUSED_SPACE2           ,
-    //SPECIES_UNUSED_SPACE3           ,
-    //SPECIES_UNUSED_SPACE4           ,
+    SPECIES_URSALUNA           ,
+    SPECIES_URSALUNA_BLOODMOON           ,
     //SPECIES_UNUSED_SPACE5           ,
     //SPECIES_UNUSED_SPACE6           ,
-    //SPECIES_UNUSED_SPACE7           ,
+    //SPECIES_TEST           ,
     //SPECIES_UNUSED_SPACE8           ,
     //SPECIES_UNUSED_SPACE9           ,
     //SPECIES_UNUSED_SPACE10            ,
@@ -4243,16 +4316,16 @@ static const u16 sRandomSpeciesEvoLegendary[] =
     SPECIES_REGIDRAGO         ,
     SPECIES_REGIELEKI         ,
     SPECIES_REGIGIGAS         ,
-    SPECIES_DEOXYS_ATTACK     ,
-    SPECIES_DEOXYS_DEFENSE    ,
-    SPECIES_DEOXYS_SPEED      ,
+    //SPECIES_DEOXYS_ATTACK     ,
+    //SPECIES_DEOXYS_DEFENSE    ,
+    //SPECIES_DEOXYS_SPEED      ,
     //SPECIES_UNUSED_SPACE1           ,
     //SPECIES_UNUSED_SPACE2           ,
     //SPECIES_UNUSED_SPACE3           ,
     //SPECIES_UNUSED_SPACE4           ,
     //SPECIES_UNUSED_SPACE5           ,
     //SPECIES_UNUSED_SPACE6           ,
-    //SPECIES_UNUSED_SPACE7           ,
+    //SPECIES_TEST           ,
     //SPECIES_UNUSED_SPACE8           ,
     //SPECIES_UNUSED_SPACE9           ,
     //SPECIES_UNUSED_SPACE10            ,
@@ -4454,8 +4527,8 @@ const u16 gEvolutionLines[NUM_SPECIES][EVOS_PER_LINE] =
     [SPECIES_GALLADE]                           = {SPECIES_RALTS, SPECIES_KIRLIA, SPECIES_GARDEVOIR, SPECIES_GALLADE},
     [SPECIES_BAGON ... SPECIES_SALAMENCE]       = {SPECIES_BAGON, SPECIES_SHELGON, SPECIES_SALAMENCE},
     [SPECIES_BELDUM ... SPECIES_METAGROSS]      = {SPECIES_BELDUM, SPECIES_METANG, SPECIES_METAGROSS},
-    [SPECIES_DEOXYS]                            = {SPECIES_DEOXYS, SPECIES_DEOXYS_ATTACK, SPECIES_DEOXYS_DEFENSE, SPECIES_DEOXYS_SPEED},
-    [SPECIES_DEOXYS_ATTACK ... SPECIES_DEOXYS_SPEED] = {SPECIES_DEOXYS, SPECIES_DEOXYS_ATTACK, SPECIES_DEOXYS_DEFENSE, SPECIES_DEOXYS_SPEED},
+    //[SPECIES_DEOXYS]                            = {SPECIES_DEOXYS, SPECIES_DEOXYS_ATTACK, SPECIES_DEOXYS_DEFENSE, SPECIES_DEOXYS_SPEED},
+    //[SPECIES_DEOXYS_ATTACK ... SPECIES_DEOXYS_SPEED] = {SPECIES_DEOXYS, SPECIES_DEOXYS_ATTACK, SPECIES_DEOXYS_DEFENSE, SPECIES_DEOXYS_SPEED},
     [SPECIES_CHIMECHO]                          = {SPECIES_CHINGLING, SPECIES_CHIMECHO},
     [SPECIES_CHINGLING]                         = {SPECIES_CHINGLING, SPECIES_CHIMECHO},
     [SPECIES_DUNSPARCE]                         = {SPECIES_DUNSPARCE, SPECIES_DUDUNSPARCE},
@@ -4987,43 +5060,6 @@ void CreateBoxMon(struct BoxPokemon *boxMon, u16 species, u8 level, u8 fixedIV, 
               | (gSaveBlock2Ptr->playerTrainerId[1] << 8)
               | (gSaveBlock2Ptr->playerTrainerId[2] << 16)
               | (gSaveBlock2Ptr->playerTrainerId[3] << 24);
-        if (gIsFishingEncounter)
-            //shinyRolls = 65536;
-            shinyRolls += 1 + 2 * gChainFishingStreak; //1 + 2 rolls per streak count. max 41
-
-        if (shinyRolls)
-        {
-            if (gSaveBlock1Ptr->tx_Features_ShinyChance == 0) // 1/8192
-                do {
-                    personality = Random32();
-                    shinyValue = HIHALF(value) ^ LOHALF(value) ^ HIHALF(personality) ^ LOHALF(personality);
-                    rolls++;
-                } while (shinyValue >= SHINY_ODDS && rolls < shinyRolls);    
-            else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 1) // 1/4096
-                do {
-                    personality = Random32();
-                    shinyValue = HIHALF(value) ^ LOHALF(value) ^ HIHALF(personality) ^ LOHALF(personality);
-                    rolls++;
-                } while (shinyValue >= 16 && rolls < shinyRolls);
-            else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 2) // 1/2048
-                do {
-                    personality = Random32();
-                    shinyValue = HIHALF(value) ^ LOHALF(value) ^ HIHALF(personality) ^ LOHALF(personality);
-                    rolls++;
-                } while (shinyValue >= 32 && rolls < shinyRolls);
-            else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 3) // 1/1024
-                do {
-                    personality = Random32();
-                    shinyValue = HIHALF(value) ^ LOHALF(value) ^ HIHALF(personality) ^ LOHALF(personality);
-                    rolls++;
-                } while (shinyValue >= 64 && rolls < shinyRolls);
-            else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 4) // 1/512
-                do {
-                    personality = Random32();
-                    shinyValue = HIHALF(value) ^ LOHALF(value) ^ HIHALF(personality) ^ LOHALF(personality);
-                    rolls++;
-                } while (shinyValue >= 128 && rolls < shinyRolls);   
-        }
 
         if (FlagGet(FLAG_FORCE_SHINY))
         {
@@ -5724,6 +5760,7 @@ void CreateEnemyEventMon(void)
         heldItem[1] = itemId >> 8;
         SetMonData(&gEnemyParty[0], MON_DATA_HELD_ITEM, heldItem);
     }
+    SetNuzlockeChecks();
 }
 
 static u16 CalculateBoxMonChecksum(struct BoxPokemon *boxMon)
@@ -6508,6 +6545,12 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
         defense *= 1.25;
         spDefense *= 1.25;
     }
+    //Test event
+    if ((attacker->ability == ABILITY_LEVITATE) && (type == TYPE_MYSTERY))
+    {
+        attack *= 1.5;
+        spAttack *= 1.5;
+    }
     // Apply abilities / field sports
     if (gSaveBlock2Ptr->optionStyle == 0)
         if (defender->ability == ABILITY_THICK_FAT && (type == TYPE_FIRE || type == TYPE_ICE))
@@ -6519,7 +6562,7 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
     && (gSaveBlock2Ptr->optionsDifficulty == 2) 
     && (side == B_SIDE_PLAYER) 
     //&& !(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_RECORDED_LINK | BATTLE_TYPE_FRONTIER))
-    ) //FlagSet(FLAG_DIFFICULTY_HARD)
+    ) //Damage scaling in HARD MODE. Pokemon take more damage with more badges
     {
         if (FlagGet(FLAG_BADGE05_GET) == TRUE)
         {
@@ -6723,6 +6766,8 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
         gBattleMovePower = (150 * gBattleMovePower) / 100;
     if ((attacker->species == SPECIES_SPINDA) && ((Random() % 100) <= 2))
         gBattleMovePower = (200 * gBattleMovePower) / 100;
+    if ((attacker->species == SPECIES_GROUDON) && (moveType == TYPE_FIRE))
+        gBattleMovePower = (150 * gBattleMovePower) / 100;
 
     // Self-destruct / Explosion cut defense in half
     if (gBattleMoves[gCurrentMove].effect == EFFECT_EXPLOSION)
@@ -7147,7 +7192,10 @@ void SetMultiuseSpriteTemplateToTrainerBack(u16 trainerPicId, u8 battlerPosition
     gMultiuseSpriteTemplate.paletteTag = trainerPicId;
     if (battlerPosition == B_POSITION_PLAYER_LEFT || battlerPosition == B_POSITION_PLAYER_RIGHT)
     {
-        gMultiuseSpriteTemplate = sTrainerBackSpriteTemplates[trainerPicId];
+        if (FlagGet(FLAG_RS_OUTFIT))
+            gMultiuseSpriteTemplate = sTrainerBackSpriteTemplates_RS[trainerPicId];
+        else
+            gMultiuseSpriteTemplate = sTrainerBackSpriteTemplates[trainerPicId];
         gMultiuseSpriteTemplate.anims = gTrainerBackAnimsPtrTable[trainerPicId];
     }
     else
@@ -8204,14 +8252,16 @@ u8 GetAbilityBySpecies(u16 species, u8 abilityNum)
             || species == SPECIES_ZAPDOS 
             || species == SPECIES_MOLTRES
             || species == SPECIES_MEWTWO
-            || species == SPECIES_RAICHU
+            || species == SPECIES_RAIKOU
             || species == SPECIES_ENTEI
             || species == SPECIES_SUICUNE
             || species == SPECIES_HO_OH
             || species == SPECIES_LUGIA)
             && (gSaveBlock1Ptr->tx_Mode_Legendary_Abilities == 0))
         gLastUsedAbility = gSpeciesInfo[species].abilities_old[0];
-    else if ((abilityNum == 1) && (species == SPECIES_NOCTOWL) && (gSaveBlock1Ptr->tx_Mode_Modern_Types == 0))
+    else if ((abilityNum == 1)
+            && (species == SPECIES_NOCTOWL || species == SPECIES_YANMEGA)
+            && (gSaveBlock1Ptr->tx_Mode_Modern_Types == 0))
         gLastUsedAbility = gSpeciesInfo[species].abilities_old[1];
     else if (abilityNum)
         gLastUsedAbility = gSpeciesInfo[species].abilities[1];
@@ -10025,67 +10075,137 @@ bool8 TryIncrementMonLevel(struct Pokemon *mon)
 
 u32 CanMonLearnTMHM(struct Pokemon *mon, u8 tm)
 {
-    u16 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG, 0);
-    //tx_randomizer_and_challenges
-    if (gSaveBlock1Ptr->tx_Random_Moves)
-        species = GetSpeciesRandomSeeded(species, TX_RANDOM_T_MOVES, 0);
-
-    if (species == SPECIES_EGG)
+    if (gSaveBlock1Ptr->tx_Mode_Modern_Moves == 0)
     {
-        return 0;
-    }
+        u16 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG, 0);
+        //tx_randomizer_and_challenges
+        if (gSaveBlock1Ptr->tx_Random_Moves)
+            species = GetSpeciesRandomSeeded(species, TX_RANDOM_T_MOVES, 0);
 
-    // Fewer than 64 moves, use GF's method (for matching).
-    if (sizeof(struct TMHMLearnset) <= 8)
-    {
-        if (tm < 32)
+        if (species == SPECIES_EGG)
         {
-            u32 mask = 1 << tm;
-            return gTMHMLearnsets[species].as_u32s[0] & mask;
+            return 0;
+        }
+
+        // Fewer than 64 moves, use GF's method (for matching).
+        if (sizeof(struct TMHMLearnset) <= 8)
+        {
+            if (tm < 32)
+            {
+                u32 mask = 1 << tm;
+                return gTMHMLearnsets_Old[species].as_u32s[0] & mask;
+            }
+            else
+            {
+                u32 mask = 1 << (tm - 32);
+                return gTMHMLearnsets_Old[species].as_u32s[1] & mask;
+            }
         }
         else
         {
-            u32 mask = 1 << (tm - 32);
-            return gTMHMLearnsets[species].as_u32s[1] & mask;
+            u32 index = tm / 32;
+            u32 mask = 1 << (tm % 32);
+            return gTMHMLearnsets_Old[species].as_u32s[index] & mask;
         }
     }
-    else
+    else if (gSaveBlock1Ptr->tx_Mode_Modern_Moves == 1)
     {
-        u32 index = tm / 32;
-        u32 mask = 1 << (tm % 32);
-        return gTMHMLearnsets[species].as_u32s[index] & mask;
+        u16 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG, 0);
+        //tx_randomizer_and_challenges
+        if (gSaveBlock1Ptr->tx_Random_Moves)
+            species = GetSpeciesRandomSeeded(species, TX_RANDOM_T_MOVES, 0);
+
+        if (species == SPECIES_EGG)
+        {
+            return 0;
+        }
+
+        // Fewer than 64 moves, use GF's method (for matching).
+        if (sizeof(struct TMHMLearnset) <= 8)
+        {
+            if (tm < 32)
+            {
+                u32 mask = 1 << tm;
+                return gTMHMLearnsets[species].as_u32s[0] & mask;
+            }
+            else
+            {
+                u32 mask = 1 << (tm - 32);
+                return gTMHMLearnsets[species].as_u32s[1] & mask;
+            }
+        }
+        else
+        {
+            u32 index = tm / 32;
+            u32 mask = 1 << (tm % 32);
+            return gTMHMLearnsets[species].as_u32s[index] & mask;
+        }
     }
 }
 
 u32 CanSpeciesLearnTMHM(u16 species, u8 tm)
 {
-    //tx_randomizer_and_challenges
-    if (gSaveBlock1Ptr->tx_Random_Moves)
-        species = GetSpeciesRandomSeeded(species, TX_RANDOM_T_MOVES, 0);
+    if (gSaveBlock1Ptr->tx_Mode_Modern_Moves == 0)
+    {
+        //tx_randomizer_and_challenges
+        if (gSaveBlock1Ptr->tx_Random_Moves)
+            species = GetSpeciesRandomSeeded(species, TX_RANDOM_T_MOVES, 0);
 
-    if (species == SPECIES_EGG)
-    {
-        return 0;
-    }
-    // Fewer than 64 moves, use GF's method (for matching).
-    if (sizeof(struct TMHMLearnset) <= 8)
-    {
-        if (tm < 32)
+        if (species == SPECIES_EGG)
         {
-            u32 mask = 1 << tm;
-            return gTMHMLearnsets[species].as_u32s[0] & mask;
+            return 0;
+        }
+        // Fewer than 64 moves, use GF's method (for matching).
+        if (sizeof(struct TMHMLearnset) <= 8)
+        {
+            if (tm < 32)
+            {
+                u32 mask = 1 << tm;
+                return gTMHMLearnsets_Old[species].as_u32s[0] & mask;
+            }
+            else
+            {
+                u32 mask = 1 << (tm - 32);
+                return gTMHMLearnsets_Old[species].as_u32s[1] & mask;
+            }
         }
         else
         {
-            u32 mask = 1 << (tm - 32);
-            return gTMHMLearnsets[species].as_u32s[1] & mask;
+            u32 index = tm / 32;
+            u32 mask = 1 << (tm % 32);
+            return gTMHMLearnsets_Old[species].as_u32s[index] & mask;
         }
     }
-    else
+    else if (gSaveBlock1Ptr->tx_Mode_Modern_Moves == 1)
     {
-        u32 index = tm / 32;
-        u32 mask = 1 << (tm % 32);
-        return gTMHMLearnsets[species].as_u32s[index] & mask;
+        //tx_randomizer_and_challenges
+        if (gSaveBlock1Ptr->tx_Random_Moves)
+            species = GetSpeciesRandomSeeded(species, TX_RANDOM_T_MOVES, 0);
+
+        if (species == SPECIES_EGG)
+        {
+            return 0;
+        }
+        // Fewer than 64 moves, use GF's method (for matching).
+        if (sizeof(struct TMHMLearnset) <= 8)
+        {
+            if (tm < 32)
+            {
+                u32 mask = 1 << tm;
+                return gTMHMLearnsets[species].as_u32s[0] & mask;
+            }
+            else
+            {
+                u32 mask = 1 << (tm - 32);
+                return gTMHMLearnsets[species].as_u32s[1] & mask;
+            }
+        }
+        else
+        {
+            u32 index = tm / 32;
+            u32 mask = 1 << (tm % 32);
+            return gTMHMLearnsets[species].as_u32s[index] & mask;
+        }
     }
 }
 
@@ -10394,7 +10514,7 @@ u16 GetBattleBGM(void)
             {
                 if((Random() % 3) == 1)
                     return MUS_DP_VS_GALACTIC_BOSS;
-                if((Random() % 3) == 2)
+                else if((Random() % 3) == 2)
                     return MUS_HG_VS_ROCKET;
                 else
                     return MUS_VS_AQUA_MAGMA_LEADER;
@@ -10416,7 +10536,7 @@ u16 GetBattleBGM(void)
             {
                 if((Random() % 3) == 1)
                     return MUS_DP_VS_GALACTIC;
-                if((Random() % 3) == 2)
+                else if((Random() % 3) == 2)
                     return MUS_HG_VS_ROCKET;
                 else
                     return MUS_VS_AQUA_MAGMA;
@@ -10438,7 +10558,7 @@ u16 GetBattleBGM(void)
             {
                 if((Random() % 3) == 1)
                     return MUS_DP_VS_GALACTIC_COMMANDER;
-                if((Random() % 3) == 2)
+                else if((Random() % 3) == 2)
                     return MUS_HG_VS_ROCKET;
                 else
                     return MUS_VS_AQUA_MAGMA;
@@ -10459,11 +10579,11 @@ u16 GetBattleBGM(void)
             {
                 if((Random() % 5) == 1)
                     return MUS_RG_VS_GYM_LEADER;
-                if((Random() % 5) == 2)
+                else if((Random() % 5) == 2)
                     return MUS_DP_VS_GYM_LEADER;
-                if((Random() % 5) == 3)
+                else if((Random() % 5) == 3)
                     return MUS_HG_VS_GYM_LEADER;
-                if((Random() % 5) == 4)
+                else if((Random() % 5) == 4)
                     return MUS_HG_VS_GYM_LEADER_KANTO;
                 else
                     return MUS_VS_GYM_LEADER;
@@ -10484,9 +10604,9 @@ u16 GetBattleBGM(void)
             {
                 if((Random() % 4) == 1)
                     return MUS_RG_VS_CHAMPION;
-                if((Random() % 4) == 2)
+                else if((Random() % 4) == 2)
                     return MUS_DP_VS_CHAMPION;
-                if((Random() % 4) == 3)
+                else if((Random() % 4) == 3)
                     return MUS_HG_VS_CHAMPION;
                 else
                     return MUS_VS_CHAMPION;
@@ -10509,7 +10629,7 @@ u16 GetBattleBGM(void)
                 {
                     if((Random() % 3) == 1)
                         return MUS_DP_VS_RIVAL;
-                    if((Random() % 3) == 2)
+                    else if((Random() % 3) == 2)
                         return MUS_HG_VS_RIVAL;
                     else
                         return MUS_VS_RIVAL;
@@ -10531,11 +10651,11 @@ u16 GetBattleBGM(void)
             {
                 if((Random() % 5) == 1)
                     return MUS_DP_VS_ELITE_FOUR;
-                if((Random() % 5) == 2)
+                else if((Random() % 5) == 2)
                     return MUS_RG_VS_GYM_LEADER;
-                if((Random() % 5) == 3)
+                else if((Random() % 5) == 3)
                     return MUS_HG_VS_GYM_LEADER;
-                if((Random() % 5) == 4)
+                else if((Random() % 5) == 4)
                     return MUS_HG_VS_GYM_LEADER_KANTO;
                 else
                     return MUS_VS_ELITE_FOUR;
@@ -10562,7 +10682,7 @@ u16 GetBattleBGM(void)
             {
                 if((Random() % 3) == 1)
                     return MUS_PL_VS_FRONTIER_BRAIN;
-                if((Random() % 3) == 2)
+                else if((Random() % 3) == 2)
                     return MUS_HG_VS_FRONTIER_BRAIN;
                 else
                     return MUS_VS_FRONTIER_BRAIN;
@@ -10585,11 +10705,11 @@ u16 GetBattleBGM(void)
                 {
                     if((Random() % 5) == 1)
                         return MUS_DP_VS_TRAINER;
-                    if((Random() % 5) == 2)
+                    else if((Random() % 5) == 2)
                         return MUS_RG_VS_TRAINER;
-                    if((Random() % 5) == 3)
+                    else if((Random() % 5) == 3)
                         return MUS_HG_VS_TRAINER;
-                    if((Random() % 5) == 4)
+                    else if((Random() % 5) == 4)
                         return MUS_HG_VS_TRAINER_KANTO;
                     else
                         return MUS_VS_TRAINER;
@@ -10612,11 +10732,11 @@ u16 GetBattleBGM(void)
                 {
                     if((Random() % 5) == 1)
                         return MUS_DP_VS_TRAINER;
-                    if((Random() % 5) == 2)
+                    else if((Random() % 5) == 2)
                         return MUS_RG_VS_TRAINER;
-                    if((Random() % 5) == 3)
+                    else if((Random() % 5) == 3)
                         return MUS_HG_VS_TRAINER;
-                    if((Random() % 5) == 4)
+                    else if((Random() % 5) == 4)
                         return MUS_HG_VS_TRAINER_KANTO;
                     else
                         return MUS_VS_TRAINER;
@@ -10640,11 +10760,11 @@ u16 GetBattleBGM(void)
         {
             if((Random() % 5) == 1)
                 return MUS_HG_VS_WILD_KANTO;
-            if((Random() % 5) == 2)
+            else if((Random() % 5) == 2)
                 return MUS_RG_VS_WILD;
-            if((Random() % 5) == 3)
+            else if((Random() % 5) == 3)
                 return MUS_DP_VS_WILD;
-            if((Random() % 5) == 4)
+            else if((Random() % 5) == 4)
                 return MUS_HG_VS_WILD;
             else
                 return MUS_VS_WILD;
@@ -10715,7 +10835,36 @@ const u32 *GetMonSpritePalFromSpeciesAndPersonality(u16 species, u32 otId, u32 p
     if (gSaveBlock1Ptr->tx_Features_ShinyChance == 0) // 1/8192
     {
         if (shinyValue < SHINY_ODDS)
-            return gMonShinyPaletteTable[species].data;
+        {
+            if ((species == SPECIES_PIKACHU
+                || species == SPECIES_RAICHU
+                || species == SPECIES_PICHU
+                || species == SPECIES_VAPOREON
+                || species == SPECIES_JOLTEON
+                || species == SPECIES_FLAREON
+                || species == SPECIES_REGICE
+                || species == SPECIES_HERACROSS
+                || species == SPECIES_HAUNTER
+                || species == SPECIES_GENGAR
+                || species == SPECIES_SCYTHER
+                || species == SPECIES_BLAZIKEN
+                || species == SPECIES_XATU
+                || species == SPECIES_PARAS
+                || species == SPECIES_CHINCHOU
+                || species == SPECIES_LANTURN
+                || species == SPECIES_ZAPDOS
+                || species == SPECIES_ELEKID
+                || species == SPECIES_FARFETCHD
+                || species == SPECIES_MAROWAK
+                || species == SPECIES_PHANPY
+                || species == SPECIES_LAPRAS
+                || species == SPECIES_TENTACOOL
+                || species == SPECIES_TENTACRUEL)
+                && (gSaveBlock1Ptr->tx_Features_ShinyColors == 1))
+                return gMonShinyPaletteTable_Modern[species].data;
+            else
+                return gMonShinyPaletteTable[species].data;
+        }
         else
         {
             return gMonPaletteTable[species].data;
@@ -10724,7 +10873,36 @@ const u32 *GetMonSpritePalFromSpeciesAndPersonality(u16 species, u32 otId, u32 p
     else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 1) // 1/4096
     {
         if (shinyValue < 16 && personality !=0)
-            return gMonShinyPaletteTable[species].data;
+        {
+            if ((species == SPECIES_PIKACHU
+                || species == SPECIES_RAICHU
+                || species == SPECIES_PICHU
+                || species == SPECIES_VAPOREON
+                || species == SPECIES_JOLTEON
+                || species == SPECIES_FLAREON
+                || species == SPECIES_REGICE
+                || species == SPECIES_HERACROSS
+                || species == SPECIES_HAUNTER
+                || species == SPECIES_GENGAR
+                || species == SPECIES_SCYTHER
+                || species == SPECIES_BLAZIKEN
+                || species == SPECIES_XATU
+                || species == SPECIES_PARAS
+                || species == SPECIES_CHINCHOU
+                || species == SPECIES_LANTURN
+                || species == SPECIES_ZAPDOS
+                || species == SPECIES_ELEKID
+                || species == SPECIES_FARFETCHD
+                || species == SPECIES_MAROWAK
+                || species == SPECIES_PHANPY
+                || species == SPECIES_LAPRAS
+                || species == SPECIES_TENTACOOL
+                || species == SPECIES_TENTACRUEL)
+                && (gSaveBlock1Ptr->tx_Features_ShinyColors == 1))
+                return gMonShinyPaletteTable_Modern[species].data;
+            else
+                return gMonShinyPaletteTable[species].data;
+        }
         else
         {
             return gMonPaletteTable[species].data;
@@ -10733,7 +10911,36 @@ const u32 *GetMonSpritePalFromSpeciesAndPersonality(u16 species, u32 otId, u32 p
     else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 2) // 1/2048
     {
         if (shinyValue < 32 && personality !=0)
-            return gMonShinyPaletteTable[species].data;
+        {
+            if ((species == SPECIES_PIKACHU
+                || species == SPECIES_RAICHU
+                || species == SPECIES_PICHU
+                || species == SPECIES_VAPOREON
+                || species == SPECIES_JOLTEON
+                || species == SPECIES_FLAREON
+                || species == SPECIES_REGICE
+                || species == SPECIES_HERACROSS
+                || species == SPECIES_HAUNTER
+                || species == SPECIES_GENGAR
+                || species == SPECIES_SCYTHER
+                || species == SPECIES_BLAZIKEN
+                || species == SPECIES_XATU
+                || species == SPECIES_PARAS
+                || species == SPECIES_CHINCHOU
+                || species == SPECIES_LANTURN
+                || species == SPECIES_ZAPDOS
+                || species == SPECIES_ELEKID
+                || species == SPECIES_FARFETCHD
+                || species == SPECIES_MAROWAK
+                || species == SPECIES_PHANPY
+                || species == SPECIES_LAPRAS
+                || species == SPECIES_TENTACOOL
+                || species == SPECIES_TENTACRUEL)
+                && (gSaveBlock1Ptr->tx_Features_ShinyColors == 1))
+                return gMonShinyPaletteTable_Modern[species].data;
+            else
+                return gMonShinyPaletteTable[species].data;
+        }
         else
         {
             return gMonPaletteTable[species].data;
@@ -10742,7 +10949,36 @@ const u32 *GetMonSpritePalFromSpeciesAndPersonality(u16 species, u32 otId, u32 p
     else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 3) // 1/1024
     {
         if (shinyValue < 64 && personality !=0)
-            return gMonShinyPaletteTable[species].data;
+        {
+            if ((species == SPECIES_PIKACHU
+                || species == SPECIES_RAICHU
+                || species == SPECIES_PICHU
+                || species == SPECIES_VAPOREON
+                || species == SPECIES_JOLTEON
+                || species == SPECIES_FLAREON
+                || species == SPECIES_REGICE
+                || species == SPECIES_HERACROSS
+                || species == SPECIES_HAUNTER
+                || species == SPECIES_GENGAR
+                || species == SPECIES_SCYTHER
+                || species == SPECIES_BLAZIKEN
+                || species == SPECIES_XATU
+                || species == SPECIES_PARAS
+                || species == SPECIES_CHINCHOU
+                || species == SPECIES_LANTURN
+                || species == SPECIES_ZAPDOS
+                || species == SPECIES_ELEKID
+                || species == SPECIES_FARFETCHD
+                || species == SPECIES_MAROWAK
+                || species == SPECIES_PHANPY
+                || species == SPECIES_LAPRAS
+                || species == SPECIES_TENTACOOL
+                || species == SPECIES_TENTACRUEL)
+                && (gSaveBlock1Ptr->tx_Features_ShinyColors == 1))
+                return gMonShinyPaletteTable_Modern[species].data;
+            else
+                return gMonShinyPaletteTable[species].data;
+        }
         else
         {
             return gMonPaletteTable[species].data;
@@ -10751,7 +10987,36 @@ const u32 *GetMonSpritePalFromSpeciesAndPersonality(u16 species, u32 otId, u32 p
     else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 4) // 1/512
     {
         if (shinyValue < 128 && personality !=0)
-            return gMonShinyPaletteTable[species].data;
+        {
+            if ((species == SPECIES_PIKACHU
+                || species == SPECIES_RAICHU
+                || species == SPECIES_PICHU
+                || species == SPECIES_VAPOREON
+                || species == SPECIES_JOLTEON
+                || species == SPECIES_FLAREON
+                || species == SPECIES_REGICE
+                || species == SPECIES_HERACROSS
+                || species == SPECIES_HAUNTER
+                || species == SPECIES_GENGAR
+                || species == SPECIES_SCYTHER
+                || species == SPECIES_BLAZIKEN
+                || species == SPECIES_XATU
+                || species == SPECIES_PARAS
+                || species == SPECIES_CHINCHOU
+                || species == SPECIES_LANTURN
+                || species == SPECIES_ZAPDOS
+                || species == SPECIES_ELEKID
+                || species == SPECIES_FARFETCHD
+                || species == SPECIES_MAROWAK
+                || species == SPECIES_PHANPY
+                || species == SPECIES_LAPRAS
+                || species == SPECIES_TENTACOOL
+                || species == SPECIES_TENTACRUEL)
+                && (gSaveBlock1Ptr->tx_Features_ShinyColors == 1))
+                return gMonShinyPaletteTable_Modern[species].data;
+            else
+                return gMonShinyPaletteTable[species].data;
+        }
         else
         {
             return gMonPaletteTable[species].data;
@@ -10775,7 +11040,36 @@ const struct CompressedSpritePalette *GetMonSpritePalStructFromOtIdPersonality(u
     if (gSaveBlock1Ptr->tx_Features_ShinyChance == 0) // 1/8192
     {
         if (shinyValue < SHINY_ODDS)
-            return &gMonShinyPaletteTable[species];
+        {
+            if ((species == SPECIES_PIKACHU
+                || species == SPECIES_RAICHU
+                || species == SPECIES_PICHU
+                || species == SPECIES_VAPOREON
+                || species == SPECIES_JOLTEON
+                || species == SPECIES_FLAREON
+                || species == SPECIES_REGICE
+                || species == SPECIES_HERACROSS
+                || species == SPECIES_HAUNTER
+                || species == SPECIES_GENGAR
+                || species == SPECIES_SCYTHER
+                || species == SPECIES_BLAZIKEN
+                || species == SPECIES_XATU
+                || species == SPECIES_PARAS
+                || species == SPECIES_CHINCHOU
+                || species == SPECIES_LANTURN
+                || species == SPECIES_ZAPDOS
+                || species == SPECIES_ELEKID
+                || species == SPECIES_FARFETCHD
+                || species == SPECIES_MAROWAK
+                || species == SPECIES_PHANPY
+                || species == SPECIES_LAPRAS
+                || species == SPECIES_TENTACOOL
+                || species == SPECIES_TENTACRUEL)
+                && (gSaveBlock1Ptr->tx_Features_ShinyColors == 1))
+                return &gMonShinyPaletteTable_Modern[species];
+            else
+                return &gMonShinyPaletteTable[species];
+        }
         else
         {
             return &gMonPaletteTable[species];
@@ -10784,7 +11078,36 @@ const struct CompressedSpritePalette *GetMonSpritePalStructFromOtIdPersonality(u
     else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 1) // 1/4096
     {
         if (shinyValue < 16)
-            return &gMonShinyPaletteTable[species];
+        {
+            if ((species == SPECIES_PIKACHU
+                || species == SPECIES_RAICHU
+                || species == SPECIES_PICHU
+                || species == SPECIES_VAPOREON
+                || species == SPECIES_JOLTEON
+                || species == SPECIES_FLAREON
+                || species == SPECIES_REGICE
+                || species == SPECIES_HERACROSS
+                || species == SPECIES_HAUNTER
+                || species == SPECIES_GENGAR
+                || species == SPECIES_SCYTHER
+                || species == SPECIES_BLAZIKEN
+                || species == SPECIES_XATU
+                || species == SPECIES_PARAS
+                || species == SPECIES_CHINCHOU
+                || species == SPECIES_LANTURN
+                || species == SPECIES_ZAPDOS
+                || species == SPECIES_ELEKID
+                || species == SPECIES_FARFETCHD
+                || species == SPECIES_MAROWAK
+                || species == SPECIES_PHANPY
+                || species == SPECIES_LAPRAS
+                || species == SPECIES_TENTACOOL
+                || species == SPECIES_TENTACRUEL)
+                && (gSaveBlock1Ptr->tx_Features_ShinyColors == 1))
+                return &gMonShinyPaletteTable_Modern[species];
+            else
+                return &gMonShinyPaletteTable[species];
+        }
         else
         {
             return &gMonPaletteTable[species];
@@ -10793,7 +11116,36 @@ const struct CompressedSpritePalette *GetMonSpritePalStructFromOtIdPersonality(u
     else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 2) // 1/2048
     {
         if (shinyValue < 32)
-            return &gMonShinyPaletteTable[species];
+        {
+            if ((species == SPECIES_PIKACHU
+                || species == SPECIES_RAICHU
+                || species == SPECIES_PICHU
+                || species == SPECIES_VAPOREON
+                || species == SPECIES_JOLTEON
+                || species == SPECIES_FLAREON
+                || species == SPECIES_REGICE
+                || species == SPECIES_HERACROSS
+                || species == SPECIES_HAUNTER
+                || species == SPECIES_GENGAR
+                || species == SPECIES_SCYTHER
+                || species == SPECIES_BLAZIKEN
+                || species == SPECIES_XATU
+                || species == SPECIES_PARAS
+                || species == SPECIES_CHINCHOU
+                || species == SPECIES_LANTURN
+                || species == SPECIES_ZAPDOS
+                || species == SPECIES_ELEKID
+                || species == SPECIES_FARFETCHD
+                || species == SPECIES_MAROWAK
+                || species == SPECIES_PHANPY
+                || species == SPECIES_LAPRAS
+                || species == SPECIES_TENTACOOL
+                || species == SPECIES_TENTACRUEL)
+                && (gSaveBlock1Ptr->tx_Features_ShinyColors == 1))
+                return &gMonShinyPaletteTable_Modern[species];
+            else
+                return &gMonShinyPaletteTable[species];
+        }
         else
         {
             return &gMonPaletteTable[species];
@@ -10802,7 +11154,36 @@ const struct CompressedSpritePalette *GetMonSpritePalStructFromOtIdPersonality(u
     else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 3) // 1/1024
     {
         if (shinyValue < 64)
-            return &gMonShinyPaletteTable[species];
+        {
+            if ((species == SPECIES_PIKACHU
+                || species == SPECIES_RAICHU
+                || species == SPECIES_PICHU
+                || species == SPECIES_VAPOREON
+                || species == SPECIES_JOLTEON
+                || species == SPECIES_FLAREON
+                || species == SPECIES_REGICE
+                || species == SPECIES_HERACROSS
+                || species == SPECIES_HAUNTER
+                || species == SPECIES_GENGAR
+                || species == SPECIES_SCYTHER
+                || species == SPECIES_BLAZIKEN
+                || species == SPECIES_XATU
+                || species == SPECIES_PARAS
+                || species == SPECIES_CHINCHOU
+                || species == SPECIES_LANTURN
+                || species == SPECIES_ZAPDOS
+                || species == SPECIES_ELEKID
+                || species == SPECIES_FARFETCHD
+                || species == SPECIES_MAROWAK
+                || species == SPECIES_PHANPY
+                || species == SPECIES_LAPRAS
+                || species == SPECIES_TENTACOOL
+                || species == SPECIES_TENTACRUEL)
+                && (gSaveBlock1Ptr->tx_Features_ShinyColors == 1))
+                return &gMonShinyPaletteTable_Modern[species];
+            else
+                return &gMonShinyPaletteTable[species];
+        }
         else
         {
             return &gMonPaletteTable[species];
@@ -10811,7 +11192,36 @@ const struct CompressedSpritePalette *GetMonSpritePalStructFromOtIdPersonality(u
     else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 4) // 1/512
     {
         if (shinyValue < 128)
-            return &gMonShinyPaletteTable[species];
+        {
+            if ((species == SPECIES_PIKACHU
+                || species == SPECIES_RAICHU
+                || species == SPECIES_PICHU
+                || species == SPECIES_VAPOREON
+                || species == SPECIES_JOLTEON
+                || species == SPECIES_FLAREON
+                || species == SPECIES_REGICE
+                || species == SPECIES_HERACROSS
+                || species == SPECIES_HAUNTER
+                || species == SPECIES_GENGAR
+                || species == SPECIES_SCYTHER
+                || species == SPECIES_BLAZIKEN
+                || species == SPECIES_XATU
+                || species == SPECIES_PARAS
+                || species == SPECIES_CHINCHOU
+                || species == SPECIES_LANTURN
+                || species == SPECIES_ZAPDOS
+                || species == SPECIES_ELEKID
+                || species == SPECIES_FARFETCHD
+                || species == SPECIES_MAROWAK
+                || species == SPECIES_PHANPY
+                || species == SPECIES_LAPRAS
+                || species == SPECIES_TENTACOOL
+                || species == SPECIES_TENTACRUEL)
+                && (gSaveBlock1Ptr->tx_Features_ShinyColors == 1))
+                return &gMonShinyPaletteTable_Modern[species];
+            else
+                return &gMonShinyPaletteTable[species];
+        }
         else
         {
             return &gMonPaletteTable[species];
@@ -11618,31 +12028,42 @@ u8 GetTypeBySpecies(u16 species, u8 typeNum)
 {
     u8 type;
 
-    if ((gSaveBlock1Ptr->tx_Mode_Modern_Types == 0) 
-    && (species == SPECIES_ARBOK 
-    || species == SPECIES_PARASECT 
-    || species == SPECIES_GOLDUCK
-    || species == SPECIES_KINGLER
-    || species == SPECIES_MEGANIUM
-    || species == SPECIES_TYPHLOSION
-    || species == SPECIES_FERALIGATR
-    || species == SPECIES_NOCTOWL
-    || species == SPECIES_SUNFLORA
-    || species == SPECIES_STANTLER
-    || species == SPECIES_GROVYLE
-    || species == SPECIES_SCEPTILE
-    || species == SPECIES_MASQUERAIN
-    || species == SPECIES_DELCATTY
-    || species == SPECIES_GULPIN
-    || species == SPECIES_SWALOT
-    || species == SPECIES_LUVDISC))
+    //If "tx_Mode_Modern_Types" is enabled, 18 Pokémon have new types. THIS CODE DISABLES THE NEW TYPES IN EACH POKÉMON.
+    //The second column shows which type has been added or removed from each Pokémon.
+    //"-" means that the type is removed, "+" means that the type is added.
+
+    //The game defaults to the new typings.
+    //Logically speaking, this should have been reversed: The code should check if "tx_Mode_Modern_Types" is enabled, and then
+    //apply the new typing. I didn't do it like that, and reversing it means breaking savegames, so now it stays like this.
+    if ((gSaveBlock1Ptr->tx_Mode_Modern_Types == 0)
+    && (species == SPECIES_ARBOK                //-Dark
+    || species == SPECIES_PARASECT              //+Grass, -Ghost
+    || species == SPECIES_GOLDUCK               //-Psychic
+    || species == SPECIES_KINGLER               //-Steel
+    || species == SPECIES_MEGANIUM              //-Fairy
+    || species == SPECIES_TYPHLOSION            //-Ground
+    || species == SPECIES_FERALIGATR            //-Dragon
+    || species == SPECIES_NOCTOWL               //+Normal, -Psychic (+new ability to maintain Normal Type STAB)
+    || species == SPECIES_SUNFLORA              //-Fire
+    || species == SPECIES_STANTLER              //-Psychic
+    || species == SPECIES_GROVYLE               //-Dragon
+    || species == SPECIES_SCEPTILE              //-Dragon
+    || species == SPECIES_MASQUERAIN            //+Flying, -Water
+    || species == SPECIES_DELCATTY              //-Fairy
+    || species == SPECIES_GULPIN                //-Normal
+    || species == SPECIES_SWALOT                //-Normal
+    || species == SPECIES_LUVDISC               //-Fairy
+    || species == SPECIES_ELECTIVIRE            //-Fighting
+    || species == SPECIES_YANMEGA))             //+Flying, -Dragon
     {
         if (typeNum == 1)
             type = gSpeciesInfo[species].types_old[0];
         else
             type = gSpeciesInfo[species].types_old[1];
     }
-    else if ((gSaveBlock1Ptr->tx_Mode_Fairy_Types == 0) 
+    //20 new Pokémon are now Fairy Type. This code DISABLES the Fairy type for the following Pokémon.
+    //Same as above, this code should be reversed, but I didn't do it, so it stays like that for now.
+    else if ((gSaveBlock1Ptr->tx_Mode_Fairy_Types == 0)
     && (species == SPECIES_JIGGLYPUFF 
     || species == SPECIES_WIGGLYTUFF
     || species == SPECIES_CLEFAIRY
@@ -11669,7 +12090,8 @@ u8 GetTypeBySpecies(u16 species, u8 typeNum)
         else
             type = gSpeciesInfo[species].types_old[1];
     }
-    else if ((gSaveBlock1Ptr->tx_Mode_Modern_Types == 1) 
+    //When modern typings are enabled, Snubull and Granbull also have Fairy Type + Normal Type
+    else if ((gSaveBlock1Ptr->tx_Mode_Modern_Types == 1)
     && (species == SPECIES_SNUBBULL
     || species == SPECIES_GRANBULL))
     {

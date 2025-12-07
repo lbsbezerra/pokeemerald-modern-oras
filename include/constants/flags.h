@@ -42,54 +42,54 @@
 #define TEMP_FLAGS_END   FLAG_TEMP_1F
 #define NUM_TEMP_FLAGS   (TEMP_FLAGS_END - TEMP_FLAGS_START + 1)     
 
-#define FLAG_SYS_NO_COLLISION       0x20 // Unused Flag //DEBUG
-#define FLAG_SYS_NO_ENCOUNTER       0x21 // Unused Flag //DEBUG
-#define FLAG_SYS_NO_TRAINER_SEE     0x22 // Unused Flag //DEBUG
-#define FLAG_SYS_NO_BAG_USE         0x23 // Unused Flag //DEBUG
-#define FLAG_SYS_NO_CATCHING        0x24 // Unused Flag //DEBUG
-#define FLAG_SYS_PC_FROM_DEBUG_MENU 0x25 // Unused Flag //DEBUG
-#define FLAG_ARCEUS_EGG_GIVE        0x26
-#define FLAG_SYS_NO_BATTLE_DMG      0x27 // Unused Flag //DEBUG
-#define FLAG_IV_SETTER       0x28 
-#define FLAG_SIDNEY_REMATCH    0x29 //Elite Four Rematch 1
-#define FLAG_PHOEBE_REMATCH    0x2A //Elite Four Rematch 2
-#define FLAG_SYS_SET_BATTLE_BGM    0x2B // Changes BGM
-#define FLAG_WONDERTRADE_FIRSTIME       0x2C 
-#define FLAG_NO_WT_BECAUSE_CHALLENGE      0x2D 
-#define FLAG_GLACIA_REMATCH  0x2E //Elite Four Rematch 3
-#define FLAG_DOME_FOSSIL_ALTERING_CAVE      0x2F 
-#define FLAG_CAVE_MOONSTONE  0x30 
-#define FLAG_CAVE_SUNSTONE   0x31 
-#define FLAG_EV_MAN_FIRSTIME        0x32
-#define FLAG_MODEST_MINT_LILYCOVE   0x33
-#define FLAG_TIMID_MINT_MAUVILLE         0x34 
-#define FLAG_HELIX_FOSSIL_ALTERING   0x35 
-#define FLAG_CALM_MINT_SANDTOWER  0x36
-#define FLAG_DRAKE_REMATCH   0x37 //Elite Four Rematch 4
-#define FLAG_WALLACE_REMATCH 0x38 //Elite Four Rematch 5, Champion
-#define FLAG_STEVEN_REMATCH  0x39 // Steven Rematch, true champion
-#define FLAG_SYS_BRAILLE_REGIELEKI_COMPLETED    0x3A
-#define FLAG_DEFEATED_REGIELEKI 0x3B 
-#define FLAG_HIDE_REGIELEKI    0x3C 
-#define FLAG_HIDE_REGIDRAGO    0x3D
-#define FLAG_SAPPHIRE_KECLEON    0x3E 
-#define FLAG_SYS_BRAILLE_REGIDRAGO_COMPLETED    0x3F
-#define FLAG_DEFEATED_REGIDRAGO    0x40 
-#define FLAG_DEFEATED_DUSKNOIR    0x41 
-#define FLAG_SYS_BRAILLE_REGIGIGAS_COMPLETED    0x42
-#define FLAG_DEFEATED_REGIGIGAS    0x43
-#define FLAG_HIDE_REGIGIGAS    0x44 
-#define FLAG_DEFEATED_ARTICUNO    0x45 
-#define FLAG_DEFEATED_ZAPDOS    0x46
-#define FLAG_DEFEATED_MOLTRES    0x47 
-#define FLAG_HIDE_ARTICUNO    0x48 
-#define FLAG_HIDE_ZAPDOS    0x49 
-#define FLAG_HIDE_MOLTRES    0x4A 
-#define FLAG_DEFEATED_MEWTWO    0x4B
-#define FLAG_HIDE_MEWTWO    0x4C 
-#define FLAG_UNLOCK_BIRDS    0x4D
-#define FLAG_UNLOCK_MEWTWO   0x4E
-#define FLAG_RASH_MINT_METEOR_FALLS    0x4F
+#define FLAG_SYS_NO_COLLISION                0x20 //DEBUG
+#define FLAG_SYS_NO_ENCOUNTER                0x21 //DEBUG
+#define FLAG_SYS_NO_TRAINER_SEE              0x22 //DEBUG
+#define FLAG_SYS_NO_BAG_USE                  0x23 //DEBUG
+#define FLAG_SYS_NO_CATCHING                 0x24 //DEBUG
+#define FLAG_SYS_PC_FROM_DEBUG_MENU          0x25 //DEBUG
+#define FLAG_ARCEUS_EGG_GIVE                 0x26
+#define FLAG_SYS_NO_BATTLE_DMG               0x27 //DEBUG
+#define FLAG_IV_SETTER                       0x28 
+#define FLAG_SIDNEY_REMATCH                  0x29 // Elite Four Rematch 1
+#define FLAG_PHOEBE_REMATCH                  0x2A // Elite Four Rematch 2
+#define FLAG_SYS_SET_BATTLE_BGM              0x2B // Changes BGM
+#define FLAG_TEMPORALY_DISABLE_STATIC_RANDOMIZER                    0x2C
+#define FLAG_NO_WT_BECAUSE_CHALLENGE         0x2D 
+#define FLAG_GLACIA_REMATCH                  0x2E // Elite Four Rematch 3
+#define FLAG_DOME_FOSSIL_ALTERING_CAVE       0x2F 
+#define FLAG_CAVE_MOONSTONE                  0x30 
+#define FLAG_CAVE_SUNSTONE                   0x31 
+#define FLAG_EV_MAN_FIRSTIME                 0x32
+#define FLAG_MODEST_MINT_LILYCOVE            0x33
+#define FLAG_TIMID_MINT_MAUVILLE             0x34 
+#define FLAG_HELIX_FOSSIL_ALTERING           0x35 
+#define FLAG_CALM_MINT_SANDTOWER             0x36
+#define FLAG_DRAKE_REMATCH                   0x37 // Elite Four Rematch 4
+#define FLAG_WALLACE_REMATCH                 0x38 // Elite Four Rematch 5, Champion
+#define FLAG_STEVEN_REMATCH                  0x39 // Steven Rematch, true champion
+#define FLAG_SYS_BRAILLE_REGIELEKI_COMPLETED 0x3A
+#define FLAG_DEFEATED_REGIELEKI              0x3B 
+#define FLAG_HIDE_REGIELEKI                  0x3C 
+#define FLAG_HIDE_REGIDRAGO                  0x3D
+#define FLAG_SAPPHIRE_KECLEON                0x3E 
+#define FLAG_SYS_BRAILLE_REGIDRAGO_COMPLETED 0x3F
+#define FLAG_DEFEATED_REGIDRAGO              0x40 
+#define FLAG_DEFEATED_DUSKNOIR               0x41 
+#define FLAG_SYS_BRAILLE_REGIGIGAS_COMPLETED 0x42
+#define FLAG_DEFEATED_REGIGIGAS              0x43
+#define FLAG_HIDE_REGIGIGAS                  0x44 
+#define FLAG_DEFEATED_ARTICUNO               0x45 
+#define FLAG_DEFEATED_ZAPDOS                 0x46
+#define FLAG_DEFEATED_MOLTRES                0x47 
+#define FLAG_HIDE_ARTICUNO                   0x48 
+#define FLAG_HIDE_ZAPDOS                     0x49 
+#define FLAG_HIDE_MOLTRES                    0x4A 
+#define FLAG_DEFEATED_MEWTWO                 0x4B
+#define FLAG_HIDE_MEWTWO                     0x4C 
+#define FLAG_UNLOCK_BIRDS                    0x4D
+#define FLAG_UNLOCK_MEWTWO                   0x4E
+#define FLAG_RASH_MINT_METEOR_FALLS          0x4F
 
 // Scripts
 #define FLAG_HIDE_SKY_PILLAR_TOP_RAYQUAZA_STILL  0x50
@@ -657,38 +657,38 @@
 #define FLAG_OLD_MAN_AND_DUSCLOPS  0x266
 #define FLAG_CERULEAN_CAVE_LUCKY_EGG  0x267
 #define FLAG_MET_FRONTIER_ELEMENTAL_MOVE_TUTOR  0x268
-#define FLAG_3031BOX       0x269 // Unused Flag
-#define FLAG_UNUSED_0x26A  0x26A // Unused Flag
-#define FLAG_UNUSED_0x26B  0x26B // Unused Flag
-#define FLAG_UNUSED_0x26C  0x26C // Unused Flag
-#define FLAG_UNUSED_0x26D  0x26D // Unused Flag
-#define FLAG_UNUSED_0x26E  0x26E // Unused Flag
-#define FLAG_UNUSED_0x26F  0x26F // Unused Flag
-#define FLAG_UNUSED_0x270  0x270 // Unused Flag
-#define FLAG_UNUSED_0x271  0x271 // Unused Flag
-#define FLAG_UNUSED_0x272  0x272 // Unused Flag
-#define FLAG_UNUSED_0x273  0x273 // Unused Flag
-#define FLAG_UNUSED_0x274  0x274 // Unused Flag
-#define FLAG_UNUSED_0x275  0x275 // Unused Flag
-#define FLAG_UNUSED_0x276  0x276 // Unused Flag
-#define FLAG_UNUSED_0x277  0x277 // Unused Flag
-#define FLAG_UNUSED_0x278  0x278 // Unused Flag
-#define FLAG_UNUSED_0x279  0x279 // Unused Flag
-#define FLAG_UNUSED_0x27A  0x27A // Unused Flag
-#define FLAG_UNUSED_0x27B  0x27B // Unused Flag
-#define FLAG_UNUSED_0x27C  0x27C // Unused Flag
-#define FLAG_UNUSED_0x27D  0x27D // Unused Flag
-#define FLAG_UNUSED_0x27E  0x27E // Unused Flag
-#define FLAG_UNUSED_0x27F  0x27F // Unused Flag
-#define FLAG_UNUSED_0x280  0x280 // Unused Flag
-#define FLAG_UNUSED_0x281  0x281 // Unused Flag
-#define FLAG_UNUSED_0x282  0x282 // Unused Flag
-#define FLAG_UNUSED_0x283  0x283 // Unused Flag
-#define FLAG_UNUSED_0x284  0x284 // Unused Flag
-#define FLAG_UNUSED_0x285  0x285 // Unused Flag
-#define FLAG_UNUSED_0x286  0x286 // Unused Flag
-#define FLAG_UNUSED_0x287  0x287 // Unused Flag
-#define FLAG_UNUSED_0x288  0x288 // Unused Flag
+#define FLAG_3031BOX       0x269
+#define FLAG_UNUSED_0x26A  0x26A //A
+#define FLAG_UNUSED_0x26B  0x26B
+#define FLAG_UNUSED_0x26C  0x26C
+#define FLAG_UNUSED_0x26D  0x26D
+#define FLAG_UNUSED_0x26E  0x26E
+#define FLAG_UNUSED_0x26F  0x26F
+#define FLAG_UNUSED_0x270  0x270
+#define FLAG_UNUSED_0x271  0x271
+#define FLAG_UNUSED_0x272  0x272
+#define FLAG_UNUSED_0x273  0x273
+#define FLAG_UNUSED_0x274  0x274
+#define FLAG_UNUSED_0x275  0x275
+#define FLAG_UNUSED_0x276  0x276
+#define FLAG_UNUSED_0x277  0x277
+#define FLAG_UNUSED_0x278  0x278
+#define FLAG_UNUSED_0x279  0x279
+#define FLAG_UNUSED_0x27A  0x27A
+#define FLAG_UNUSED_0x27B  0x27B
+#define FLAG_UNUSED_0x27C  0x27C
+#define FLAG_UNUSED_0x27D  0x27D
+#define FLAG_UNUSED_0x27E  0x27E
+#define FLAG_UNUSED_0x27F  0x27F
+#define FLAG_UNUSED_0x280  0x280
+#define FLAG_UNUSED_0x281  0x281
+#define FLAG_UNUSED_0x282  0x282
+#define FLAG_UNUSED_0x283  0x283
+#define FLAG_UNUSED_0x284  0x284 
+#define FLAG_UNUSED_0x285  0x285 //QM
+#define FLAG_SURF_PICHU_OBTAINED  0x286 // Surf Pichu
+#define FLAG_RS_OUTFIT     0x287
+#define FLAG_OUTFIT_BOX_OBTAINED  0x288
 #define FLAG_UNUSED_0x289  0x289 // Unused Flag
 #define FLAG_UNUSED_0x28A  0x28A // Unused Flag
 #define FLAG_UNUSED_0x28B  0x28B // Unused Flag
@@ -1219,7 +1219,7 @@
 #define FLAG_ITEM_SAFARI_ZONE_SOUTH_EAST_BIG_PEARL                  0x492
 
 #define FLAG_JIRACHI                                                0x493
-#define FLAG_ROBERTO1                                               0x494
+#define FLAG_PETALBURG_SHRINE_FIRST_TIME                            0x494
 #define FLAG_ENTEI_BATTLE_1                                         0x495
 #define FLAG_ENTEI_BATTLE_2                                         0x496
 #define FLAG_ENTEI_BATTLE_3                                         0x497
@@ -1236,19 +1236,19 @@
 #define FLAG_SHINY_STARTER_2                                        0x4A1 // Makes starter Shiny (Usually Treecko)
 #define FLAG_SHINY_STARTER_3                                        0x4A2 // Makes starter Shiny (Usually Mudkip)
 #define FLAG_FORCE_SHINY                                            0x4A3 // All encounters are shiny
-#define FLAG_UNUSED_0x4A4                                           0x4A4 // Unused Flag
-#define FLAG_UNUSED_0x4A5                                           0x4A5 // Unused Flag
+#define FLAG_KABUTO_PUZZLE_SOLVED                                   0x4A4
+#define FLAG_OMANYTE_PUZZLE_SOLVED                                  0x4A5
 #define FLAG_EXP_SHARE                                              0x4A6
-#define FLAG_UNUSED_0x4A7                                           0x4A7 // Unused Flag
-#define FLAG_UNUSED_0x4A8                                           0x4A8 // Unused Flag
-#define FLAG_UNUSED_0x4A9                                           0x4A9 // Unused Flag
-#define FLAG_UNUSED_0x4AA                                           0x4AA // Unused Flag
-#define FLAG_UNUSED_0x4AB                                           0x4AB // Unused Flag
-#define FLAG_UNUSED_0x4AC                                           0x4AC // Unused Flag
-#define FLAG_UNUSED_0x4AD                                           0x4AD // Unused Flag
-#define FLAG_UNUSED_0x4AE                                           0x4AE // Unused Flag
-#define FLAG_UNUSED_0x4AF                                           0x4AF // Unused Flag
-#define FLAG_UNUSED_0x4B0                                           0x4B0 // Unused Flag
+#define FLAG_HO_OH_PUZZLE_SOLVED                                    0x4A7
+#define FLAG_AERODACTYL_PUZZLE_SOLVED                               0x4A8
+#define FLAG_ALL_PUZZLES_COMPLETED                                  0x4A9
+#define FLAG_UNOWN_CHAMBER_OPEN                                     0x4AA
+#define FLAG_TEST_DONE                                              0x4AB
+#define FLAG_TEST_CAPTURED                                          0x4AC
+#define FLAG_TEST_GUIDE                                             0x4AD
+#define FLAG_TEST_HIDE_1                                            0x4AE
+#define FLAG_TEST_HIDE_2                                            0x4AF
+#define FLAG_TEST_HIDE_3                                            0x4B0
 #define FLAG_UNUSED_0x4B1                                           0x4B1 // Unused Flag
 #define FLAG_UNUSED_0x4B2                                           0x4B2 // Unused Flag
 #define FLAG_UNUSED_0x4B3                                           0x4B3 // Unused Flag
@@ -1644,7 +1644,9 @@
 #define FLAG_ENABLE_MULTI_CORRIDOR_DOOR         (SPECIAL_FLAGS_START + 0x2)
 #define FLAG_SPECIAL_FLAG_UNUSED_0x4003         (SPECIAL_FLAGS_START + 0x3) // Unused Flag
 #define FLAG_STORING_ITEMS_IN_PYRAMID_BAG       (SPECIAL_FLAGS_START + 0x4)
-#define FLAG_SAFE_FOLLOWER_MOVEMENT             (SPECIAL_FLAGS_START + 0x5) // When set, applymovement does not put the follower inside a pokeball
+// When set, `applymovement` does not hide follower pokemon;
+// Also, scripted movements on the player will move follower(s), too
+#define FLAG_SAFE_FOLLOWER_MOVEMENT             (SPECIAL_FLAGS_START + 0x5)
 // FLAG_SPECIAL_FLAG_0x4005 - 0x407F also exist and are unused
 #define SPECIAL_FLAGS_END                       (SPECIAL_FLAGS_START + 0x7F)
 #define NUM_SPECIAL_FLAGS                       (SPECIAL_FLAGS_END - SPECIAL_FLAGS_START + 1)

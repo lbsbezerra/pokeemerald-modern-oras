@@ -42,6 +42,7 @@
 #include "constants/item_effects.h"
 #include "constants/items.h"
 #include "constants/songs.h"
+#include "script_pokemon_util.h"
 
 #include "tx_randomizer_and_challenges.h"
 #include "battle_setup.h" //tx_randomizer_and_challenges
@@ -725,6 +726,37 @@ void ItemUseOutOfBattle_InfiniteRareCandies(u8 taskId)
     }
 }
 
+void ItemUseOutOfBattle_OutfitBox(u8 taskId)
+{
+    if (gTasks[taskId].tUsingRegisteredKeyItem) // to account for pressing select in the overworld, although you can't use it there                                  
+    {
+        DisplayItemMessageOnField(taskId, gText_OutfitBox_CantUse, Task_CloseCantUseKeyItemMessage);
+    }
+    //You can't change your outfit while riding a bike, surfing or diving
+    else if ((gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_MACH_BIKE) 
+         || (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_ACRO_BIKE)
+         || (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_SURFING)
+         || (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_UNDERWATER))
+    {
+        DisplayItemMessage(taskId, 1, gText_OutfitBox_CantUseBikeSurfUnderwater, CloseItemMessage);
+    }
+    else
+    //You can't change your outfit while riding a bike or surfing
+    {
+        PlayFanfare(SE_USE_ITEM);
+        if (FlagGet(FLAG_RS_OUTFIT))
+        {
+            DisplayItemMessage(taskId, 1, gText_OutfitBox_Em, CloseItemMessage);
+            FlagClear(FLAG_RS_OUTFIT);
+        }
+        else
+        {
+            DisplayItemMessage(taskId, 1, gText_OutfitBox_RS, CloseItemMessage);
+            FlagSet(FLAG_RS_OUTFIT);
+        }
+    }
+}
+
 void ItemUseOutOfBattle_HealingHeart(u8 taskId)
 {
     PlayFanfare(MUS_HEAL);
@@ -1017,8 +1049,13 @@ static void ItemUseOnFieldCB_EscapeRope(u8 taskId)
 
 bool8 CanUseDigOrEscapeRopeOnCurMap(void)
 {
-    if (gMapHeader.allowEscaping)
-        return TRUE;
+    if (gSaveBlock1Ptr->tx_Difficulty_EscapeRopeDig == 0)
+    {
+        if (gMapHeader.allowEscaping)
+            return TRUE;
+        else
+            return FALSE;
+    }
     else
         return FALSE;
 }

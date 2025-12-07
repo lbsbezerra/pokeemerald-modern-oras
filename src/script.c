@@ -4,6 +4,7 @@
 #include "mystery_gift.h"
 #include "util.h"
 #include "constants/event_objects.h"
+#include "constants/flags.h"
 #include "constants/map_scripts.h"
 #include "rtc.h"
 
@@ -263,6 +264,8 @@ void ScriptContext_SetupScript(const u8 *ptr)
     InitScriptContext(&sGlobalScriptContext, gScriptCmdTable, gScriptCmdTableEnd);
     SetupBytecodeScript(&sGlobalScriptContext, ptr);
     LockPlayerFieldControls();
+    if (OW_MON_SCRIPT_MOVEMENT)
+        FlagSet(FLAG_SAFE_FOLLOWER_MOVEMENT);
     sGlobalScriptContextStatus = CONTEXT_RUNNING;
 }
 
@@ -489,23 +492,138 @@ void InitRamScript_NoObjectEvent(u8 *script, u16 scriptSize)
     InitRamScript(script, scriptSize, MAP_GROUP(UNDEFINED), MAP_NUM(UNDEFINED), NO_OBJECT);
 }
 
-void SetTimeBasedEncounters(void)
+void ChangeEncounterTable(void)
 {
-	RtcCalcLocalTime();
-    if ((gLocalTime.hours >= 6 && gLocalTime.hours <= 19) && (gSaveBlock1Ptr->tx_Mode_AlternateSpawns == 1))
+    if ((gSaveBlock1Ptr->tx_Mode_Encounters == 0)) // Vanilla Mode, unmodified encounters
+        VarSet(VAR_ENCOUNTER_TABLE, 1);
+    else if ((gSaveBlock1Ptr->tx_Mode_Encounters == 1)) //Modern Encounters always
+        VarSet(VAR_ENCOUNTER_TABLE, 2);
+    else if ((gSaveBlock1Ptr->tx_Mode_Encounters == 2) && (FlagGet(FLAG_SYS_GAME_CLEAR) == FALSE)) //Post-game Mode, before champion (Vanilla)
+        VarSet(VAR_ENCOUNTER_TABLE, 1);
+    else if ((gSaveBlock1Ptr->tx_Mode_Encounters == 2) && (FlagGet(FLAG_SYS_GAME_CLEAR) == TRUE)) //Post-game Mode, after champion (Modern)
+        VarSet(VAR_ENCOUNTER_TABLE, 2);
+}
+
+//Migration scripts from 2.4 to 3.2
+void Update24to30(void)
+{
+    if (gSaveBlock1Ptr->tx_Features_ShinyColors == 0) //old tx_Mode_AlternateSpawns
+        gSaveBlock1Ptr->tx_Mode_Encounters = 0;
+    else if (gSaveBlock1Ptr->tx_Features_ShinyColors == 1) //old tx_Mode_AlternateSpawns
+        gSaveBlock1Ptr->tx_Mode_Encounters = 1;
+}
+
+void Update24to32_SetFrontierBansToZero(void)
+{
+    gSaveBlock1Ptr->tx_Features_FrontierBans = 0;
+}
+
+void Update24to32_SetFrontierBansToOne(void)
+{
+    gSaveBlock1Ptr->tx_Features_FrontierBans = 1;
+}
+
+//Migration scripts from 3.2 to 3.3
+void Update32to33_SetShinyColorsToZero(void)
+{
+    gSaveBlock1Ptr->tx_Features_ShinyColors = 1;
+}
+
+void Update32to33_SetShinyColorsToOne(void)
+{
+    gSaveBlock1Ptr->tx_Features_ShinyColors = 1;
+}
+
+void Update32to33_TypeEffectiveness_GenVI(void)
+{
+    gSaveBlock1Ptr->tx_Mode_TypeEffectiveness = 0;
+}
+
+void Update32to33_TypeEffectiveness_Modern(void)
+{
+    gSaveBlock1Ptr->tx_Mode_TypeEffectiveness = 1;
+}
+
+//Challenge disabler NPC
+void DisableChallengesAfterBeatingGameEvoLimit(void)
+{
+    gSaveBlock1Ptr->tx_Challenges_EvoLimit = 0;
+}
+
+void DisableChallengesAfterBeatingGameMirror(void)
+{
+    gSaveBlock1Ptr->tx_Challenges_Mirror = 0;
+}
+void DisableChallengesAfterBeatingGameMirrorThief(void)
+{
+    gSaveBlock1Ptr->tx_Challenges_Mirror_Thief = 0;
+}
+
+void DisableChallengesAfterBeatingGameExpensiveChallenge(void)
+{
+    gSaveBlock1Ptr->tx_Challenges_Expensive = 0;
+}
+
+void DisableChallengesAfterBeatingGameOneType(void)
+{
+    gSaveBlock1Ptr->tx_Challenges_OneTypeChallenge = 0;
+}
+
+void DisableChallengesAfterBeatingGamePartyLimit(void)
+{
+    gSaveBlock1Ptr->tx_Challenges_PartyLimit = 0;
+}
+
+void DisableChallengesAfterBeatingGameNoItemPlayer(void)
+{
+    gSaveBlock1Ptr->tx_Challenges_NoItemPlayer = 0;
+}
+
+void DisableChallengesAfterBeatingGameNoItemTrainer(void)
+{
+    gSaveBlock1Ptr->tx_Challenges_NoItemTrainer = 0;
+}
+
+void DisableChallengesAfterBeatingGamePkmCenterChallenge(void)
+{
+    gSaveBlock1Ptr->tx_Challenges_PkmnCenter = 0;
+}
+
+//Debug
+void CheckNuzlockeMode(void)
+{
+    if (!gSaveBlock1Ptr->tx_Nuzlocke_EasyMode)
+        VarSet(VAR_UNUSED_0x40DB, 0);
+    else if (gSaveBlock1Ptr->tx_Nuzlocke_EasyMode)
+        VarSet(VAR_UNUSED_0x40DB, 1);
+
+    if (!gSaveBlock1Ptr->tx_Challenges_Nuzlocke)
+        VarSet(VAR_UNUSED_0x40FE, 0);
+    else if (gSaveBlock1Ptr->tx_Challenges_Nuzlocke)
+        VarSet(VAR_UNUSED_0x40FE, 1);
+    
+    if (!gSaveBlock1Ptr->tx_Challenges_NuzlockeHardcore)
+        VarSet(VAR_UNUSED_0x40FF, 0);
+    else if (gSaveBlock1Ptr->tx_Challenges_NuzlockeHardcore)
+        VarSet(VAR_UNUSED_0x40FF, 1);
+}
+
+//Unused for now, but useful if used
+void DisableStaticRandomizer(void)
+{
+    if (gSaveBlock1Ptr->tx_Random_Static == 1)
     {
-		VarSet(VAR_TIME_BASED_ENCOUNTER, 3); // Modern Spawns, Day
-	}
-    else if (gSaveBlock1Ptr->tx_Mode_AlternateSpawns == 1)
+        FlagSet(FLAG_TEMPORALY_DISABLE_STATIC_RANDOMIZER);
+        gSaveBlock1Ptr->tx_Random_Static = 0;
+    }
+}
+
+//Unused for now, but useful if used
+void EnableStaticRandomizer(void)
+{
+    if (FlagGet(FLAG_TEMPORALY_DISABLE_STATIC_RANDOMIZER) == 1)
     {
-		VarSet(VAR_TIME_BASED_ENCOUNTER, 4); // Modern Spawns, Night
-	}
-	else if ((gLocalTime.hours >= 6 && gLocalTime.hours <= 19) && (gSaveBlock1Ptr->tx_Mode_AlternateSpawns == 0))
-	{
-		VarSet(VAR_TIME_BASED_ENCOUNTER, 1); // Day
-	}
-	else if (gSaveBlock1Ptr->tx_Mode_AlternateSpawns == 0)
-    {
-		VarSet(VAR_TIME_BASED_ENCOUNTER, 2); // Night
-	}
-}    
+        gSaveBlock1Ptr->tx_Random_Static = 1;
+        FlagClear(FLAG_TEMPORALY_DISABLE_STATIC_RANDOMIZER);
+    }
+}

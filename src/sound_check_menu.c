@@ -694,7 +694,7 @@ static void AdjustSelectedDriverParam(s8 delta) // sub_080E8FA4
     // also ideally should be a MinMax struct, but any attempt to make this into a struct causes it to not match due to the weird multi dim access.
     const int paramRanges[] =
     {
-        0, 387,         // Voice
+        0, 427,         // Voice
         0, 127,         // Volume
         -127, 127,      // Panpot
         -128, 32639,    // Pitch
@@ -1592,6 +1592,8 @@ static void DestroyWindow(u8 windowId) // sub_080E9750
     X(MUS_HG_OBTAIN_CASTLE_POINTS     , "MUS-HG-OBTAIN-CASTLE-POINTS"     ) \
     X(MUS_HG_OBTAIN_B_POINTS          , "MUS-HG-OBTAIN-B-POINTS"          ) \
     X(MUS_HG_WIN_MINIGAME             , "MUS-HG-WIN-MINIGAME"             ) \
+    X(MUS_BW_VS_LEGEND                , "MUS-BW-VS-LEGEND"                ) \
+    X(MUS_BW_VS_IRIS                  , "MUS-BW-VS-IRIS"                  ) \
 
 #define SOUND_LIST_SE \
     X(SE_STOP                  , "STOP"                     ) \

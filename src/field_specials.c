@@ -4367,16 +4367,17 @@ bool16 TryChangeDeoxysForm(void)
                 break;
             default:
                 gSpecialVar_Result = FALSE;
-                return;
+                return FALSE;
         }
 
         SetMonData(&gPlayerParty[gSpecialVar_0x8004], MON_DATA_SPECIES, &targetSpecies);
         CalculateMonStats(&gPlayerParty[gSpecialVar_0x8004]);
         gSpecialVar_Result = TRUE;
-        return;
+        return TRUE;
     }
 
     gSpecialVar_Result = FALSE;
+    return FALSE;
 }
 
 // Sets the HP EVs of the Pokémon in gSpecialVar_0x8004 according to the current value of var 0x8000 
@@ -4486,7 +4487,8 @@ void CheckPkm(void)
         if (GetMonData(pokemon, MON_DATA_SANITY_HAS_SPECIES) && !GetMonData(pokemon, MON_DATA_IS_EGG))
         {
             species = GetMonData(pokemon, MON_DATA_SPECIES);
-            if (species == gSpecialVar_0x8005)
+            if ((species == gSpecialVar_0x8005) || (species == gSpecialVar_0x8000) || 
+            (species == gSpecialVar_0x8001) || (species == gSpecialVar_0x8002))
             {
                 gSpecialVar_Result = TRUE;
                 return;

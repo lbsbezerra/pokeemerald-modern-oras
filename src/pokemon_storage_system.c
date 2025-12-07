@@ -97,7 +97,7 @@ enum {
     MSG_CHANGED_TO_ITEM,
     MSG_CANT_STORE_MAIL,
     MSG_NUZLOCKE,
-    MSG_DEAD_POKEMON,
+    MSG_FAINTED_FOREVER,
 };
 
 // IDs for how to resolve variables in the above messages
@@ -1101,7 +1101,7 @@ static const struct StorageMessage sMessages[] =
     [MSG_CHANGED_TO_ITEM]      = {gText_ChangedToNewItem,        MSG_VAR_ITEM_NAME},
     [MSG_CANT_STORE_MAIL]      = {gText_MailCantBeStored,        MSG_VAR_NONE},
     [MSG_NUZLOCKE]             = {gText_NuzlockeFainted,         MSG_VAR_NONE},
-    [MSG_DEAD_POKEMON]         = {gText_DeadPokemon,             MSG_VAR_NONE},
+    [MSG_FAINTED_FOREVER]      = {gText_FaintedForever,          MSG_VAR_NONE},
 };
 
 static const struct WindowTemplate sYesNoWindowTemplate =
@@ -2764,8 +2764,8 @@ static void Task_OnSelectedMon(u8 taskId)
         break;
     case 7: //tx_randomizer_and_challenges
         PlaySE(SE_FAILURE);
-        if ((gSaveBlock1Ptr->tx_Features_PkmnDeath) && (!IsNuzlockeActive()))
-            PrintMessage(MSG_DEAD_POKEMON);
+        if ((gSaveBlock1Ptr->tx_Nuzlocke_EasyMode) && (!IsNuzlockeActive()))
+            PrintMessage(MSG_FAINTED_FOREVER);
         else
             PrintMessage(MSG_NUZLOCKE);
         sStorage->state = 6;
@@ -2843,16 +2843,16 @@ static void Task_WithdrawMon(u8 taskId)
         }
         else if (GetCurrentBoxMonData(sCursorPosition, MON_DATA_NUZLOCKE_RIBBON)) //tx_randomizer_and_challenges
         {
-            if ((gSaveBlock1Ptr->tx_Features_PkmnDeath) && (!IsNuzlockeActive()))
-                PrintMessage(MSG_DEAD_POKEMON);
+            if ((gSaveBlock1Ptr->tx_Nuzlocke_EasyMode) && (!IsNuzlockeActive()))
+                PrintMessage(MSG_FAINTED_FOREVER);
             else
                 PrintMessage(MSG_NUZLOCKE);
             sStorage->state = 1;
         }
         else if (sIsMonBeingMoved && GetMonData(&sStorage->movingMon, MON_DATA_NUZLOCKE_RIBBON))
         {
-            if ((gSaveBlock1Ptr->tx_Features_PkmnDeath) && (!IsNuzlockeActive()))
-                PrintMessage(MSG_DEAD_POKEMON);
+            if ((gSaveBlock1Ptr->tx_Nuzlocke_EasyMode) && (!IsNuzlockeActive()))
+                PrintMessage(MSG_FAINTED_FOREVER);
             else
                 PrintMessage(MSG_NUZLOCKE);
             sStorage->state = 1;
@@ -3001,7 +3001,7 @@ static void Task_ReleaseMon(u8 taskId)
                     sStorage->state++;
                     break;
                 }
-                else if ((!canRelease) && (gSaveBlock1Ptr->tx_Features_PkmnDeath) && (!IsNuzlockeActive()))
+                else if ((!canRelease) && (gSaveBlock1Ptr->tx_Nuzlocke_EasyMode) && (!IsNuzlockeActive()))
                 {
                     sStorage->state++;
                     break;
@@ -6416,6 +6416,8 @@ static void PlaceMon(void)
         break;
     case CURSOR_AREA_IN_BOX:
         boxId = StorageGetCurrentBox();
+        if (((gSaveBlock1Ptr->tx_Challenges_PkmnCenter) == 1) || ((gSaveBlock1Ptr->tx_Challenges_PCHeal) == 1))
+            InitSummaryScreenData();
         SetPlacedMonData(boxId, sCursorPosition);
         SetPlacedMonSprite(boxId, sCursorPosition);
         break;
@@ -6522,8 +6524,6 @@ static void SetPlacedMonData(u8 boxId, u8 position)
                 SetMonData(&sStorage->movingMon, MON_DATA_HP, &hp);
                 SetMonData(&sStorage->movingMon, MON_DATA_STATUS, &status);
             }
-            else
-                MonRestorePP(&sStorage->movingMon);
             value = 0;
             SetBoxMonData(&sStorage->movingMon.box, MON_DATA_IN_PC, &value);
             SetBoxMonData(&sStorage->movingMon.box, MON_DATA_BOX_HP, &value);
@@ -6855,14 +6855,42 @@ static s8 RunCanReleaseMon(void)
 
 static void SaveMovingMon(void)
 {
+    u16 hp;
+    u32 status;
+    u8 value;
     if (sIsMonBeingMoved)
+    {
+        if (((gSaveBlock1Ptr->tx_Challenges_PkmnCenter) == 1) || ((gSaveBlock1Ptr->tx_Challenges_PCHeal) == 1))
+        {
+            if(GetMonData(&sStorage->movingMon, MON_DATA_IN_PC))
+            {
+                hp = GetHPFromBoxHP(&sStorage->movingMon);
+                status = GetStatusFromBoxStatus(&sStorage->movingMon);
+                SetMonData(&sStorage->movingMon, MON_DATA_HP, &hp);
+                SetMonData(&sStorage->movingMon, MON_DATA_STATUS, &status);
+            }
+        }
         sSavedMovingMon = sStorage->movingMon;
+    }
 }
 
 static void LoadSavedMovingMon(void)
 {
+    u32 hp;
+    u32 status;
+    u8 value;
     if (sIsMonBeingMoved)
     {
+        if (((gSaveBlock1Ptr->tx_Challenges_PkmnCenter) == 1) || ((gSaveBlock1Ptr->tx_Challenges_PCHeal) == 1))
+        {
+            if(GetMonData(&sStorage->movingMon, MON_DATA_IN_PC))
+            {
+                hp = GetHPFromBoxHP(&sStorage->movingMon);
+                status = GetStatusFromBoxStatus(&sStorage->movingMon);
+                SetMonData(&sStorage->movingMon, MON_DATA_HP, &hp);
+                SetMonData(&sStorage->movingMon, MON_DATA_STATUS, &status);
+            }
+        }
         // If it came from the party load a struct Pokemon,
         // otherwise load a BoxPokemon
         if (sMovingMonOrigBoxId == TOTAL_BOXES_COUNT)
@@ -6890,15 +6918,24 @@ static void InitSummaryScreenData(void)
                 SetMonData(sStorage->summaryMon.mon, MON_DATA_HP, &hp);
                 SetMonData(sStorage->summaryMon.mon, MON_DATA_STATUS, &status);
             }
-            else
-                MonRestorePP(sStorage->summaryMon.mon);
         }
         sStorage->summaryStartPos = 0;
         sStorage->summaryMaxPos = 0;
         sStorage->summaryScreenMode = SUMMARY_MODE_NORMAL;
     }
     else if (sCursorArea == CURSOR_AREA_IN_PARTY)
-    {
+    { 
+        if (((gSaveBlock1Ptr->tx_Challenges_PkmnCenter) == 1) || ((gSaveBlock1Ptr->tx_Challenges_PCHeal) == 1))
+        {
+            if (GetMonData(&sStorage->movingMon, MON_DATA_IN_PC) && sMovingMonOrigBoxId != TOTAL_BOXES_COUNT)
+            // If it did not come from the party
+            {
+                hp = GetHPFromBoxHP(&sStorage->movingMon);
+                status = GetStatusFromBoxStatus(&sStorage->movingMon);
+                SetMonData(sStorage->summaryMon.mon, MON_DATA_HP, &hp);
+                SetMonData(sStorage->summaryMon.mon, MON_DATA_STATUS, &status);
+            }
+        }
         sStorage->summaryMon.mon = gPlayerParty;
         sStorage->summaryStartPos = sCursorPosition;
         sStorage->summaryMaxPos = CountPartyMons() - 1;
@@ -6906,6 +6943,17 @@ static void InitSummaryScreenData(void)
     }
     else
     {
+        if (((gSaveBlock1Ptr->tx_Challenges_PkmnCenter) == 1) || ((gSaveBlock1Ptr->tx_Challenges_PCHeal) == 1))
+        {
+            if (GetMonData(&sStorage->movingMon, MON_DATA_IN_PC) && sMovingMonOrigBoxId != TOTAL_BOXES_COUNT)
+            // If it did not come from the party
+            {
+                hp = GetHPFromBoxHP(&sStorage->movingMon);
+                status = GetStatusFromBoxStatus(&sStorage->movingMon);
+                SetMonData(sStorage->summaryMon.mon, MON_DATA_HP, &hp);
+                SetMonData(sStorage->summaryMon.mon, MON_DATA_STATUS, &status);
+            }
+        }
         sStorage->summaryMon.box = GetBoxedMonPtr(StorageGetCurrentBox(), 0);
         sStorage->summaryStartPos = sCursorPosition;
         sStorage->summaryMaxPos = IN_BOX_COUNT - 1;
@@ -7097,7 +7145,7 @@ static void SetDisplayMonData(void *pokemon, u8 mode)
             sStorage->displayMonPalette = GetMonSpritePalFromSpeciesAndPersonality(sStorage->displayMonSpecies, otId, sStorage->displayMonPersonality);
             gender = GetGenderFromSpeciesAndPersonality(sStorage->displayMonSpecies, sStorage->displayMonPersonality);
             sStorage->displayMonItemId = GetBoxMonData(boxMon, MON_DATA_HELD_ITEM);
-            sStorage->displayMonNuzlockeRibbon = GetMonData(boxMon, MON_DATA_NUZLOCKE_RIBBON);
+            sStorage->displayMonNuzlockeRibbon = GetBoxMonData(boxMon, MON_DATA_NUZLOCKE_RIBBON);
         }
     }
     else

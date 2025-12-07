@@ -7,9 +7,11 @@
 PetalburgCity_MapScripts::
 	map_script MAP_SCRIPT_ON_TRANSITION, PetalburgCity_OnTransition
 	map_script MAP_SCRIPT_ON_FRAME_TABLE, PetalburgCity_OnFrame
+	map_script MAP_SCRIPT_ON_RESUME, EncounterTable
 	.byte 0
 
 PetalburgCity_OnTransition:
+	callnative ChangeEncounterTable
 	setflag FLAG_VISITED_PETALBURG_CITY
 	call_if_eq VAR_PETALBURG_CITY_STATE, 0, PetalburgCity_EventScript_MoveGymBoyToWestEntrance
 	call_if_eq VAR_PETALBURG_CITY_STATE, 2, PetalburgCity_EventScript_DisableMapNameAndMusic
@@ -35,27 +37,23 @@ PetalburgCity_GalladeEvo3:
 	end
 
 PetalburgCity_GalladeEvo_Text:
-	.string "PROF. BIRCH might be the most famous\n"
-	.string "PROFESSOR of HOENN, but I am also a\l"
-	.string "reliable PROFESSOR.\p"
-	.string "To prove it, I can give you a piece of\n"
-	.string "information that he might not know\l"
-	.string "about. Do you want to listen to it?$"
+	.string "PROF. BIRCH is the most famous\n"
+	.string "HOENN PROFESSOR, but I am also\l"
+	.string "a reliable biologist.\p"
+	.string "I can give you info he might\n"
+	.string "not know.\p"
+	.string "Do you want to hear it?$"
 
 PetalburgCity_GalladeEvo_Text2:
-	.string "Choosing between a MALE or FEMALE RALTS\n"
-	.string "is quite important.\p"
-	.string "Depending on what you capture, the last\n"
-	.string "evolution of RALTS will be different.\p"
-	.string "If RALTS is MALE, he will naturally\n"
-	.string "evolve into GALLADE but only if it\l"
-	.string "happens during the morning, which is\l"
-	.string "from 6AM to 9AM.\p"
-	.string "RALTS will evolve into GARDEVOIR if he\n"
-	.string "doesn't evolve during morning, or if\l"
-	.string "said RALTS is FEMALE.\p"
-	.string "I believe this information might be\n"
-	.string "useful for a new trainer like you.$"
+	.string "Choosing MALE or FEMALE RALTS is\n"
+	.string "important, as the last evolution\l"
+	.string "changes based on gender and time.\p"
+	.string "MALE RALTS evolves into GALLADE\n"
+	.string "if it evolves in the morning, from\l"
+	.string "6AM to 9AM.\p"
+	.string "Otherwise, or if RALTS is FEMALE,\n"
+	.string "it evolves into GARDEVOIR.\p"
+	.string "This info is useful for new trainers.$"
 
 PetalburgCity_GalladeEvo_Text3:
 	.string "Oh… Okay…$"

@@ -158,3 +158,6 @@
 	.include "src/pokedex_plus_hgss.o"
 	.include "src/sound_check_menu.o"
 	.include "src/debug_pokemon_creator.o"
+	.include "src/sliding_puzzle.o"
+	.include "src/surfable.o"
+	.include "src/ui_stat_editor.o"

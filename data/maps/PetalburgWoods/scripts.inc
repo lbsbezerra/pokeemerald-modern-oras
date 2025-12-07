@@ -6,11 +6,11 @@
 
 PetalburgWoods_MapScripts::
 	map_script MAP_SCRIPT_ON_TRANSITION, PetalburgWoods_OnTransition
-	map_script MAP_SCRIPT_ON_RESUME, SetTimeEncounters
+	map_script MAP_SCRIPT_ON_RESUME, EncounterTable
 	.byte 0
 
 PetalburgWoods_OnTransition::
-	callnative SetTimeBasedEncounters
+	callnative ChangeEncounterTable
 	goto_if_unset FLAG_EXTRA_LEGENDARIES, PetalburgWoods_SwitchToOld
 	call_if_unset FLAG_SYS_GAME_CLEAR, PetalburgWoods_NoCelebiEvent
 	call_if_set FLAG_SYS_GAME_CLEAR, PetalburgWoods_YesCelebiEvent
@@ -123,11 +123,14 @@ PetalburgWoods_CelebiEvent_Ran::
 	end
 
 PetalburgWoods_EventScript_CelebiMoves:
-	delay_16
-	delay_16
-	delay_16
 	walk_down
 	set_visible
+	jump_in_place_down
+	delay_16
+	delay_16
+	delay_16
+	delay_16
+	delay_16
 	step_end
 
 PetalburgWoods_EventScript_CelebiMoves2:
@@ -136,10 +139,10 @@ PetalburgWoods_EventScript_CelebiMoves2:
 	step_end
 
 Text_PetalburgWoods_Celebi0:
-	.string "The tree is rattling.\p"
-	.string "You also feel that someone or\n"
-	.string "something is observing you…\p"
-	.string "But… you cannot see any POKéMON…$"
+	.string "The tree shakes softly.\p"
+	.string "You sense a presence. Someone or\n"
+	.string "something is watching you…\p"
+	.string "Yet, no POKéMON is in sight.$"
 
 Text_PetalburgWoods_Celebi1:
 	.string ". . . \p"
@@ -192,7 +195,7 @@ PetalburgWoods_Text_Dusclops:
 
 PetalburgWoods_Celebi_Sign::
 	faceplayer
-	goto_if_unset FLAG_ROBERTO1, PetalburgWoods_Celebi_SignFirstTime
+	goto_if_unset FLAG_PETALBURG_SHRINE_FIRST_TIME, PetalburgWoods_Celebi_SignFirstTime
 	goto_if_set FLAG_DEFEATEDCELEBI, PetalburgWoods_Celebi_SignEventFinished
 	goto_if_set FLAG_SYS_GAME_CLEAR, PetalburgWoods_Celebi_SignChampion
 	msgbox Text_PetalburgWoods_Celebi_Sign, MSGBOX_NPC
@@ -201,7 +204,7 @@ PetalburgWoods_Celebi_Sign::
 PetalburgWoods_Celebi_SignFirstTime::
 	faceplayer
 	msgbox Text_PetalburgWoods_Celebi_SignFirstTime, MSGBOX_NPC
-	setflag FLAG_ROBERTO1
+	setflag FLAG_PETALBURG_SHRINE_FIRST_TIME
 	end
 
 PetalburgWoods_Celebi_SignEventFinished::
@@ -215,69 +218,64 @@ PetalburgWoods_Celebi_SignChampion::
 	end
 
 Text_PetalburgWoods_Celebi_Sign:
-	.string "Hi trainer.\p"
-	.string "Dangerous? No, no. Do not worry.\l"
-	.string "DUSKY is patrolling around.\p"
-	.string "And you? How is your adventure\n"
-	.string "going?$"
+	.string "Hi, {PLAYER}.\p"
+	.string "Dangerous? No, no. Don’t worry.\l"
+	.string "I always have DUSKY with me.$"
 
 Text_PetalburgWoods_Celebi_SignFirstTime:
-	.string "Oh, a youngster…\p"
+	.string "Oh, a trainer…\p"
 	.string "What are you doing here in these\n"
 	.string "dark, shady woods?\p"
 	.string ". . .\p"
-	.string "Oh, I see. You are just passing by.\p"
+	.string "Oh, I see - you’re just passing by.\p"
 	.string "What? Ah, me?\p"
-	.string "I am just watering the tree shrine\n"
-	.string "like I have always done.\p"
-	.string "Ah, you are wondering why I am watering\n"
-	.string "an innocent looking tree in the middle\l"
-	.string "of some woods, right?\p"
-	.string "But you see, this tree is special.\n"
-	.string "In these woods, a MYTHICAL POKéMON\l"
-	.string "lives. It is the FOREST GUARDIAN.\p"
-	.string "I have been watering this tree for\n"
-	.string "over twenty years of my life.\p"
-	.string "And I can assure you that this story\n"
-	.string "is as real as the air we breath.\l"
-	.string "The FOREST GUARDIAN is small, GREEN,\l"
-	.string "and just gazing at it feels…\p"
-	.string "Like I am watching a spirit from the\n"
-	.string "forest. Sadly, last time I saw it\l" 
-	.string "was many, many years ago…\p"
-	.string "Where could the GUARDIAN be?\p"
-	.string "Maybe I need to be STRONGER to make\n"
-	.string "it appear…\p"
-	.string "It really makes me unhappy how weak\n"
-	.string "I have become with the years.\p"
-	.string "Anyway, I will continue my deeds.\n"
-	.string "See you soon, young one.$"
+	.string "I’m simply tending to the shrine,\n"
+	.string "as I always have.\p"
+	.string "You’re wondering why I take care of\n"
+	.string "an old shrine in the middle of\l"
+	.string "PETALBURG WOODS, aren’t you?\p"
+	.string "Well, this shrine is special.\n"
+	.string "In these woods lives a MYTHICAL\l"
+	.string "POKéMON - the FOREST GUARDIAN.\p"
+	.string "I’ve been watching over it for\n"
+	.string "more than twenty years.\p"
+	.string "And I can assure you, this story\n"
+	.string "is as real as the air we breathe.\p"
+	.string "The FOREST GUARDIAN is small, GREEN,\n"
+	.string "and gazing at it feels…\p"
+	.string "Like seeing the spirit of the forest.\p"
+	.string "Sadly, I last saw it many, many\n"
+	.string "years ago…\p"
+	.string "Where could the GUARDIAN be now?\p"
+	.string "Anyway, I’ll continue my duties.\n"
+	.string "See you soon!$"
 
 Text_PetalburgWoods_Celebi_SignEventFinished:
-	.string ". . . \p"
-	.string "I truly cannot believe my eyes!\n"
-	.string "You battled with the GUARDIAN!?\p"
-	.string "I will never forget this moment.\n"
-	.string "I will keep watering this shrine\l"
-	.string "until it comes back in the future.$"
+	.string ". . .\p"
+	.string "I can hardly believe my eyes!\n"
+	.string "You actually battled the GUARDIAN!?\p"
+	.string "I’ll never forget this moment.\p"
+	.string "I’ll keep tending to the shrine\l"
+	.string "until the GUARDIAN returns!$"
 
 Text_PetalburgWoods_Celebi_SignEventChampion:
-	.string "Hi again, young one.\p"
-	.string "Something has been going on with the\n"
-	.string "GUARDIAN tree.\p"
-	.string "I have been hearing a small muttering\n"
-	.string "around it for many hours.\p"
-	.string "Something about a THUNDER, VOLCANO\n"
+	.string "Hello again, young trainer.\p"
+	.string "Something strange is happening\n"
+	.string "with the GUARDIAN shrine.\p"
+	.string "I’ve been hearing faint muttering\n"
+	.string "around the large tree.\p"
+	.string "It’s hard to make out, but it speaks\n"
+	.string "of a THUNDER, VOLCANO,\l"
 	.string "and AURORA POKéMON…\p"
 	.string "Wait… I know those descriptions…\n"
-	.string "Something about three beasts? But…\p"
-	.string "Not from this region…? Where were\n"
-	.string "they from? GIOTO? HOJO? JONO? JOHTO?\p"
-	.string "And if they are here, in HOENN…\n"
-	.string "Maybe they are hiding in places related\l"
-	.string "to their descriptions?\p"
-	.string "If you have time, maybe you could have\n"
-	.string "a look. What do you think?$"
+	.string "Three beasts… but…\p"
+	.string "Not from this region…?\n"
+	.string "Where could they be from?\p"
+	.string "And if they’re here, could they be\n"
+	.string "hiding in places tied to their\l"
+	.string "elements?\p"
+	.string "If you have time, perhaps you should\n"
+	.string "investigate. What do you think?$"
 
 PetalburgWoods_EventScript_DevonResearcherLeft::
 	lockall

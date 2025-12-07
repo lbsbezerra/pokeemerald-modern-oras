@@ -480,14 +480,46 @@ const struct CompressedSpritePalette gMonShinyPaletteTable[] =
     SPECIES_SHINY_PAL(ANNIHILAPE, gMonShinyPalette_Annihilape),
     SPECIES_SHINY_PAL(FARIGIRAF, gMonShinyPalette_Farigiraf),
     SPECIES_SHINY_PAL(DUDUNSPARCE, gMonShinyPalette_Dudunsparce),
-    //SPECIES_SHINY_PAL(UNUSED_SPACE1, gMonShinyPalette_Unused_Space1),
-    //SPECIES_SHINY_PAL(UNUSED_SPACE2, gMonShinyPalette_Unused_Space2),
-    //SPECIES_SHINY_PAL(UNUSED_SPACE3, gMonShinyPalette_Unused_Space3),
-    //SPECIES_SHINY_PAL(UNUSED_SPACE4, gMonShinyPalette_Unused_Space4),
+    SPECIES_SHINY_PAL(WYRDEER, gMonShinyPalette_Wyrdeer),
+    SPECIES_SHINY_PAL(URSALUNA, gMonShinyPalette_Ursaluna),
+    SPECIES_SHINY_PAL(URSALUNA_BLOODMOON, gMonShinyPalette_Ursaluna_BloodMoon),
+    SPECIES_SHINY_PAL(KLEAVOR, gMonShinyPalette_Kleavor),
     //SPECIES_SHINY_PAL(UNUSED_SPACE5, gMonShinyPalette_Unused_Space5),
     //SPECIES_SHINY_PAL(UNUSED_SPACE6, gMonShinyPalette_Unused_Space6),
-    //SPECIES_SHINY_PAL(UNUSED_SPACE7, gMonShinyPalette_Unused_Space7),
+    SPECIES_SHINY_PAL(TEST, gMonShinyPalette_Test),
     //SPECIES_SHINY_PAL(UNUSED_SPACE8, gMonShinyPalette_Unused_Space8),
     //SPECIES_SHINY_PAL(UNUSED_SPACE9, gMonShinyPalette_Unused_Space9),
     //SPECIES_SHINY_PAL(UNUSED_SPACE10, gMonShinyPalette_Unused_Space10),
+};
+
+const struct CompressedSpritePalette gMonShinyPaletteTable_Modern[] =
+{
+    //Total palette swaps
+    SPECIES_SHINY_PAL(PIKACHU, gMonShinyPalette_Modern_Pikachu), //GB palette
+    SPECIES_SHINY_PAL(RAICHU, gMonShinyPalette_Modern_Raichu), //GB palette
+    SPECIES_SHINY_PAL(PICHU, gMonShinyPalette_Modern_Pichu), //GB palette
+    //Rotation palette for the 3 Eevee evolutions from Kanto
+    SPECIES_SHINY_PAL(VAPOREON, gMonShinyPalette_Modern_Vaporeon), //Vaporeon has Flareon colors
+    SPECIES_SHINY_PAL(JOLTEON, gMonShinyPalette_Modern_Jolteon), //Jolteon has Vaporeon colors
+    SPECIES_SHINY_PAL(FLAREON, gMonShinyPalette_Modern_Flareon), //Flareon has Jolteon colors
+    SPECIES_SHINY_PAL(REGICE, gMonShinyPalette_Modern_Regice), //Glass regice
+    SPECIES_SHINY_PAL(HERACROSS, gMonShinyPalette_Modern_Heracross), //Golden bug!
+    SPECIES_SHINY_PAL(HAUNTER, gMonShinyPalette_Modern_Haunter), //Mega-Gengar palette
+    SPECIES_SHINY_PAL(GENGAR, gMonShinyPalette_Modern_Gengar), //Mega-Gengar palette
+    SPECIES_SHINY_PAL(SCYTHER, gMonShinyPalette_Modern_Scyther), //Red, like Scizor
+    SPECIES_SHINY_PAL(BLAZIKEN, gMonShinyPalette_Modern_Blaziken), //Just black
+    SPECIES_SHINY_PAL(XATU, gMonShinyPalette_Modern_Xatu), //Just different looking
+    SPECIES_SHINY_PAL(PARAS, gMonShinyPalette_Modern_Paras), //Blue mushroom
+    
+    //Color saturation boost / lowered
+    SPECIES_SHINY_PAL(CHINCHOU, gMonShinyPalette_Modern_Chinchou),
+    SPECIES_SHINY_PAL(LANTURN, gMonShinyPalette_Modern_Lanturn),
+    SPECIES_SHINY_PAL(ZAPDOS, gMonShinyPalette_Modern_Zapdos),
+    SPECIES_SHINY_PAL(ELEKID, gMonShinyPalette_Modern_Elekid),
+    SPECIES_SHINY_PAL(FARFETCHD, gMonShinyPalette_Modern_Farfetchd),
+    SPECIES_SHINY_PAL(MAROWAK, gMonShinyPalette_Modern_Marowak),
+    SPECIES_SHINY_PAL(PHANPY, gMonShinyPalette_Modern_Phanpy),
+    SPECIES_SHINY_PAL(LAPRAS, gMonShinyPalette_Modern_Lapras),
+    SPECIES_SHINY_PAL(TENTACOOL, gMonShinyPalette_Modern_Tentacool),
+    SPECIES_SHINY_PAL(TENTACRUEL, gMonShinyPalette_Modern_Tentacruel),
 };

@@ -248,6 +248,7 @@ EWRAM_DATA u8 gLastUsedBall = 0;
 EWRAM_DATA u16 gLastThrownBall = 0;
 EWRAM_DATA u16 gBallToDisplay = 0;
 EWRAM_DATA bool8 gLastUsedBallMenuPresent = FALSE;
+//EWRAM_DATA u8 sRunHoldCounter = 0;
 
 void (*gPreBattleCallback1)(void);
 void (*gBattleMainFunc)(void);
@@ -405,7 +406,139 @@ static const s8 sCenterToCornerVecXs[8] ={-32, -16, -16, -32, -32};
 // 10 is ×1.0 TYPE_MUL_NORMAL
 // 05 is ×0.5 TYPE_MUL_NOT_EFFECTIVE
 // 00 is ×0.0 TYPE_MUL_NO_EFFECT
-const u8 gTypeEffectiveness[369] =
+const u8 gTypeEffectiveness[354] =
+{
+    TYPE_NORMAL, TYPE_ROCK, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_NORMAL, TYPE_STEEL, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_FIRE, TYPE_FIRE, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_FIRE, TYPE_WATER, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_FIRE, TYPE_GRASS, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_FIRE, TYPE_ICE, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_FIRE, TYPE_BUG, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_FIRE, TYPE_ROCK, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_FIRE, TYPE_DRAGON, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_FIRE, TYPE_STEEL, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_WATER, TYPE_FIRE, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_WATER, TYPE_WATER, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_WATER, TYPE_GRASS, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_WATER, TYPE_GROUND, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_WATER, TYPE_ROCK, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_WATER, TYPE_DRAGON, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_ELECTRIC, TYPE_WATER, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_ELECTRIC, TYPE_ELECTRIC, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_ELECTRIC, TYPE_GRASS, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_ELECTRIC, TYPE_GROUND, TYPE_MUL_NO_EFFECT,
+    TYPE_ELECTRIC, TYPE_FLYING, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_ELECTRIC, TYPE_DRAGON, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_GRASS, TYPE_FIRE, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_GRASS, TYPE_WATER, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_GRASS, TYPE_GRASS, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_GRASS, TYPE_POISON, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_GRASS, TYPE_GROUND, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_GRASS, TYPE_FLYING, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_GRASS, TYPE_BUG, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_GRASS, TYPE_ROCK, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_GRASS, TYPE_DRAGON, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_GRASS, TYPE_STEEL, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_WATER, TYPE_ICE, TYPE_MUL_NOT_EFFECTIVE, //Ice resists Water
+    // TYPE_ICE, TYPE_WATER, TYPE_MUL_NOT_EFFECTIVE, //Water doesn't resist Ice
+    TYPE_ICE, TYPE_GRASS, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_ICE, TYPE_ICE, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_ICE, TYPE_GROUND, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_ICE, TYPE_FLYING, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_ICE, TYPE_DRAGON, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_ICE, TYPE_STEEL, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_ICE, TYPE_FIRE, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_FIGHTING, TYPE_NORMAL, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_FIGHTING, TYPE_ICE, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_FIGHTING, TYPE_POISON, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_FIGHTING, TYPE_FLYING, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_FIGHTING, TYPE_PSYCHIC, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_FIGHTING, TYPE_BUG, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_FIGHTING, TYPE_ROCK, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_FIGHTING, TYPE_DARK, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_FIGHTING, TYPE_STEEL, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_POISON, TYPE_GRASS, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_POISON, TYPE_POISON, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_POISON, TYPE_GROUND, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_POISON, TYPE_ROCK, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_POISON, TYPE_GHOST, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_POISON, TYPE_STEEL, TYPE_MUL_NO_EFFECT,
+    TYPE_GROUND, TYPE_FIRE, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_GROUND, TYPE_ELECTRIC, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_GROUND, TYPE_GRASS, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_GROUND, TYPE_POISON, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_GROUND, TYPE_FLYING, TYPE_MUL_NO_EFFECT,
+    TYPE_GROUND, TYPE_BUG, TYPE_MUL_NOT_EFFECTIVE,
+    //TYPE_GROUND, TYPE_ROCK, TYPE_MUL_SUPER_EFFECTIVE, //Ground isn't supper effective against Rock
+    TYPE_GROUND, TYPE_STEEL, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_FLYING, TYPE_ELECTRIC, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_FLYING, TYPE_GRASS, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_FLYING, TYPE_FIGHTING, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_FLYING, TYPE_BUG, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_FLYING, TYPE_ROCK, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_FLYING, TYPE_STEEL, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_PSYCHIC, TYPE_FIGHTING, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_PSYCHIC, TYPE_POISON, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_PSYCHIC, TYPE_PSYCHIC, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_PSYCHIC, TYPE_DARK, TYPE_MUL_NO_EFFECT,
+    TYPE_PSYCHIC, TYPE_STEEL, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_BUG, TYPE_FIRE, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_BUG, TYPE_GRASS, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_BUG, TYPE_FIGHTING, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_BUG, TYPE_POISON, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_BUG, TYPE_FLYING, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_BUG, TYPE_PSYCHIC, TYPE_MUL_SUPER_EFFECTIVE,
+    //TYPE_BUG, TYPE_GHOST, TYPE_MUL_NOT_EFFECTIVE, //Bug doesn't resist Ghost
+    TYPE_BUG, TYPE_DARK, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_BUG, TYPE_STEEL, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_ROCK, TYPE_FIRE, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_ROCK, TYPE_ICE, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_ROCK, TYPE_FIGHTING, TYPE_MUL_NOT_EFFECTIVE,
+    //TYPE_ROCK, TYPE_GROUND, TYPE_MUL_NOT_EFFECTIVE, //Ground doesn't resist Rock
+    TYPE_ROCK, TYPE_FLYING, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_ROCK, TYPE_BUG, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_ROCK, TYPE_STEEL, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_ROCK, TYPE_ROCK, TYPE_MUL_NOT_EFFECTIVE, //Rock resists rock
+    TYPE_GHOST, TYPE_NORMAL, TYPE_MUL_NO_EFFECT,
+    TYPE_GHOST, TYPE_PSYCHIC, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_GHOST, TYPE_DARK, TYPE_MUL_NOT_EFFECTIVE,
+    //TYPE_GHOST, TYPE_STEEL, TYPE_MUL_NOT_EFFECTIVE, //Steel doesn't resist Ghost
+    TYPE_GHOST, TYPE_GHOST, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_DRAGON, TYPE_DRAGON, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_DRAGON, TYPE_STEEL, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_DARK, TYPE_FIGHTING, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_DARK, TYPE_PSYCHIC, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_DARK, TYPE_GHOST, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_DARK, TYPE_DARK, TYPE_MUL_NOT_EFFECTIVE,
+    //TYPE_DARK, TYPE_STEEL, TYPE_MUL_NOT_EFFECTIVE, //Steel doesn't resist Dark
+    TYPE_STEEL, TYPE_FIRE, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_STEEL, TYPE_WATER, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_STEEL, TYPE_ELECTRIC, TYPE_MUL_NOT_EFFECTIVE,
+    //TYPE_STEEL, TYPE_ICE, TYPE_MUL_SUPER_EFFECTIVE, //Steel is neutral to Ice
+    TYPE_STEEL, TYPE_ROCK, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_STEEL, TYPE_STEEL, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_NORMAL, TYPE_GHOST, TYPE_MUL_NO_EFFECT,
+    TYPE_FIGHTING, TYPE_GHOST, TYPE_MUL_NO_EFFECT,
+    //Fairy Type
+    TYPE_FAIRY, TYPE_FIGHTING, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_FAIRY, TYPE_DRAGON, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_FAIRY, TYPE_DARK, TYPE_MUL_SUPER_EFFECTIVE,
+    TYPE_FAIRY, TYPE_POISON, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_FAIRY, TYPE_STEEL, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_FAIRY, TYPE_FIRE, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_FIGHTING, TYPE_FAIRY, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_POISON, TYPE_FAIRY, TYPE_MUL_SUPER_EFFECTIVE,
+    //TYPE_BUG, TYPE_FAIRY, TYPE_MUL_NOT_EFFECTIVE, //Fairy doesn't resist bug
+    TYPE_DRAGON, TYPE_FAIRY, TYPE_MUL_NO_EFFECT,
+    TYPE_DARK, TYPE_FAIRY, TYPE_MUL_NOT_EFFECTIVE,
+    TYPE_STEEL, TYPE_FAIRY, TYPE_MUL_SUPER_EFFECTIVE,
+    //End
+    TYPE_FORESIGHT, TYPE_FORESIGHT, TYPE_MUL_NO_EFFECT,
+    TYPE_ENDTABLE, TYPE_ENDTABLE, TYPE_MUL_NO_EFFECT
+};
+
+const u8 gTypeEffectiveness_GenVI[366] = //Gen 6 type matchup, with fairy type added AND Steel not resisting Ghost or Dark
 {
     TYPE_NORMAL, TYPE_ROCK, TYPE_MUL_NOT_EFFECTIVE,
     TYPE_NORMAL, TYPE_STEEL, TYPE_MUL_NOT_EFFECTIVE,
@@ -526,9 +659,9 @@ const u8 gTypeEffectiveness[369] =
     TYPE_DRAGON, TYPE_FAIRY, TYPE_MUL_NO_EFFECT,
     TYPE_DARK, TYPE_FAIRY, TYPE_MUL_NOT_EFFECTIVE,
     TYPE_STEEL, TYPE_FAIRY, TYPE_MUL_SUPER_EFFECTIVE,
-    TYPE_FORESIGHT, TYPE_FORESIGHT, TYPE_MUL_NO_EFFECT,
     TYPE_NORMAL, TYPE_GHOST, TYPE_MUL_NO_EFFECT,
     TYPE_FIGHTING, TYPE_GHOST, TYPE_MUL_NO_EFFECT,
+    TYPE_FORESIGHT, TYPE_FORESIGHT, TYPE_MUL_NO_EFFECT,
     TYPE_ENDTABLE, TYPE_ENDTABLE, TYPE_MUL_NO_EFFECT
 };
 
@@ -2419,7 +2552,9 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
         gBattleTypeFlags |= gTrainers[trainerNum].doubleBattle;
 
         //tx_randomizer_and_challenges
-        if (gSaveBlock1Ptr->tx_Challenges_TrainerScalingIVs && !FlagGet(FLAG_IS_CHAMPION))
+        if (gSaveBlock1Ptr->tx_Challenges_TrainerScalingIVs && !(gBattleTypeFlags & (BATTLE_TYPE_FRONTIER
+                                                                        | BATTLE_TYPE_EREADER_TRAINER
+                                                                        | BATTLE_TYPE_TRAINER_HILL)))
         {
             u8 iv = GetCurrentTrainerIVs();
 
@@ -2433,7 +2568,9 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
                 CalculateMonStats(&party[i]);
             }
         }
-        if (gSaveBlock1Ptr->tx_Challenges_TrainerScalingEVs && !FlagGet(FLAG_IS_CHAMPION))
+        if (gSaveBlock1Ptr->tx_Challenges_TrainerScalingEVs && !(gBattleTypeFlags & (BATTLE_TYPE_FRONTIER
+                                                                        | BATTLE_TYPE_EREADER_TRAINER
+                                                                        | BATTLE_TYPE_TRAINER_HILL)))
         {
             u8 ev = GetCurrentTrainerEVs();
 
@@ -4032,6 +4169,8 @@ static void BattleIntroPrintWildMonAttacked(void)
     }
 }
 
+#define RUN_HOLD_FRAMES 30  // Frames button B needs to be hold in order to run away from battle
+
 static void BattleIntroQuickRun(void)
 {
     if (gSaveBlock2Ptr->optionsRunType == 1)
@@ -4050,18 +4189,41 @@ static void BattleIntroQuickRun(void)
         }
     }
     else if (gSaveBlock2Ptr->optionsRunType == 3)
-        {
+    {
+        static u8 sRunHoldCounter = 0;
+
         if (gBattleControllerExecFlags == 0)
         {
             if (JOY_HELD(B_BUTTON))
             {
-                if (!IsRunningFromBattleImpossible() && TryRunFromBattle(gBattlerAttacker)){
+                // Count continuous hold frames.
+                if (sRunHoldCounter < 0xFF)
+                    sRunHoldCounter++;
+
+                // If not yet long enough, DO NOT advance battle state.
+                if (sRunHoldCounter < RUN_HOLD_FRAMES)
+                    return;
+
+                // Threshold reached: try to run once, then reset.
+                sRunHoldCounter = 0;
+
+                if (!IsRunningFromBattleImpossible() && TryRunFromBattle(gBattlerAttacker))
+                {
                     gBattleMainFunc = HandleEndTurn_RanFromBattle;
                     return;
                 }
+
+                // Can't escape
                 PrepareStringBattle(STRINGID_CANTESCAPE, 0);
+                gBattleMainFunc = BattleIntroPrintPlayerSendsOut;
+                return;
             }
-            gBattleMainFunc = BattleIntroPrintPlayerSendsOut;
+            else
+            {
+                // Button not held: reset counter and proceed normally.
+                sRunHoldCounter = 0;
+                gBattleMainFunc = BattleIntroPrintPlayerSendsOut;
+            }
         }
     }
 }
@@ -5498,7 +5660,7 @@ static void HandleEndTurn_BattleWon(void)
             {
                 if((Random() % 3) == 1)
                     PlayBGM(MUS_PL_VICTORY_FRONTIER_BRAIN);
-                if((Random() % 3) == 2)
+                else if((Random() % 3) == 2)
                     PlayBGM(MUS_HG_VICTORY_FRONTIER_BRAIN);
                 else
                     PlayBGM(MUS_VICTORY_GYM_LEADER);
@@ -5516,7 +5678,7 @@ static void HandleEndTurn_BattleWon(void)
             {
                 if((Random() % 3) == 1)
                     PlayBGM(MUS_DP_VICTORY_TRAINER);
-                if((Random() % 3) == 2)
+                else if((Random() % 3) == 2)
                     PlayBGM(MUS_HG_VICTORY_TRAINER);
                 else
                     PlayBGM(MUS_VICTORY_TRAINER);
@@ -5592,7 +5754,7 @@ static void HandleEndTurn_BattleWon(void)
                     {
                         if((Random() % 3) == 1)
                             PlayBGM(MUS_DP_VICTORY_GYM_LEADER);
-                        if((Random() % 3) == 2)
+                        else if((Random() % 3) == 2)
                             PlayBGM(MUS_HG_VICTORY_GYM_LEADER);
                         else
                             PlayBGM(MUS_VICTORY_GYM_LEADER);
@@ -5611,7 +5773,7 @@ static void HandleEndTurn_BattleWon(void)
                 {
                     if((Random() % 3) == 1)
                         PlayBGM(MUS_DP_VICTORY_TRAINER);
-                    if((Random() % 3) == 2)
+                    else if((Random() % 3) == 2)
                         PlayBGM(MUS_HG_VICTORY_TRAINER);
                     else
                         PlayBGM(MUS_VICTORY_TRAINER);
@@ -5758,7 +5920,7 @@ static void HandleEndTurn_FinishBattle(void)
         {
             TryPutBreakingNewsOnAir();
         }
-        if ((gSaveBlock1Ptr->tx_Features_PkmnDeath) && (!IsNuzlockeActive()))
+        if ((gSaveBlock1Ptr->tx_Nuzlocke_EasyMode) && (!IsNuzlockeActive()))
         {
             if (!(gBattleTypeFlags &(BATTLE_TYPE_LINK
                                         | BATTLE_TYPE_LINK_IN_BATTLE
@@ -5822,7 +5984,6 @@ static void FreeResetData_ReturnToOvOrDoEvolutions(void)
 {
     if (!gPaletteFade.active)
     {
-        gIsFishingEncounter = FALSE;
         ResetSpriteData();
         if (gLeveledUpInBattle == 0 || (gBattleOutcome != B_OUTCOME_WON && gBattleOutcome != B_OUTCOME_CAUGHT))
         {

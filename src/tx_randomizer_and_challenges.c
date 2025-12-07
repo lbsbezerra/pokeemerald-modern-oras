@@ -14,7 +14,7 @@ bool8 AreFeaturesActivated(void)
 {
     if (gSaveBlock1Ptr->tx_Features_ShinyChance
         || gSaveBlock1Ptr->tx_Features_WildMonDropItems
-        || gSaveBlock1Ptr->tx_Mode_AlternateSpawns
+        || gSaveBlock1Ptr->tx_Mode_Encounters
         || gSaveBlock1Ptr->tx_Mode_InfiniteTMs
         || gSaveBlock1Ptr->tx_Mode_PoisonSurvive
         || gSaveBlock1Ptr->tx_Features_EasierFeebas)
@@ -45,6 +45,8 @@ bool8 IsRandomizerActivated(void)
 
 bool8 IsRandomItemsActivated(void)
 {
+    if (!FlagGet(FLAG_ADVENTURE_STARTED))   //Don't randomize starting items
+        return FALSE;
     return gSaveBlock1Ptr->tx_Random_Items;
 }
 
@@ -55,7 +57,9 @@ bool8 IsDifficultyOptionsActivated(void)
         || gSaveBlock1Ptr->tx_Challenges_ExpMultiplier
         || gSaveBlock1Ptr->tx_Challenges_NoItemPlayer
         || gSaveBlock1Ptr->tx_Challenges_NoItemTrainer
-        || gSaveBlock1Ptr->tx_Challenges_PkmnCenter)
+        || gSaveBlock1Ptr->tx_Challenges_PkmnCenter
+        || gSaveBlock1Ptr->tx_Difficulty_EscapeRopeDig
+        || gSaveBlock1Ptr->tx_Difficulty_CatchRate)
         return TRUE;
 
     return FALSE;
@@ -191,12 +195,12 @@ const u8 NuzlockeLUT[] =
     [MAPSEC_VICTORY_ROAD] = 0x3E,
     [MAPSEC_UNDERWATER_124] = 0x3F,
     //8
-    [MAPSEC_UNDERWATER_126] = 0x3F,
     [MAPSEC_ARTISAN_CAVE] = 0x40,
     [MAPSEC_DESERT_UNDERPASS] = 0x41,
     [MAPSEC_ALTERING_CAVE_FRLG] = 0x42,
     [MAPSEC_SAFARI_ZONE_AREA5] = 0x43,
-    [MAPSEC_SAFARI_ZONE_AREA6] = 0x44
+    [MAPSEC_SAFARI_ZONE_AREA6] = 0x44,
+    [MAPSEC_UNDERWATER_126] = 0x45,
 };
 
 //tx_randomizer_and_challenges
@@ -269,6 +273,7 @@ void NuzlockeDeleteFaintedPartyPokemon(void) // @Kurausukun
     u8 i;
     struct Pokemon *pokemon;
     u32 monItem;
+    u16 item = ITEM_NONE;
 
     for (i = 0; i < PARTY_SIZE; i++)
     {
@@ -282,9 +287,9 @@ void NuzlockeDeleteFaintedPartyPokemon(void) // @Kurausukun
                 if (monItem != ITEM_NONE)
                 {
                     AddBagItem(monItem, 1);
-                    SetMonData(pokemon, MON_DATA_HELD_ITEM, ITEM_NONE);
+                    SetMonData(pokemon, MON_DATA_HELD_ITEM, &item);
                 }
-                if ((gSaveBlock1Ptr->tx_Features_PkmnDeath) && (!IsNuzlockeActive()))
+                if ((gSaveBlock1Ptr->tx_Nuzlocke_EasyMode) && (!IsNuzlockeActive()))
                     NuzlockeDeletePartyMonOption(i);
                 else
                     NuzlockeDeletePartyMon(i);

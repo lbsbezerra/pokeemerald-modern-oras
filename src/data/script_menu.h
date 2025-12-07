@@ -287,6 +287,9 @@ static const struct MenuAction MultichoiceList_GameCornerCoins[] =
 {
     {gText_50CoinsAndPrice},
     {gText_500CoinsAndPrice},
+    {gText_1000CoinsAndPrice},
+    {gText_2500CoinsAndPrice},
+    {gText_5000CoinsAndPrice},
     {gText_Exit},
 };
 
@@ -974,6 +977,7 @@ static const u8 *const sPCNameStrings[] =
     gText_SomeonesPC,
     gText_LanettesPC,
     gText_PlayersPC,
+    gText_Challenges,
     gText_LogOff,
 };
 

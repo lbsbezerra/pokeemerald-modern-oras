@@ -531,7 +531,7 @@
 #define MUS_RG_VS_MEWTWO                  507 // MUS_RG_VS_MYU2
 #define MUS_RG_VS_LEGEND                  508 // MUS_RG_VS_DEN
 #define MUS_RG_ENCOUNTER_GYM_LEADER       509 // MUS_RG_EXEYE
-#define MUS_RG_ENCOUNTER_DEOXYS           500 // MUS_RG_DEOEYE
+#define MUS_RG_ENCOUNTER_DEOXYS           510 // MUS_RG_DEOEYE
 #define MUS_RG_TRAINER_TOWER              511 // MUS_RG_T_TOWER
 #define MUS_RG_SLOW_PALLET                512 // MUS_RG_SLOWMASARA
 #define MUS_RG_TEACHY_TV_MENU             513 // MUS_RG_TVNOIZE
@@ -944,12 +944,14 @@
 #define MUS_HG_OBTAIN_CASTLE_POINTS       896 // Received Castle Points!
 #define MUS_HG_OBTAIN_B_POINTS            897 // Received Battle Points!
 #define MUS_HG_WIN_MINIGAME               898 // Cleared Wobbuffet Pop!
+#define MUS_BW_VS_LEGEND                  899 // Battle Vs. Legendary Pokémon - Black and White
+#define MUS_BW_VS_IRIS                    900 // Champion Battle! - Black and White 2
 
-#define HG_MUSIC_END                      MUS_HG_WIN_MINIGAME
+#define HG_MUSIC_END                      MUS_BW_VS_IRIS
 
 #define SONGS_END                         HG_MUSIC_END
 #define END_SE                            PH_NURSE_SOLO
-#define END_MUS                           MUS_HG_WIN_MINIGAME
+#define END_MUS                           MUS_BW_VS_IRIS
 
 #define MUS_ROUTE118                      0x7FFF  // Map is split into 2 music sections. controlled by GetCurrLocationDefaultMusic().
 

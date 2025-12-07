@@ -137,3 +137,56 @@ Regigigas_Braille_Text:
 	.braille "DEFEATED.\n"
 	.braille "YOU ARE\n"
 	.braille "CHAMPION.$"
+
+UnownChamber_Left_Braille_Text:
+	brailleformat 3, 0, 25, 19, 6, 3
+	.braille "LEFT AND RIGHT\n"
+	.braille "RIGHT AND LEFT\n"
+	.braille "TWO SIDES OF\n"
+	.braille "THE SAME COIN.$"
+
+UnownChamber_Mid_Braille_Text:
+	brailleformat 3, 0, 25, 19, 6, 3
+	.braille "CHECK. MIRROR.\n"
+	.braille "EIGHT TIMES.\n"
+	.braille "IN ORDER.\n"
+	.braille "OR START AGAIN$"
+
+UnownChamber_Right_Braille_Text:
+	brailleformat 3, 0, 25, 19, 6, 3
+	.braille "RIGHT AND LEFT\n"
+	.braille "LEFT AND RIGHT\n"
+	.braille "TWO SIDES OF\n"
+	.braille "SAME MIRROR.$"
+
+UnownChamber_Random_Text_1:
+	brailleformat 3, 0, 25, 19, 6, 3
+	.braille "GOLD$"
+
+UnownChamber_Random_Text_2:
+	brailleformat 3, 0, 25, 19, 6, 3
+	.braille "AND SILVER.$"
+
+UnownChamber_Random_Text_3:
+	brailleformat 3, 0, 25, 19, 6, 3
+	.braille "SILVER$"
+
+UnownChamber_Random_Text_4:
+	brailleformat 3, 0, 25, 19, 6, 3
+	.braille "AND GOLD.$"
+
+UnownChamber_Random_Text_5:
+	brailleformat 3, 0, 25, 19, 6, 3
+	.braille "TWENTY$"
+
+UnownChamber_Random_Text_6:
+	brailleformat 3, 0, 25, 19, 6, 3
+	.braille "EIGHT.$"
+
+UnownChamber_Random_Text_7:
+	brailleformat 3, 0, 25, 19, 6, 3
+	.braille "THEY ARE$"
+
+UnownChamber_Random_Text_8:
+	brailleformat 3, 0, 25, 19, 6, 3
+	.braille "WAITING.$"

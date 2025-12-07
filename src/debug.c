@@ -429,7 +429,7 @@ extern const u8 gAbilityNames[][ABILITY_NAME_LENGTH + 1];
 
 // *******************************
 //Maps per map group COPY FROM /include/constants/map_groups.h
-static const u8 MAP_GROUP_COUNT[] = {57, 5, 5, 6, 7, 8, 9, 7, 7, 14, 8, 17, 10, 23, 13, 15, 15, 2, 2, 2, 3, 1, 1, 1, 126, 61, 89, 2, 1, 13, 1, 1, 3, 1, 0};
+static const u8 MAP_GROUP_COUNT[] = {57, 5, 5, 6, 7, 8, 9, 7, 7, 14, 8, 17, 10, 23, 13, 15, 15, 2, 2, 2, 3, 1, 1, 1, 126, 61, 93, 2, 1, 13, 1, 1, 3, 1, 0};
 
 // Text
 // General
@@ -453,13 +453,13 @@ static const u8 sDebugText_AccessPC[] =         _("Access PC…{CLEAR_TO 110}{RI
 static const u8 sDebugText_Cancel[] =           _("Cancel");
 // Script menu
 static const u8 sDebugText_Util_Script_1[] =               _("Open Challenges Menu");
-static const u8 sDebugText_Util_Script_2[] =               _("Grow Berry Tree");
-static const u8 sDebugText_Util_Script_3[] =               _("Script 3 (Empty)");
+static const u8 sDebugText_Util_Script_2[] =               _("Update 2.4 -> 3.2");
+static const u8 sDebugText_Util_Script_3[] =               _("Update 3.2 -> 3.3+");
 static const u8 sDebugText_Util_Script_4[] =               _("Script 4 (Empty)");
 static const u8 sDebugText_Util_Script_5[] =               _("Script 5 (Empty)");
 static const u8 sDebugText_Util_Script_6[] =               _("Script 6 (Empty)");
-static const u8 sDebugText_Util_Script_7[] =               _("Script 7 (Empty)");
-static const u8 sDebugText_Util_Script_8[] =               _("Script 8 (Empty)");
+static const u8 sDebugText_Util_Script_7[] =               _("Check Nuzlocke Mode");
+static const u8 sDebugText_Util_Script_8[] =               _("Grow Berry Tree");
 // Util Menu
 static const u8 sDebugText_Util_HealParty[] =               _("Heal Party");
 static const u8 sDebugText_Util_Fly[] =                     _("Fly to map…{CLEAR_TO 110}{RIGHT_ARROW}");
@@ -4590,6 +4590,8 @@ static void DebugAction_Sound_MUS_SelectId(u8 taskId)
     X(MUS_HG_OBTAIN_CASTLE_POINTS     , "MUS-HG-OBTAIN-CASTLE-POINTS"     ) \
     X(MUS_HG_OBTAIN_B_POINTS          , "MUS-HG-OBTAIN-B-POINTS"          ) \
     X(MUS_HG_WIN_MINIGAME             , "MUS-HG-WIN-MINIGAME"             ) \
+    X(MUS_BW_VS_LEGEND                , "MUS-BW-VS-LEGEND"                ) \
+    X(MUS_BW_VS_IRIS                  , "MUS-BW-VS-IRIS"                  ) \
 
 #define SOUND_LIST_SE \
     X(SE_USE_ITEM              , "SE-USE-ITEM"              ) \

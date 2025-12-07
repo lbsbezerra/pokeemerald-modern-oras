@@ -49,6 +49,20 @@ bool8 IsMirageIslandPresent(void)
             return TRUE;
         else if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL) == SPECIES_MEW)
             return TRUE;
+    } while (++curMon < partyEnd);
+
+    struct BoxPokemon * curBoxMon = &(gPokemonStoragePtr->boxes[0][0]);
+    struct BoxPokemon * boxMonEnd = &(gPokemonStoragePtr->boxes[TOTAL_BOXES_COUNT][IN_BOX_COUNT]);
+
+    do {
+        species = curBoxMon->hasSpecies;
+        if (species) {
+            personality = curBoxMon->personality & 0xffff;
+            if (personality == rnd) {
+                return TRUE;
+            }
+        }
+    } while (++curBoxMon < boxMonEnd);
 
     return FALSE;
 }

@@ -607,24 +607,47 @@ void AI_TrySwitchOrUseItem(void)
 static void ModulateByTypeEffectiveness(u8 atkType, u8 defType1, u8 defType2, u8 *var)
 {
     s32 i = 0;
-
-    while (GetTypeEffectivenessRandom(TYPE_EFFECT_ATK_TYPE(i)) != TYPE_ENDTABLE)
+    if (gSaveBlock1Ptr->tx_Mode_TypeEffectiveness == 1) //Modern type effectiveness
     {
-        if (GetTypeEffectivenessRandom(TYPE_EFFECT_ATK_TYPE(i)) == TYPE_FORESIGHT)
+        while (GetTypeEffectivenessRandom(TYPE_EFFECT_ATK_TYPE(i)) != TYPE_ENDTABLE)
         {
+            if (GetTypeEffectivenessRandom(TYPE_EFFECT_ATK_TYPE(i)) == TYPE_FORESIGHT)
+            {
+                i += 3;
+                continue;
+            }
+            else if (GetTypeEffectivenessRandom(TYPE_EFFECT_ATK_TYPE(i)) == atkType)
+            {
+                // Check type1.
+                if (TYPE_EFFECT_DEF_TYPE(i) == defType1)
+                    *var = (*var * TYPE_EFFECT_MULTIPLIER(i)) / TYPE_MUL_NORMAL;
+                // Check type2.
+                if (TYPE_EFFECT_DEF_TYPE(i) == defType2 && defType1 != defType2)
+                    *var = (*var * TYPE_EFFECT_MULTIPLIER(i)) / TYPE_MUL_NORMAL;
+            }
             i += 3;
-            continue;
         }
-        else if (GetTypeEffectivenessRandom(TYPE_EFFECT_ATK_TYPE(i)) == atkType)
+    }
+    else if (gSaveBlock1Ptr->tx_Mode_TypeEffectiveness == 0) //Gen6 type effectiveness
+    {
+        while (GetTypeEffectivenessRandom(TYPE_EFFECT_ATK_TYPE_OLD(i)) != TYPE_ENDTABLE)
         {
-            // Check type1.
-            if (TYPE_EFFECT_DEF_TYPE(i) == defType1)
-                *var = (*var * TYPE_EFFECT_MULTIPLIER(i)) / TYPE_MUL_NORMAL;
-            // Check type2.
-            if (TYPE_EFFECT_DEF_TYPE(i) == defType2 && defType1 != defType2)
-                *var = (*var * TYPE_EFFECT_MULTIPLIER(i)) / TYPE_MUL_NORMAL;
+            if (GetTypeEffectivenessRandom(TYPE_EFFECT_ATK_TYPE_OLD(i)) == TYPE_FORESIGHT)
+            {
+                i += 3;
+                continue;
+            }
+            else if (GetTypeEffectivenessRandom(TYPE_EFFECT_ATK_TYPE_OLD(i)) == atkType)
+            {
+                // Check type1.
+                if (TYPE_EFFECT_DEF_TYPE_OLD(i) == defType1)
+                    *var = (*var * TYPE_EFFECT_MULTIPLIER_OLD(i)) / TYPE_MUL_NORMAL;
+                // Check type2.
+                if (TYPE_EFFECT_DEF_TYPE_OLD(i) == defType2 && defType1 != defType2)
+                    *var = (*var * TYPE_EFFECT_MULTIPLIER_OLD(i)) / TYPE_MUL_NORMAL;
+            }
+            i += 3;
         }
-        i += 3;
     }
 }
 
@@ -644,7 +667,6 @@ u8 GetMostSuitableMonToSwitchInto(void)
     s32 i, j;
     u8 invalidMons;
     u16 move;
-    bool8 checkedAllMonForSEMoves = FALSE;  // We have checked all Pokemon in the party for if they have a super effective move
 
     if (*(gBattleStruct->monToSwitchIntoId + gActiveBattler) != PARTY_SIZE)
         return *(gBattleStruct->monToSwitchIntoId + gActiveBattler);
@@ -692,8 +714,7 @@ u8 GetMostSuitableMonToSwitchInto(void)
 
     while (invalidMons != (1 << PARTY_SIZE) - 1) // All mons are invalid.
     {
-        //bestDmg = TYPE_MUL_NO_EFFECT;
-        bestDmg = 255;
+        bestDmg = TYPE_MUL_NO_EFFECT;
         bestMonId = PARTY_SIZE;
         // Find the mon whose type is the most suitable offensively.
         for (i = firstId; i < lastId; i++)
@@ -716,8 +737,7 @@ u8 GetMostSuitableMonToSwitchInto(void)
                 /* Possible bug: this comparison gives the type that takes the most damage, when
                 a "good" AI would want to select the type that takes the least damage. Unknown if this
                 is a legitimate mistake or if it's an intentional, if weird, design choice */
-                //if (bestDmg < typeDmg)
-                if (bestDmg > typeDmg)
+                if (bestDmg < typeDmg)
                 {
                     bestDmg = typeDmg;
                     bestMonId = i;
@@ -739,16 +759,10 @@ u8 GetMostSuitableMonToSwitchInto(void)
                     break;
             }
 
-            //if (i != MAX_MON_MOVES)
-            if (i != MAX_MON_MOVES || (checkedAllMonForSEMoves && bestDmg <= TYPE_MUL_NOT_EFFECTIVE))
+            if (i != MAX_MON_MOVES)
                 return bestMonId; // Has both the typing and at least one super effective move.
 
             invalidMons |= gBitTable[bestMonId]; // Sorry buddy, we want something better.
-            if (invalidMons == 0x3F && !checkedAllMonForSEMoves)  // If we already checked all for a super effective move, then use the one with the best typing
-            {
-                invalidMons = 0;
-                checkedAllMonForSEMoves = TRUE;
-            }
         }
         else
         {
@@ -856,8 +870,10 @@ static bool8 ShouldUseItem(void)
         if (item == ITEM_NONE)
             continue;
         if (gSaveBlock1Ptr->tx_Mode_New_Citrus == 0)
+        {
             if (gItemEffectTable_OldSitrus[item - ITEM_POTION] == NULL)
                 continue;
+        }
         else if (gSaveBlock1Ptr->tx_Mode_New_Citrus == 1)
             if (gItemEffectTable[item - ITEM_POTION] == NULL)
                 continue;

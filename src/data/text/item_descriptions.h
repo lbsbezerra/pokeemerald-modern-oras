@@ -1421,7 +1421,7 @@ static const u8 sHM05Desc[] = _(
 static const u8 sHM06Desc[] = _(
     "A rock-crushingly\n"
     "tough attack that\n"
-    "may lower DEFENSE.");
+    "may lower SP. DEF.");
 
 static const u8 sHM07Desc[] = _(
     "Attacks the foe\n"
@@ -1435,9 +1435,9 @@ static const u8 sHM08Desc[] = _(
 
 // FireRed/LeafGreen key items
 static const u8 sOaksParcelDesc[] = _(
-    "A parcel for PROF.\n"
-    "OAK from a POKéMON\n"
-    "MART's clerk.");
+    "A box that contains\n"
+    "a cool secondary\n"
+    "outfit.");
 
 static const u8 sPokeFluteDesc[] = _(
     "A sweet-sounding\n"
