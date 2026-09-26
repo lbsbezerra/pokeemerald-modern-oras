@@ -44,6 +44,7 @@
 #include "berry_powder.h"
 #include "mystery_gift.h"
 #include "union_room_chat.h"
+#include "save_migration.h"
 #include "constants/items.h"
 #include "tx_randomizer_and_challenges.h"
 
@@ -109,6 +110,7 @@ static void SetDefaultOptions(void)
     gSaveBlock2Ptr->optionsFishing = 1;
     gSaveBlock2Ptr->optionsFastIntro = 1;
     gSaveBlock2Ptr->optionsFastBattle = 1;
+    gSaveBlock2Ptr->optionsBattleSpeed = 0;
     gSaveBlock2Ptr->optionsBikeMusic = 0;
     gSaveBlock2Ptr->optionsEvenFasterJoy = 1;
     gSaveBlock2Ptr->optionsSurfMusic = 0;
@@ -124,6 +126,8 @@ static void SetDefaultOptions(void)
     gSaveBlock2Ptr->optionsNewBackgrounds = 0;
     gSaveBlock2Ptr->optionsRunType = 1;
     gSaveBlock2Ptr->optionsSurfOverworld = 0;
+    gSaveBlock2Ptr->optionsCursorMemory = 1;
+    gSaveBlock2Ptr->optionsBrighterNights = 0;
 }
 
 static void ClearPokedexFlags(void)
@@ -179,6 +183,7 @@ void NewGameInitData(void)
 {
     bool8 HardPrev = FlagGet(FLAG_DIFFICULTY_HARD);
     bool8 TMPrev = FlagGet(FLAG_FINITE_TMS);
+    bool8 WonderTrade = FlagGet(FLAG_WT_ENABLED);
     bool8 UnlimitedWT = FlagGet(FLAG_UNLIMITIED_WONDERTRADE);
     bool8 EnableMints = FlagGet(FLAG_MINTS_ENABLED);
     bool8 EnableExtraLegendaries = FlagGet(FLAG_EXTRA_LEGENDARIES);
@@ -241,16 +246,20 @@ void NewGameInitData(void)
     WipeTrainerNameRecords();
     ResetTrainerHillResults();
     ResetContestLinkResults();
-    RandomizeTypeEffectivenessListEWRAM(Random32());
+    gSaveBlock1Ptr->typeRandomizerSeed = Random32() & 0xFFFF;
+    RandomizeTypeEffectivenessListEWRAM(gSaveBlock1Ptr->typeRandomizerSeed);
     if ((gSaveBlock1Ptr->tx_Nuzlocke_EasyMode) && (gSaveBlock1Ptr->tx_Challenges_Nuzlocke))
         gSaveBlock1Ptr->tx_Nuzlocke_EasyMode = 0;
 
     HardPrev ? FlagSet(FLAG_DIFFICULTY_HARD) : FlagClear(FLAG_DIFFICULTY_HARD);
     TMPrev ? FlagSet(FLAG_FINITE_TMS) : FlagClear(FLAG_FINITE_TMS);
+    WonderTrade ? FlagSet(FLAG_WT_ENABLED) : FlagClear(FLAG_WT_ENABLED);
     UnlimitedWT ? FlagSet(FLAG_UNLIMITIED_WONDERTRADE) : FlagClear(FLAG_UNLIMITIED_WONDERTRADE);
     EnableMints ? FlagSet(FLAG_MINTS_ENABLED) : FlagClear(FLAG_MINTS_ENABLED);
     EnableExtraLegendaries ? FlagSet(FLAG_EXTRA_LEGENDARIES) : FlagClear(FLAG_EXTRA_LEGENDARIES);
     FasterJoy ? FlagSet(FLAG_EVEN_FASTER_JOY) : FlagClear(FLAG_EVEN_FASTER_JOY);
+
+    VarSet(VAR_NUMBER_OF_RELEASE, MODERN_EMERALD_RELEASE_NUMBER);
 
     /*if (difficultyPrev == DIFFICULTY_EASY)
         VarSet(VAR_DIFFICULTY, DIFFICULTY_EASY);
@@ -258,7 +267,8 @@ void NewGameInitData(void)
         VarSet(VAR_DIFFICULTY, DIFFICULTY_NORMAL);
     else if (difficultyPrev == DIFFICULTY_HARD)
         VarSet(VAR_DIFFICULTY, DIFFICULTY_HARD);*/
-    
+
+    StampCurrentSaveVersion();
 }
 void CheckIfChallengesAreActive(void)
 {

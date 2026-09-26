@@ -26,8 +26,16 @@
 extern const u8 EventScript_RepelWoreOff[];
 
 #define MAX_ENCOUNTER_RATE 2880
+#define MAX_SWEET_SCENT_CHAIN 20
+#define MAX_CHAIN_FISHING_STREAK 100
 
 #define NUM_FEEBAS_SPOTS 6
+
+EWRAM_DATA u8 gSweetScentChainStreak = 0;
+EWRAM_DATA bool8 gIsSweetScentEncounter = FALSE;
+EWRAM_DATA u8 gChainFishingStreak = 0;
+EWRAM_DATA static u16 sLastFishingSpecies = 0;
+EWRAM_DATA bool8 gIsFishingEncounter = FALSE;
 
 // Number of accessible fishing spots in each section of Route 119
 // Each section is an area of the route between the y coordinates in sRoute119WaterTileData
@@ -357,6 +365,8 @@ static u16 GetCurrentMapWildMonHeaderId(void)
         if (gWildMonHeaders[i].mapGroup == gSaveBlock1Ptr->location.mapGroup &&
             gWildMonHeaders[i].mapNum == gSaveBlock1Ptr->location.mapNum)
         {
+            u16 originalId = i;
+
             if (VarGet(VAR_ENCOUNTER_TABLE) >= 1 && VarGet(VAR_ENCOUNTER_TABLE) <= 4)
                 i += (VarGet(VAR_ENCOUNTER_TABLE) - 1);
             if (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(ALTERING_CAVE) &&
@@ -367,6 +377,15 @@ static u16 GetCurrentMapWildMonHeaderId(void)
                     alteringCaveId = 0;
 
                 i += alteringCaveId;
+            }
+
+            // Prevent night table overshoot: if the offset landed on a different
+            // map's header, fall back to modern day (originalId + 1).
+            if (VarGet(VAR_ENCOUNTER_TABLE) == 3
+                && (gWildMonHeaders[i].mapGroup != gWildMonHeaders[originalId].mapGroup
+                    || gWildMonHeaders[i].mapNum != gWildMonHeaders[originalId].mapNum))
+            {
+                i = originalId + 1;
             }
 
             return i;
@@ -760,6 +779,7 @@ bool8 SweetScentWildEncounter(void)
 {
     s16 x, y;
     u16 headerId;
+    bool8 encounterStarted = FALSE;
 
     PlayerGetDestCoords(&x, &y);
     headerId = GetCurrentMapWildMonHeaderId();
@@ -804,8 +824,7 @@ bool8 SweetScentWildEncounter(void)
             else
                 TryGenerateWildMon(gWildMonHeaders[headerId].landMonsInfo, WILD_AREA_LAND, 0);
 
-            BattleSetup_StartWildBattle();
-            return TRUE;
+            encounterStarted = TRUE;
         }
         else if (MetatileBehavior_IsWaterWildEncounter(MapGridGetMetatileBehaviorAt(x, y)) == TRUE)
         {
@@ -821,12 +840,68 @@ bool8 SweetScentWildEncounter(void)
             }
 
             TryGenerateWildMon(gWildMonHeaders[headerId].waterMonsInfo, WILD_AREA_WATER, 0);
-            BattleSetup_StartWildBattle();
-            return TRUE;
+            encounterStarted = TRUE;
         }
     }
 
-    return FALSE;
+    if (!encounterStarted)
+        return FALSE;
+
+    gIsSweetScentEncounter = TRUE;
+
+    // Sweet Scent chain shiny reroll (applied to already-created enemy mon)
+    if (gSweetScentChainStreak > 0)
+    {
+        u32 otId = GetMonData(&gEnemyParty[0], MON_DATA_OT_ID);
+        u32 personality = GetMonData(&gEnemyParty[0], MON_DATA_PERSONALITY);
+        u32 shinyValue = GET_SHINY_VALUE(otId, personality);
+        u32 shinyThreshold = SHINY_ODDS;
+        u8 pokemon_nature = GetNatureFromPersonality(personality);
+
+        if (gSaveBlock1Ptr->tx_Features_ShinyChance == 1)
+            shinyThreshold = 16;
+        else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 2)
+            shinyThreshold = 32;
+        else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 3)
+            shinyThreshold = 64;
+        else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 4)
+            shinyThreshold = 128;
+
+        if (shinyValue >= shinyThreshold) // not already shiny
+        {
+            u32 rolls = 0;
+            u32 shinyRolls = 1 + 2 * gSweetScentChainStreak;
+            do {
+                personality = Random32();
+                shinyValue = GET_SHINY_VALUE(otId, personality);
+                rolls++;
+            } while (shinyValue >= shinyThreshold && rolls < shinyRolls);
+
+            // If shiny found, fix nature (preserves Synchronize) and apply
+            if (shinyValue < shinyThreshold)
+            {
+                while (GetNatureFromPersonality(personality) != pokemon_nature)
+                {
+                    personality = Random32();
+                    personality = ((((Random() % shinyThreshold) ^ (HIHALF(otId) ^ LOHALF(otId))) ^ LOHALF(personality)) << 16) | LOHALF(personality);
+                }
+                // Re-create mon with new personality to avoid Bad Egg (checksum)
+                {
+                    u16 monSpecies = GetMonData(&gEnemyParty[0], MON_DATA_SPECIES);
+                    u8 monLevel = GetMonData(&gEnemyParty[0], MON_DATA_LEVEL);
+                    ZeroEnemyPartyMons();
+                    CreateMon(&gEnemyParty[0], monSpecies, monLevel, USE_RANDOM_IVS, TRUE, personality, OT_ID_PLAYER_ID, 0);
+                }
+            }
+        }
+    }
+
+    // Increment chain
+    if (gSweetScentChainStreak < MAX_SWEET_SCENT_CHAIN)
+        gSweetScentChainStreak++;
+
+    BattleSetup_StartWildBattle();
+    return TRUE;
 }
 
 bool8 DoesCurrentMapHaveFishingMons(void)
@@ -843,6 +918,8 @@ void FishingWildEncounter(u8 rod)
 {
     u16 species;
 
+    gIsFishingEncounter = TRUE;
+
     if (CheckFeebas() == TRUE)
     {
         u8 level = ChooseWildMonLevel(&sWildFeebas);
@@ -854,6 +931,59 @@ void FishingWildEncounter(u8 rod)
     {
         species = GenerateFishingWildMon(gWildMonHeaders[GetCurrentMapWildMonHeaderId()].fishingMonsInfo, rod);
     }
+
+    // Chain fishing shiny reroll (applied to already-created enemy mon)
+    if (gChainFishingStreak > 0)
+    {
+        u32 otId = GetMonData(&gEnemyParty[0], MON_DATA_OT_ID);
+        u32 personality = GetMonData(&gEnemyParty[0], MON_DATA_PERSONALITY);
+        u32 shinyValue = GET_SHINY_VALUE(otId, personality);
+        u32 shinyThreshold = SHINY_ODDS;
+        u8 pokemon_nature = GetNatureFromPersonality(personality);
+
+        if (gSaveBlock1Ptr->tx_Features_ShinyChance == 1)
+            shinyThreshold = 16;
+        else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 2)
+            shinyThreshold = 32;
+        else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 3)
+            shinyThreshold = 64;
+        else if (gSaveBlock1Ptr->tx_Features_ShinyChance == 4)
+            shinyThreshold = 128;
+
+        if (shinyValue >= shinyThreshold) // not already shiny
+        {
+            u32 rolls = 0;
+            u32 shinyRolls = 1 + 2 * gChainFishingStreak;
+            do {
+                personality = Random32();
+                shinyValue = GET_SHINY_VALUE(otId, personality);
+                rolls++;
+            } while (shinyValue >= shinyThreshold && rolls < shinyRolls);
+
+            // If shiny found, fix nature and apply
+            if (shinyValue < shinyThreshold)
+            {
+                // Use FORCE_SHINY technique to match nature
+                while (GetNatureFromPersonality(personality) != pokemon_nature)
+                {
+                    personality = Random32();
+                    personality = ((((Random() % shinyThreshold) ^ (HIHALF(otId) ^ LOHALF(otId))) ^ LOHALF(personality)) << 16) | LOHALF(personality);
+                }
+                // Must re-create the mon with new personality to avoid Bad Egg (checksum)
+                {
+                    u16 monSpecies = GetMonData(&gEnemyParty[0], MON_DATA_SPECIES);
+                    u8 monLevel = GetMonData(&gEnemyParty[0], MON_DATA_LEVEL);
+                    ZeroEnemyPartyMons();
+                    CreateMon(&gEnemyParty[0], monSpecies, monLevel, USE_RANDOM_IVS, TRUE, personality, OT_ID_PLAYER_ID, 0);
+                }
+            }
+        }
+    }
+
+    // Update chain: increment on every successful fishing encounter
+    if (gChainFishingStreak < MAX_CHAIN_FISHING_STREAK)
+        gChainFishingStreak++;
+
     IncrementGameStat(GAME_STAT_FISHING_ENCOUNTERS);
     SetPokemonAnglerSpecies(species);
     BattleSetup_StartWildBattle();

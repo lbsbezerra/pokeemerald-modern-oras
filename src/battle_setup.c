@@ -542,7 +542,7 @@ static void DoBattlePyramidTrainerHillBattle(void)
 // Initiates battle where Wally catches Ralts
 void StartWallyTutorialBattle(void)
 {
-    CreateMaleMon(&gEnemyParty[0], SPECIES_RALTS, 5);
+    CreateFemaleMon(&gEnemyParty[0], SPECIES_RALTS, 5);
     LockPlayerFieldControls();
     gMain.savedCallback = CB2_ReturnToFieldContinueScriptPlayMapMusic;
     gBattleTypeFlags = BATTLE_TYPE_WALLY_TUTORIAL;
@@ -634,7 +634,7 @@ void BattleSetup_StartLegendaryBattle(void)
         break;
     case SPECIES_LATIOS:
     case SPECIES_LATIAS:
-        CreateBattleStartTask(B_TRANSITION_GRID_SQUARES, MUS_BW_VS_LEGEND);
+        CreateBattleStartTask(B_TRANSITION_GRID_SQUARES, BW_SEQ_BGM_VS_MOVEPOKE);
         break;
     case SPECIES_ARCEUS:
         gBattleTypeFlags |= BATTLE_TYPE_GROUDON;

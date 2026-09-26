@@ -39,6 +39,7 @@
 #include "window.h"
 #include "mystery_gift_menu.h"
 #include "tx_randomizer_and_challenges.h"
+#include "save_migration.h"
 #include "constants/flags.h"
 
 /*
@@ -173,6 +174,22 @@
 
 static EWRAM_DATA bool8 sStartedPokeBallTask = 0;
 static EWRAM_DATA u16 sCurrItemAndOptionMenuCheck = 0;
+static EWRAM_DATA u16 sBirchIntroSpecies = 0;
+
+static u16 GetBirchIntroSpecies(void)
+{
+    static u16 species; 
+    species = Random() % 4;
+
+    if (species == 1)
+        return SPECIES_AZURILL;
+    else if (species == 2)
+        return SPECIES_BUDEW;
+    else if (species == 3)
+        return SPECIES_WYNAUT;
+    else
+        return SPECIES_LOTAD;
+}
 
 static u8 sBirchSpeechMainTaskId;
 
@@ -258,6 +275,21 @@ static void MainMenu_FormatSavegamePokedex(void);
 static void MainMenu_FormatSavegameTime(void);
 static void MainMenu_FormatSavegameBadges(void);
 static void NewGameBirchSpeech_CreateDialogueWindowBorder(u8, u8, u8, u8, u8, u8);
+static void Task_NewGameBirchSpeech_WaitForTextAfterChallengeMenu(u8 taskId);
+static void Task_NewGameBirchSpeech_ReturnFromChallengesScreenShowTextbox(u8 taskId);
+
+// Version updater forward declarations
+static void Task_VersionUpdater_ShowIntroMessage(u8);
+static void Task_VersionUpdater_WaitIntroMessage(u8);
+static void Task_VersionUpdater_ShowVersionMenu(u8);
+static void Task_VersionUpdater_HandleVersionChoice(u8);
+static void Task_VersionUpdater_ShowNextQuestion(u8);
+static void Task_VersionUpdater_WaitQuestionText(u8);
+static void Task_VersionUpdater_ShowYesNo(u8);
+static void Task_VersionUpdater_HandleYesNo(u8);
+static void Task_VersionUpdater_ShowComplete(u8);
+static void Task_VersionUpdater_WaitComplete(u8);
+static void Task_VersionUpdater_Finish(u8);
 
 // .rodata
 
@@ -383,6 +415,16 @@ static const struct WindowTemplate sWindowTemplates_MainMenu[] =
         .paletteNum = 15,
         .baseBlock = 0x16D
     },
+    // Version updater select menu (window 8)
+    {
+        .bg = 0,
+        .tilemapLeft = 10,
+        .tilemapTop = 7,
+        .width = 10,
+        .height = 6,
+        .paletteNum = 15,
+        .baseBlock = 0x1E0
+    },
     DUMMY_WIN_TEMPLATE
 };
 
@@ -495,6 +537,161 @@ static const struct MenuAction sMenuActions_Difficulty[] = {
     {gText_Normal, NULL},
     {gText_Hard, NULL}
 };
+
+// ============================================================
+// Version Updater Data
+// ============================================================
+
+static const u8 sText_VersionUpdater_Intro[] = _("A save from an older version was\ndetected. An update is needed.\p{COLOR RED}Choose from which version are you\nupdating from.{COLOR DARK_GRAY}");
+static const u8 sText_VersionUpdater_V24[] = _("v2.4 or older");
+static const u8 sText_VersionUpdater_V30[] = _("v3.0/3.1/3.2");
+static const u8 sText_VersionUpdater_V35[] = _("v3.3/3.4/3.5");
+
+static const u8 sText_VersionUpdater_WonderTrade[] = _("{COLOR RED}Before proceeding, please save your\ngame in an exterior map.{COLOR DARK_GRAY}\pIf this is not the version you're\nupdating from, reset and start again.\pWould you like to enable\nWonderTrade?\pSelecting {COLOR RED}No{COLOR DARK_GRAY} will disable it until you\nbecome Champion.");
+static const u8 sText_VersionUpdater_UnlimitedWT[] = _("WonderTrades are limited to 3\ntimes a day.\pHowever, a new option can make\nWonderTrades unlimited.\pThis option doesn't matter if\nWonderTrade has been disabled.\pEnable unlimited WonderTrades?");
+static const u8 sText_VersionUpdater_FrontierBans[] = _("Enable Battle Frontier Bans?\pAccording to your current difficulty,\nenabling it will ban legendaries from\pparticipating in the Battle Frontier.\nDisabling it will let lengendaries in,\pno matter your chosen difficulty.\pWould you like to enable the bans?\n{COLOR RED}Yes{COLOR DARK_GRAY} has been always the default option.");
+static const u8 sText_VersionUpdater_ShinyColors[] = _("Some {PKMN} species have custom, new\nshiny forms.\pPreviously, this option was always {COLOR RED}On{COLOR DARK_GRAY},\nnow it's optional.\pCheck online docs for more info and\nimages on new shiny forms.\pEnable alternate Shiny colors?");
+static const u8 sText_VersionUpdater_TypeChart[] = _("Which Type Chart will you use?\pGen VI+ Type Chart nerfs Steel not\nresisting Ghost and Dark.\pModern Type Chart buffs bad types into\nnot so bad, like Bug.\pCheck online docs for more info on this\nnew option.\pWould you like to use Gen VI\nType Chart?\pSelecting {COLOR RED}Yes{COLOR DARK_GRAY} will enable Gen VI Chart.\n{COLOR RED}No{COLOR DARK_GRAY} will set it to Modern Type Chart.");
+static const u8 sText_VersionUpdater_Complete[] = _("Update complete!\nSave your game to keep changes.");
+
+static const struct MenuAction sMenuActions_VersionSelect[] = {
+    {sText_VersionUpdater_V24, NULL},
+    {sText_VersionUpdater_V30, NULL},
+    {sText_VersionUpdater_V35, NULL},
+};
+
+// Origin version indices (from version select menu)
+#define FROM_VERSION_24  0
+#define FROM_VERSION_30  1
+#define FROM_VERSION_35  2
+
+// Migration step: a question to ask the player during version update.
+// minimumFrom: step is asked only if player's origin <= this value.
+// Actions on Yes/No: set a flag OR write a saveblock1 field.
+enum VersionUpdaterAction {
+    VU_ACTION_NONE,
+    VU_ACTION_SET_FLAG,
+    VU_ACTION_SET_SB1_FIELD,
+};
+
+struct VersionUpdaterStep {
+    const u8 *promptText;
+    u8 minimumFrom;      // Ask if player chose this origin or older
+    u8 yesActionType;    // VU_ACTION_*
+    u8 noActionType;     // VU_ACTION_*
+    u16 yesTarget;       // Flag ID or unused
+    u16 noTarget;        // Flag ID or unused
+    u8 yesValue;         // Value for field write
+    u8 noValue;          // Value for field write
+};
+
+//Defines to make everything a bit more readable
+#define FRONTIER_BANS_24 1
+#define SHINY_COLORS_30 2
+#define TYPE_EFFECTIVENESS_30 3
+#define WONDERTRADE_35 4
+
+
+// Helper: apply a migration action
+static void ApplyVersionUpdaterAction(u8 actionType, u16 target, u8 value)
+{
+    switch (actionType)
+    {
+    case VU_ACTION_SET_FLAG:
+        if (target != 0)
+            FlagSet(target);
+        break;
+    case VU_ACTION_SET_SB1_FIELD:
+        // Per-field handling. Add cases here as new fields are wired up.
+        switch (target)
+        {
+        case FRONTIER_BANS_24:
+            gSaveBlock1Ptr->tx_Features_FrontierBans = value;
+            break;
+        case SHINY_COLORS_30:
+            gSaveBlock1Ptr->tx_Features_ShinyColors = value;
+            break;
+        case TYPE_EFFECTIVENESS_30:
+            gSaveBlock1Ptr->tx_Mode_TypeEffectiveness = value;
+            break;
+        case WONDERTRADE_35:
+            {
+            gSaveBlock1Ptr->tx_Features_WT = value;
+            //WonderTrade also depends on a flag being set
+            if (value == 1)
+                FlagSet(FLAG_WT_ENABLED);
+            else
+                FlagClear(FLAG_WT_ENABLED);
+            break;
+            }
+        }
+        break;
+    }
+}
+
+static const struct VersionUpdaterStep sVersionUpdaterSteps[] = {
+    // WonderTrade enable — all old versions
+    {
+        .promptText = sText_VersionUpdater_WonderTrade,
+        .minimumFrom = FROM_VERSION_35,
+        .yesActionType = VU_ACTION_SET_SB1_FIELD,
+        .yesTarget = WONDERTRADE_35,
+        .yesValue = 1,
+        .noActionType = VU_ACTION_SET_SB1_FIELD,
+        .noTarget = WONDERTRADE_35,
+        .noValue = 0,
+    },
+    // Unlimited WT — 2.4 only
+    {
+        .promptText = sText_VersionUpdater_UnlimitedWT,
+        .minimumFrom = FROM_VERSION_24,
+        .yesActionType = VU_ACTION_SET_FLAG,
+        .yesTarget = FLAG_UNLIMITIED_WONDERTRADE,
+        .yesValue = 0,
+        .noActionType = VU_ACTION_NONE,
+        .noTarget = 0,
+        .noValue = 0,
+    },
+    // Frontier Bans — 2.4 only
+    {
+        .promptText = sText_VersionUpdater_FrontierBans,
+        .minimumFrom = FROM_VERSION_24,
+        .yesActionType = VU_ACTION_SET_SB1_FIELD,
+        .yesTarget = FRONTIER_BANS_24,
+        .yesValue = 1,
+        .noActionType = VU_ACTION_SET_SB1_FIELD,
+        .noTarget = FRONTIER_BANS_24,
+        .noValue = 0,
+    },
+    // Shiny Colors — 2.4 and 3.0
+    {
+        .promptText = sText_VersionUpdater_ShinyColors,
+        .minimumFrom = FROM_VERSION_30,
+        .yesActionType = VU_ACTION_SET_SB1_FIELD,
+        .yesTarget = SHINY_COLORS_30,
+        .yesValue = 1,
+        .noActionType = VU_ACTION_SET_SB1_FIELD,
+        .noTarget = SHINY_COLORS_30,
+        .noValue = 0,
+    },
+    // Type Chart — 2.4 and 3.0
+    {
+        .promptText = sText_VersionUpdater_TypeChart,
+        .minimumFrom = FROM_VERSION_30,
+        .yesActionType = VU_ACTION_SET_SB1_FIELD,
+        .yesTarget = TYPE_EFFECTIVENESS_30,
+        .yesValue = 0,
+        .noActionType = VU_ACTION_SET_SB1_FIELD,
+        .noTarget = TYPE_EFFECTIVENESS_30,
+        .noValue = 1,
+    },
+};
+
+#define NUM_VERSION_UPDATER_STEPS ARRAY_COUNT(sVersionUpdaterSteps)
+
+// Task data fields for version updater (use high indices to avoid conflicts with tMenuType=data[0], tCurrItem=data[1])
+#define tUpdaterStep    data[13]
+#define tUpdaterOrigin  data[14]
 
 static const u8 *const sMalePresetNames[] = {
     gText_DefaultNameStu,
@@ -752,7 +949,17 @@ static void Task_MainMenuCheckBattery(u8 taskId)
         SetGpuReg(REG_OFFSET_BLDALPHA, 0);
         SetGpuReg(REG_OFFSET_BLDY, 7);
 
-        if (!(RtcGetErrorStatus() & RTC_ERR_FLAG_MASK))
+        // Check if save needs version migration before proceeding
+        if (SaveNeedsMigration() && gSaveBlock2Ptr->playTimeHours + gSaveBlock2Ptr->playTimeMinutes > 0)
+        {
+            // Disable the darken effect so version updater windows render cleanly
+            SetGpuReg(REG_OFFSET_BLDCNT, 0);
+            SetGpuReg(REG_OFFSET_BLDY, 0);
+            gTasks[taskId].tUpdaterStep = 0;
+            gTasks[taskId].tUpdaterOrigin = 0;
+            gTasks[taskId].func = Task_VersionUpdater_ShowIntroMessage;
+        }
+        else if (!(RtcGetErrorStatus() & RTC_ERR_FLAG_MASK))
         {
             gTasks[taskId].func = Task_DisplayMainMenu;
         }
@@ -777,6 +984,223 @@ static void Task_WaitForBatteryDryErrorWindow(u8 taskId)
         ClearMainMenuWindowTilemap(&sWindowTemplates_MainMenu[7]);
         gTasks[taskId].func = Task_DisplayMainMenu;
     }
+}
+
+// ============================================================
+// Version Updater Task Functions
+// ============================================================
+
+static void Task_VersionUpdater_ShowIntroMessage(u8 taskId)
+{
+    u8 version = GetSaveVersion();
+
+    if (version == ME_SAVE_VERSION_NONE)
+    {
+        // Pre-tracking save — we don't know the origin, ask the player
+        CreateMainMenuErrorWindow(sText_VersionUpdater_Intro);
+        gTasks[taskId].func = Task_VersionUpdater_WaitIntroMessage;
+    }
+    else
+    {
+        // Known version — check if there are any applicable questions.
+        // Map known version to an origin index. Versions >= 36 get FROM_VERSION_35.
+        u8 origin = FROM_VERSION_35;
+        u16 step;
+        bool8 hasQuestions = FALSE;
+
+        for (step = 0; step < NUM_VERSION_UPDATER_STEPS; step++)
+        {
+            if (origin <= sVersionUpdaterSteps[step].minimumFrom)
+            {
+                hasQuestions = TRUE;
+                break;
+            }
+        }
+
+        if (!hasQuestions)
+        {
+            // No questions needed — silently stamp and continue
+            StampCurrentSaveVersion();
+            gTasks[taskId].func = Task_MainMenuCheckBattery;
+            return;
+        }
+
+        gTasks[taskId].tUpdaterOrigin = origin;
+        gTasks[taskId].tUpdaterStep = 0;
+        gTasks[taskId].func = Task_VersionUpdater_ShowNextQuestion;
+    }
+}
+
+static void Task_VersionUpdater_WaitIntroMessage(u8 taskId)
+{
+    RunTextPrinters();
+    if (!IsTextPrinterActive(7) && JOY_NEW(A_BUTTON))
+    {
+        ClearWindowTilemap(7);
+        ClearMainMenuWindowTilemap(&sWindowTemplates_MainMenu[7]);
+        gTasks[taskId].func = Task_VersionUpdater_ShowVersionMenu;
+    }
+}
+
+static void Task_VersionUpdater_ShowVersionMenu(u8 taskId)
+{
+    FillWindowPixelBuffer(8, PIXEL_FILL(1));
+    PrintMenuTable(8, ARRAY_COUNT(sMenuActions_VersionSelect), sMenuActions_VersionSelect);
+    InitMenuInUpperLeftCornerNormal(8, ARRAY_COUNT(sMenuActions_VersionSelect), 0);
+    PutWindowTilemap(8);
+    CopyWindowToVram(8, COPYWIN_FULL);
+    DrawMainMenuWindowBorder(&sWindowTemplates_MainMenu[8], MAIN_MENU_BORDER_TILE);
+    gTasks[taskId].func = Task_VersionUpdater_HandleVersionChoice;
+}
+
+static void Task_VersionUpdater_HandleVersionChoice(u8 taskId)
+{
+    s8 selection = Menu_ProcessInputNoWrap();
+
+    if (selection == MENU_B_PRESSED)
+        return; // Force a choice, no backing out
+
+    if (selection >= 0 && selection < (s8)ARRAY_COUNT(sMenuActions_VersionSelect))
+    {
+        PlaySE(SE_SELECT);
+        gTasks[taskId].tUpdaterOrigin = selection;
+        // ============================================================
+        // Silent migrations — no user prompt, just fix data
+        // It runs at the start because "tx_Features_ShinyColors"
+        // will be re-written during the update process, meaning that
+        // users who choose not to have "Shiny Colors" on will have
+        // their Encounter mode changed to Original
+        // ============================================================
+        if (selection <= FROM_VERSION_24)
+        {
+            // Rival naming didn't exist in 2.4. 
+            if (gSaveBlock2Ptr->playerGender == MALE)
+                StringCopy(gSaveBlock2Ptr->rivalName, gText_ExpandedPlaceholder_May); //Always set to May
+            else
+                StringCopy(gSaveBlock2Ptr->rivalName, gText_ExpandedPlaceholder_Brendan); //Always set to Brendan
+
+            // Field rename: old tx_Mode_AlternateSpawns was repurposed as tx_Features_ShinyColors.
+            // Migrate its old value to the new tx_Mode_Encounters field.
+            if (gSaveBlock1Ptr->tx_Features_ShinyColors == 0)
+                gSaveBlock1Ptr->tx_Mode_Encounters = 0;
+            else if (gSaveBlock1Ptr->tx_Features_ShinyColors == 1)
+                gSaveBlock1Ptr->tx_Mode_Encounters = 1;
+        }
+        gTasks[taskId].tUpdaterStep = 0;
+        ClearWindowTilemap(8);
+        ClearMainMenuWindowTilemap(&sWindowTemplates_MainMenu[8]);
+        gTasks[taskId].func = Task_VersionUpdater_ShowNextQuestion;
+    }
+}
+
+static void Task_VersionUpdater_ShowNextQuestion(u8 taskId)
+{
+    u16 step = gTasks[taskId].tUpdaterStep;
+    u8 origin = gTasks[taskId].tUpdaterOrigin;
+
+    // Find next applicable question
+    while (step < NUM_VERSION_UPDATER_STEPS)
+    {
+        if (origin <= sVersionUpdaterSteps[step].minimumFrom)
+            break;
+        step++;
+    }
+
+    gTasks[taskId].tUpdaterStep = step;
+
+    if (step >= NUM_VERSION_UPDATER_STEPS)
+    {
+        gTasks[taskId].func = Task_VersionUpdater_ShowComplete;
+        return;
+    }
+
+    CreateMainMenuErrorWindow(sVersionUpdaterSteps[step].promptText);
+    gTasks[taskId].func = Task_VersionUpdater_WaitQuestionText;
+}
+
+static void Task_VersionUpdater_WaitQuestionText(u8 taskId)
+{
+    RunTextPrinters();
+    if (!IsTextPrinterActive(7) && JOY_NEW(A_BUTTON))
+    {
+        gTasks[taskId].func = Task_VersionUpdater_ShowYesNo;
+    }
+}
+
+static void Task_VersionUpdater_ShowYesNo(u8 taskId)
+{
+    CreateYesNoMenuParameterized(20, 8, MAIN_MENU_BORDER_TILE, 0x240, 2, 15);
+    gTasks[taskId].func = Task_VersionUpdater_HandleYesNo;
+}
+
+static void Task_VersionUpdater_HandleYesNo(u8 taskId)
+{
+    s8 selection = Menu_ProcessInputNoWrapClearOnChoose();
+    u16 step = gTasks[taskId].tUpdaterStep;
+
+    if (selection == 0) // Yes
+    {
+        PlaySE(SE_SELECT);
+        ApplyVersionUpdaterAction(sVersionUpdaterSteps[step].yesActionType,
+                                  sVersionUpdaterSteps[step].yesTarget,
+                                  sVersionUpdaterSteps[step].yesValue);
+    }
+    else if (selection == 1 || selection == MENU_B_PRESSED) // No
+    {
+        PlaySE(SE_SELECT);
+        ApplyVersionUpdaterAction(sVersionUpdaterSteps[step].noActionType,
+                                  sVersionUpdaterSteps[step].noTarget,
+                                  sVersionUpdaterSteps[step].noValue);
+    }
+    else
+    {
+        return; // Still processing input
+    }
+
+    gTasks[taskId].tUpdaterStep = step + 1;
+    ClearWindowTilemap(7);
+    ClearMainMenuWindowTilemap(&sWindowTemplates_MainMenu[7]);
+    gTasks[taskId].func = Task_VersionUpdater_ShowNextQuestion;
+}
+
+static void Task_VersionUpdater_ShowComplete(u8 taskId)
+{
+    CreateMainMenuErrorWindow(sText_VersionUpdater_Complete);
+    gTasks[taskId].func = Task_VersionUpdater_WaitComplete;
+}
+
+static void Task_VersionUpdater_WaitComplete(u8 taskId)
+{
+    RunTextPrinters();
+    if (!IsTextPrinterActive(7) && JOY_NEW(A_BUTTON))
+    {
+        ClearWindowTilemap(7);
+        ClearMainMenuWindowTilemap(&sWindowTemplates_MainMenu[7]);
+        gTasks[taskId].func = Task_VersionUpdater_Finish;
+    }
+}
+
+static void Task_VersionUpdater_Finish(u8 taskId)
+{
+    // If the player already beat the game, ensure WonderTrade is enabled
+    // (mirrors the force-enable in post_battle_event_funcs.c that only fires
+    // during the E4 victory event, which won't re-trigger for old saves).
+    if (FlagGet(FLAG_SYS_GAME_CLEAR))
+    {
+        gSaveBlock1Ptr->tx_Features_WT = 1;
+        FlagSet(FLAG_WT_ENABLED);
+    }
+    // Retroactively set shiny-seen flags for any shinies already in party/PC/daycare
+    ScanOwnedMonsForShinies();
+
+    StampCurrentSaveVersion();
+    // Clear the full BG0 tilemap so main menu draws on a clean slate
+    FillBgTilemapBufferRect_Palette0(0, 0, 0, 0, 30, 20);
+    CopyBgTilemapBufferToVram(0);
+    // Reset GPU window regs
+    SetGpuReg(REG_OFFSET_WIN0H, 0);
+    SetGpuReg(REG_OFFSET_WIN0V, 0);
+    gTasks[taskId].func = Task_MainMenuCheckBattery;
 }
 
 static void Task_DisplayMainMenu(u8 taskId)
@@ -1304,43 +1728,6 @@ static void HighlightSelectedMainMenuItem(u8 menuType, u8 selectedMenuItem, s16 
 #define tBrendanSpriteId data[10]
 #define tMaySpriteId data[11]
 
-static void CB2_NewGameBirchSpeech_ReturnFromTxRandomizerChallengesOptions(void)
-{
-    u8 taskId;
-    u8 spriteId;
-    u16 savedIme;
-    ResetBgsAndClearDma3BusyFlags(0);
-    SetGpuReg(REG_OFFSET_DISPCNT, 0);
-    SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
-    InitBgsFromTemplates(0, sMainMenuBgTemplates, 2);
-    InitBgFromTemplate(&sBirchBgTemplate);
-    SetVBlankCallback(NULL);
-    SetGpuReg(REG_OFFSET_BG2CNT, 0);
-    SetGpuReg(REG_OFFSET_BG1CNT, 0);
-    SetGpuReg(REG_OFFSET_BG0CNT, 0);
-    SetGpuReg(REG_OFFSET_BG2HOFS, 0);
-    SetGpuReg(REG_OFFSET_BG2VOFS, 0);
-    SetGpuReg(REG_OFFSET_BG1HOFS, 0);
-    SetGpuReg(REG_OFFSET_BG1VOFS, 0);
-    SetGpuReg(REG_OFFSET_BG0HOFS, 0);
-    SetGpuReg(REG_OFFSET_BG0VOFS, 0);
-    DmaFill16(3, 0, VRAM, VRAM_SIZE);
-    DmaFill32(3, 0, OAM, OAM_SIZE);
-    DmaFill16(3, 0, PLTT, PLTT_SIZE);
-    ResetPaletteFade();
-    LZ77UnCompVram(sBirchSpeechShadowGfx, (u8*)VRAM);
-    LZ77UnCompVram(sBirchSpeechBgMap, (u8*)(BG_SCREEN_ADDR(7)));
-    LoadPalette(sBirchSpeechBgPals, 0, 64);
-    LoadPalette(&sBirchSpeechBgGradientPal[1], 1, 16);
-    ResetTasks();
-    //taskId = CreateTask(Task_NewGameBirchSpeech_Init, 0); //old
-    taskId = CreateTask(Task_NewGameBirchSpeech_WhatsYourName, 0);
-    gTasks[taskId].tTimer = 5;
-    gTasks[taskId].tBG1HOFS = -60;
-    SetVBlankCallback(VBlankCB_MainMenu);
-    SetMainCallback2(CB2_MainMenu);
-}
-
 static void Task_NewGameBirchSpeech_Init(u8 taskId)
 {
     SetGpuReg(REG_OFFSET_DISPCNT, 0);
@@ -1362,6 +1749,7 @@ static void Task_NewGameBirchSpeech_Init(u8 taskId)
     ResetSpriteData();
     FreeAllSpritePalettes();
     ResetAllPicSprites();
+    sBirchIntroSpecies = GetBirchIntroSpecies();
     AddBirchSpeechObjects(taskId);
     BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
     gTasks[taskId].tBG1HOFS = 0;
@@ -1453,7 +1841,7 @@ static void Task_NewGameBirchSpeechSub_InitPokeBall(u8 taskId)
     gSprites[spriteId].invisible = FALSE;
     gSprites[spriteId].data[0] = 0;
 
-    CreatePokeballSpriteToReleaseMon(spriteId, gSprites[spriteId].oam.paletteNum, 112, 58, 0, 0, 32, PALETTES_BG, SPECIES_BUDEW, BALL_POKE);
+    CreatePokeballSpriteToReleaseMon(spriteId, gSprites[spriteId].oam.paletteNum, 112, 58, 0, 0, 32, PALETTES_BG, sBirchIntroSpecies, BALL_POKE);
     gTasks[taskId].func = Task_NewGameBirchSpeechSub_WaitForLotad;
     gTasks[sBirchSpeechMainTaskId].tTimer = 0;
 }
@@ -1588,13 +1976,13 @@ static void Task_NewGameBirchSpeech_ChooseGender(u8 taskId)
             PlaySE(SE_SELECT);
             gSaveBlock2Ptr->playerGender = gender;
             NewGameBirchSpeech_ClearGenderWindow(1, 1);
-            gTasks[taskId].func = Task_NewGameBirchSpeech_Difficulty;
+            gTasks[taskId].func = Task_NewGameBirchSpeech_WhatsYourName;
             break;
         case FEMALE:
             PlaySE(SE_SELECT);
             gSaveBlock2Ptr->playerGender = gender;
             NewGameBirchSpeech_ClearGenderWindow(1, 1);
-            gTasks[taskId].func = Task_NewGameBirchSpeech_Difficulty;
+            gTasks[taskId].func = Task_NewGameBirchSpeech_WhatsYourName;
             break;
     }
     gender2 = Menu_GetCursorPos();
@@ -1750,8 +2138,7 @@ static void Task_NewGameBirchSpeech_WhatsYourName(u8 taskId)
 static void Task_NewGameBirchSpeech_WaitForWhatsYourNameToPrint(u8 taskId)
 {
     if (!RunTextPrintersAndIsPrinter0Active())
-        //gTasks[taskId].func = Task_NewGameBirchSpeech_WaitPressBeforeNameChoice;
-        gTasks[taskId].func = Task_NewGameBirchSpeech_StartNamingScreen;
+        gTasks[taskId].func = Task_NewGameBirchSpeech_WaitPressBeforeNameChoice;
 }
 
 static void Task_NewGameBirchSpeech_WaitPressBeforeNameChoice(u8 taskId)
@@ -1798,10 +2185,7 @@ static void Task_NewGameBirchSpeech_ProcessNameYesNoMenu(u8 taskId)
     {
         case 0:
             PlaySE(SE_SELECT);
-            gSprites[gTasks[taskId].tPlayerSpriteId].oam.objMode = ST_OAM_OBJ_BLEND;
-            NewGameBirchSpeech_StartFadeOutTarget1InTarget2(taskId, 2);
-            NewGameBirchSpeech_StartFadePlatformIn(taskId, 1);
-            gTasks[taskId].func = Task_NewGameBirchSpeech_SlidePlatformAway2;
+            gTasks[taskId].func = Task_NewGameBirchSpeech_Difficulty;
             break;
         case MENU_B_PRESSED:
         case 1:
@@ -2030,6 +2414,104 @@ static void CB2_NewGameBirchSpeech_ReturnFromNamingScreen(void)
     CopyWindowToVram(0, COPYWIN_FULL);
 }
 
+static void CB2_NewGameBirchSpeech_ReturnFromTxRandomizerChallengesOptions(void)
+{
+    u8 taskId;
+    u8 spriteId;
+    u16 savedIme;
+
+    ResetBgsAndClearDma3BusyFlags(0);
+    SetGpuReg(REG_OFFSET_DISPCNT, 0);
+    SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
+    InitBgsFromTemplates(0, sMainMenuBgTemplates, ARRAY_COUNT(sMainMenuBgTemplates));
+    InitBgFromTemplate(&sBirchBgTemplate);
+    SetVBlankCallback(NULL);
+    SetGpuReg(REG_OFFSET_BG2CNT, 0);
+    SetGpuReg(REG_OFFSET_BG1CNT, 0);
+    SetGpuReg(REG_OFFSET_BG0CNT, 0);
+    SetGpuReg(REG_OFFSET_BG2HOFS, 0);
+    SetGpuReg(REG_OFFSET_BG2VOFS, 0);
+    SetGpuReg(REG_OFFSET_BG1HOFS, 0);
+    SetGpuReg(REG_OFFSET_BG1VOFS, 0);
+    SetGpuReg(REG_OFFSET_BG0HOFS, 0);
+    SetGpuReg(REG_OFFSET_BG0VOFS, 0);
+    DmaFill16(3, 0, VRAM, VRAM_SIZE);
+    DmaFill32(3, 0, OAM, OAM_SIZE);
+    DmaFill16(3, 0, PLTT, PLTT_SIZE);
+    ResetPaletteFade();
+    LZ77UnCompVram(sBirchSpeechShadowGfx, (u8 *)VRAM);
+    LZ77UnCompVram(sBirchSpeechBgMap, (u8 *)(BG_SCREEN_ADDR(7)));
+    LoadPalette(sBirchSpeechBgPals, BG_PLTT_ID(0), 2 * PLTT_SIZE_4BPP);
+    LoadPalette(&sBirchSpeechBgGradientPal[1], BG_PLTT_ID(0) + 1, PLTT_SIZEOF(8));
+    ResetTasks();
+    taskId = CreateTask(Task_NewGameBirchSpeech_ReturnFromChallengesScreenShowTextbox, 0);
+    gTasks[taskId].tTimer = 5;
+    gTasks[taskId].tBG1HOFS = -60;
+    ScanlineEffect_Stop();
+    ResetSpriteData();
+    FreeAllSpritePalettes();
+    ResetAllPicSprites();
+    AddBirchSpeechObjects(taskId);
+    if (gSaveBlock2Ptr->playerGender != MALE)
+    {
+        gTasks[taskId].tPlayerGender = FEMALE;
+        spriteId = gTasks[taskId].tMaySpriteId;
+    }
+    else
+    {
+        gTasks[taskId].tPlayerGender = MALE;
+        spriteId = gTasks[taskId].tBrendanSpriteId;
+    }
+    gSprites[spriteId].x = 180;
+    gSprites[spriteId].y = 60;
+    gSprites[spriteId].invisible = FALSE;
+    gTasks[taskId].tPlayerSpriteId = spriteId;
+    SetGpuReg(REG_OFFSET_BG1HOFS, -60);
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
+    SetGpuReg(REG_OFFSET_WIN0H, 0);
+    SetGpuReg(REG_OFFSET_WIN0V, 0);
+    SetGpuReg(REG_OFFSET_WININ, 0);
+    SetGpuReg(REG_OFFSET_WINOUT, 0);
+    SetGpuReg(REG_OFFSET_BLDCNT, 0);
+    SetGpuReg(REG_OFFSET_BLDALPHA, 0);
+    SetGpuReg(REG_OFFSET_BLDY, 0);
+    ShowBg(0);
+    ShowBg(1);
+    savedIme = REG_IME;
+    REG_IME = 0;
+    REG_IE |= 1;
+    REG_IME = savedIme;
+    SetVBlankCallback(VBlankCB_MainMenu);
+    SetMainCallback2(CB2_MainMenu);
+    InitWindows(sNewGameBirchSpeechTextWindows);
+    LoadMainMenuWindowFrameTiles(0, 0xF3);
+    LoadMessageBoxGfx(0, 0xFC, BG_PLTT_ID(15));
+    PutWindowTilemap(0);
+    CopyWindowToVram(0, COPYWIN_FULL);
+}
+
+static void Task_NewGameBirchSpeech_ReturnFromChallengesScreenShowTextbox(u8 taskId)
+{
+    if (gTasks[taskId].tTimer-- <= 0)
+    {
+        NewGameBirchSpeech_ShowDialogueWindow(0, 1);
+        StringExpandPlaceholders(gStringVar4, gText_Birch_ChallengeSelected);
+        AddTextPrinterForMessage(TRUE);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_WaitForTextAfterChallengeMenu;
+    }
+}
+
+static void Task_NewGameBirchSpeech_WaitForTextAfterChallengeMenu(u8 taskId)
+{
+    if (!RunTextPrintersAndIsPrinter0Active() && ((JOY_NEW(A_BUTTON)) || (JOY_NEW(B_BUTTON))))
+    {
+        gSprites[gTasks[taskId].tPlayerSpriteId].oam.objMode = ST_OAM_OBJ_BLEND;
+        NewGameBirchSpeech_StartFadeOutTarget1InTarget2(taskId, 2);
+        NewGameBirchSpeech_StartFadePlatformIn(taskId, 1);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_SlidePlatformAway2;
+    }
+}
+
 static void SpriteCB_Null(struct Sprite *sprite)
 {
 }
@@ -2045,7 +2527,7 @@ static void SpriteCB_MovePlayerDownWhileShrinking(struct Sprite *sprite)
 
 static u8 NewGameBirchSpeech_CreateLotadSprite(u8 x, u8 y)
 {
-    return CreateMonPicSprite_Affine(SPECIES_BUDEW, SHINY_ODDS, 0, MON_PIC_AFFINE_FRONT, x, y, 14, TAG_NONE);
+    return CreateMonPicSprite_Affine(sBirchIntroSpecies, SHINY_ODDS, 0, MON_PIC_AFFINE_FRONT, x, y, 14, TAG_NONE);
 }
 
 static void AddBirchSpeechObjects(u8 taskId)

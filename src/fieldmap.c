@@ -71,6 +71,8 @@ const struct MapHeader *const GetMapHeaderFromConnection(const struct MapConnect
 
 void InitMap(void)
 {
+    gSweetScentChainStreak = 0;
+    gChainFishingStreak = 0;
     InitMapLayoutData(&gMapHeader);
     SetOccupiedSecretBaseEntranceMetatiles(gMapHeader.events);
     RunOnLoadMapScript();

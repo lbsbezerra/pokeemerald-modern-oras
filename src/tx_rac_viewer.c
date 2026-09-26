@@ -18,12 +18,11 @@
 #include "international_string_util.h" // for GetStringRightAlignXOffset
 #include "strings.h"
 #include "gba/m4a_internal.h"
-
-extern struct MusicPlayerInfo *gMPlay_PokemonCry;
 #include "constants/rgb.h"
 #include "event_data.h"
 #include "tx_randomizer_and_challenges.h"
 
+extern struct MusicPlayerInfo *gMPlay_PokemonCry;
 // ---- Paging ----
 enum
 {
@@ -136,6 +135,7 @@ static const u8 sText_ShinyChance_Label[]  = _("SHINY CHANCE");
 static const u8 sText_ItemDrops_Label[]    = _("ITEM DROP");
 static const u8 sText_FrontierBans_Label[] = _("FRONTIER BANS");
 static const u8 sText_ShinyColors_Label[]  = _("SHINY COLORS");
+static const u8 sText_WT_Label[]           = _("WONDERTRADE");
 static const u8 sText_UnlimitedWT_Label[]  = _("UNLIMITED WT");
 static const u8 sText_Feebas_Label[]       = _("EASIER FEEBAS");
 
@@ -453,6 +453,7 @@ static u8 GetSel_Feature_ShinyChance(void)  { return gSaveBlock1Ptr->tx_Features
 static u8 GetSel_Feature_ItemDrops(void)    { return gSaveBlock1Ptr->tx_Features_WildMonDropItems ? 1 : 0; }
 static u8 GetSel_Feature_FrontierBans(void) { return (gSaveBlock1Ptr->tx_Features_FrontierBans==0)     ? 1 : 0; } //reversed from the rest
 static u8 GetSel_Feature_ShinyColors(void)  { return gSaveBlock1Ptr->tx_Features_ShinyColors      ? 1 : 0; }
+static u8 GetSel_Feature_WT(void)           { return gSaveBlock1Ptr->tx_Features_WT               ? 1 : 0; }
 static u8 GetSel_Feature_UnlimitedWT(void)  { return gSaveBlock1Ptr->tx_Features_Unlimited_WT     ? 1 : 0; }
 static u8 GetSel_Feature_Feebas(void)       { return gSaveBlock1Ptr->tx_Features_EasierFeebas     ? 1 : 0; }
 
@@ -575,6 +576,7 @@ static const struct ViewerBoolRow sBoolRows_Page2[] = {
     { sText_ShinyChance_Label,  GetSel_Feature_ShinyChance  },
     { sText_ShinyColors_Label,  GetSel_Feature_ShinyColors  },
     { sText_ItemDrops_Label,    GetSel_Feature_ItemDrops    },
+    { sText_WT_Label,           GetSel_Feature_WT           },
     { sText_UnlimitedWT_Label,  GetSel_Feature_UnlimitedWT  },
     { sText_Feebas_Label,       GetSel_Feature_Feebas       },
     { sText_FrontierBans_Label, GetSel_Feature_FrontierBans },
@@ -832,7 +834,7 @@ static void Viewer_DrawRow_Page2(u8 visRow, u16 idx)
                                   sText_Challenges_ShinyChance_Strings[sc], selected);
         break;
     }
-    case 6: // FRONTIER BANS
+    case 7: // FRONTIER BANS
     {
         const int y = visRow * 16;
         Viewer_ClearRow(visRow, selected);
@@ -1171,6 +1173,13 @@ static void Viewer_RedrawList(void)
 
 
 // ---- Entry point from field ----------------------------------------------------
+
+// Called as a special (no taskId) — mirrors the PlayerPC pattern with waitstate.
+void Special_OpenChallengeViewer(void)
+{
+    gMain.savedCallback = CB2_ReturnToFieldContinueScript;
+    SetMainCallback2(CB2_InitChallengeViewer);
+}
 
 void Task_ChallengeViewer(u8 taskId)
 {

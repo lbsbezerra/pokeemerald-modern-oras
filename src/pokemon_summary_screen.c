@@ -69,7 +69,7 @@ enum {
 #define PSS_LABEL_WINDOW_PROMPT_CANCEL 4
 #define PSS_LABEL_WINDOW_PROMPT_INFO 5
 #define PSS_LABEL_WINDOW_PROMPT_SWITCH 6
-#define PSS_LABEL_WINDOW_UNUSED1 7
+#define PSS_LABEL_WINDOW_PROMPT_STATS 7 // [SEL] Stats prompt for move select screen
 
 // Info screen
 #define PSS_LABEL_WINDOW_POKEMON_INFO_RENTAL 8
@@ -301,6 +301,10 @@ EWRAM_DATA u8 gLastViewedMonIndex = 0;
 static EWRAM_DATA u8 sMoveSlotToReplace = 0;
 ALIGNED(4) static EWRAM_DATA u8 sAnimDelayTaskId = 0;
 
+// Stats overlay state for move select screen
+static EWRAM_DATA bool8 sStatsOverlayVisible = FALSE;
+static EWRAM_DATA u8 sStatsOverlayWindowId = WINDOW_NONE;
+
 // Temporary storage for returning from Pokedex
 static u8 sSavedSummaryMode = 0;
 static void *sSavedMonList = NULL;
@@ -433,6 +437,10 @@ static void KeepMoveSelectorVisible(u8);
 static void SummaryScreen_DestroyAnimDelayTask(void);
 static void BufferStat(u8 *dst, s8 natureMod, u32 stat, u32 strId, u32 n);
 static void BufferIvOrEvStats(u8 mode);
+static void ToggleStatsOverlay(void);
+static void ShowStatsOverlay(void);
+static void HideStatsOverlay(void);
+static void PrintPokedexOrCancel(void);
 
 // const rom data
 #include "data/text/move_descriptions.h"
@@ -571,14 +579,14 @@ static const struct WindowTemplate sSummaryTemplate[] =
         .paletteNum = 7,
         .baseBlock = 121,
     },
-    [PSS_LABEL_WINDOW_UNUSED1] = {
+    [PSS_LABEL_WINDOW_PROMPT_STATS] = {
         .bg = 0,
-        .tilemapLeft = 11,
-        .tilemapTop = 4,
-        .width = 0,
+        .tilemapLeft = 22,
+        .tilemapTop = 0,
+        .width = 8,
         .height = 2,
-        .paletteNum = 6,
-        .baseBlock = 137,
+        .paletteNum = 7,
+        .baseBlock = 770,
     },
     [PSS_LABEL_WINDOW_POKEMON_INFO_RENTAL] = {
         .bg = 0,
@@ -828,6 +836,8 @@ static const u8 sButtons_Gfx[][4 * TILE_SIZE_4BPP] = {
     INCBIN_U8("graphics/summary_screen/a_button.4bpp"),
     INCBIN_U8("graphics/summary_screen/b_button.4bpp"),
 };
+
+static const u8 sSelectButton_Gfx[] = INCBIN_U8("graphics/summary_screen/select_button.4bpp");
 
 static void (*const sTextPrinterFunctions[])(void) =
 {
@@ -1335,6 +1345,10 @@ void ShowPokemonSummaryScreen(u8 mode, void *mons, u8 monIndex, u8 maxMonIndex, 
     sMonSummaryScreen->currPageIndex = sMonSummaryScreen->minPageIndex;
     sMonSummaryScreen->splitIconSpriteId = 0xFF;
     SummaryScreen_SetAnimDelayTaskId(TASK_NONE);
+
+    // Reset stats overlay state
+    sStatsOverlayVisible = FALSE;
+    sStatsOverlayWindowId = WINDOW_NONE;
 
     if (gMonSpritesGfxPtr == NULL)
         CreateMonSpritesGfxManager(MON_SPR_GFX_MANAGER_A, MON_SPR_GFX_MODE_NORMAL);
@@ -1885,6 +1899,16 @@ static void Task_OpenPokedexFromSummary(u8 taskId)
         FreeSummaryScreen();
         DestroyTask(taskId);
         
+        // Clear all BG tilemaps to prevent leftover tiles bleeding into the Pokédex screen
+        FillBgTilemapBufferRect_Palette0(0, 0, 0, 0, 32, 32);
+        FillBgTilemapBufferRect_Palette0(1, 0, 0, 0, 32, 32);
+        FillBgTilemapBufferRect_Palette0(2, 0, 0, 0, 32, 32);
+        FillBgTilemapBufferRect_Palette0(3, 0, 0, 0, 32, 32);
+        CopyBgTilemapBufferToVram(0);
+        CopyBgTilemapBufferToVram(1);
+        CopyBgTilemapBufferToVram(2);
+        CopyBgTilemapBufferToVram(3);
+
         // Open the Pokédex info screen for this specific Pokémon
         OpenPokedexInfoScreen(species, CB2_ReturnToSummaryFromPokedex);
     }
@@ -1952,10 +1976,18 @@ static void Task_HandleInput(u8 taskId)
             {
                 if (sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO)
                 {
-                    StopPokemonAnimations();
-                    PlaySE(SE_SELECT);
-                    // Open the Pokedex entry for this species
-                    CB2_ShowPokedexEntryFromSummary();
+                    if (!sMonSummaryScreen->summary.isEgg && FlagGet(FLAG_SYS_POKEDEX_GET) == TRUE)
+                    {
+                        StopPokemonAnimations();
+                        PlaySE(SE_SELECT);
+                        CB2_ShowPokedexEntryFromSummary();
+                    }
+                    else
+                    {
+                        StopPokemonAnimations();
+                        PlaySE(SE_SELECT);
+                        BeginCloseSummaryScreen(taskId);
+                    }
                 }
                 else // Contest or Battle Moves
                 {
@@ -2107,6 +2139,7 @@ static void Task_ChangeSummaryMon(u8 taskId)
         break;
     case 11:
         PrintPageSpecificText(sMonSummaryScreen->currPageIndex);
+        PrintPokedexOrCancel();
         LimitEggSummaryPageDisplay();
         break;
     case 12:
@@ -2449,6 +2482,8 @@ static void ChangeSelectedMove(s16 *taskData, s8 direction, u8 *moveIndexPtr)
 
 static void CloseMoveSelectMode(u8 taskId)
 {
+    if (sStatsOverlayVisible)
+        HideStatsOverlay();
     DestroyMoveSelectorSprites(SPRITE_ARR_ID_MOVE_SELECTOR1);
     ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_SWITCH);
     PutWindowTilemap(PSS_LABEL_WINDOW_PROMPT_INFO);
@@ -2639,10 +2674,14 @@ static void Task_HandleReplaceMoveInput(u8 taskId)
             }
             else if (JOY_NEW(DPAD_LEFT) || GetLRKeysPressed() == MENU_L_PRESSED)
             {
+                if (sStatsOverlayVisible)
+                    HideStatsOverlay();
                 ChangePage(taskId, -1);
             }
             else if (JOY_NEW(DPAD_RIGHT) || GetLRKeysPressed() == MENU_R_PRESSED)
             {
+                if (sStatsOverlayVisible)
+                    HideStatsOverlay();
                 ChangePage(taskId, 1);
             }
             else if (JOY_NEW(A_BUTTON))
@@ -2673,6 +2712,14 @@ static void Task_HandleReplaceMoveInput(u8 taskId)
                 sMoveSlotToReplace = MAX_MON_MOVES;
                 gSpecialVar_0x8005 = MAX_MON_MOVES;
                 BeginCloseSummaryScreen(taskId);
+            }
+            else if (JOY_NEW(SELECT_BUTTON))
+            {
+                if (sMonSummaryScreen->currPageIndex == PSS_PAGE_BATTLE_MOVES)
+                {
+                    PlaySE(SE_SELECT);
+                    ToggleStatsOverlay();
+                }
             }
         }
     }
@@ -2728,6 +2775,8 @@ static void Task_HandleInputCantForgetHMsMoves(u8 taskId)
         {
             if (sMonSummaryScreen->currPageIndex != PSS_PAGE_BATTLE_MOVES)
             {
+                if (sStatsOverlayVisible)
+                    HideStatsOverlay();
                 ClearWindowTilemap(PSS_LABEL_WINDOW_PORTRAIT_SPECIES);
                 if (!gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_STATUS]].invisible)
                     ClearWindowTilemap(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATUS);
@@ -2742,6 +2791,8 @@ static void Task_HandleInputCantForgetHMsMoves(u8 taskId)
         {
             if (sMonSummaryScreen->currPageIndex != PSS_PAGE_CONTEST_MOVES)
             {
+                if (sStatsOverlayVisible)
+                    HideStatsOverlay();
                 ClearWindowTilemap(PSS_LABEL_WINDOW_PORTRAIT_SPECIES);
                 if (!gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_STATUS]].invisible)
                     ClearWindowTilemap(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATUS);
@@ -3176,6 +3227,7 @@ static void PrintMonInfo(void)
     ScheduleBgCopyTilemapToVram(0);
 }
 static const u8 sText_Deoxys_Number[] = _("{NO}{CLEAR 0x01}386");
+static const u8 sText_Deoxys_Number_NoNational[] = _("{NO}{CLEAR 0x01}215");
 static const u8 sText_Test_Number[] = _("{NO}{CLEAR 0x01}???");
 
 static void PrintNotEggInfo(void)
@@ -3190,12 +3242,18 @@ static void PrintNotEggInfo(void)
     {
         if (!IsMonShiny(mon))
         {
-            PrintTextOnWindow(PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER, sText_Deoxys_Number, 0, 1, 0, 1);
+            if (FlagGet(FLAG_SYS_NATIONAL_DEX) == TRUE)
+                PrintTextOnWindow(PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER, sText_Deoxys_Number, 0, 1, 0, 1);
+            else
+                PrintTextOnWindow(PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER, sText_Deoxys_Number_NoNational, 0, 1, 0, 1);
             SetMonPicBackgroundPalette(FALSE);
         }
         else
         {
-            PrintTextOnWindow(PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER, sText_Deoxys_Number, 0, 1, 0, 7);
+            if (FlagGet(FLAG_SYS_NATIONAL_DEX) == TRUE)
+                PrintTextOnWindow(PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER, sText_Deoxys_Number, 0, 1, 0, 7);
+            else
+                PrintTextOnWindow(PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER, sText_Deoxys_Number_NoNational, 0, 1, 0, 7);
             SetMonPicBackgroundPalette(TRUE);
         }
         PutWindowTilemap(PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER);
@@ -3320,6 +3378,17 @@ static void PrintPageNamesAndStats(void)
     PrintAOrBButtonIcon(PSS_LABEL_WINDOW_PROMPT_SWITCH, FALSE, iconXPos);
     PrintTextOnWindow(PSS_LABEL_WINDOW_PROMPT_SWITCH, gText_Switch, stringXPos, 1, 0, 0);
 
+    // [SEL] Stats prompt for move select screen
+    {
+        static const u8 sText_Stats[] = _("Stats");
+        int selStringXPos = GetStringRightAlignXOffset(FONT_NORMAL, sText_Stats, 62);
+        int selIconXPos = selStringXPos - 21; // SELECT icon is 20px content + 1px gap
+        if (selIconXPos < 0)
+            selIconXPos = 0;
+        BlitBitmapToWindow(PSS_LABEL_WINDOW_PROMPT_STATS, sSelectButton_Gfx, selIconXPos, 0, 24, 16);
+        PrintTextOnWindow(PSS_LABEL_WINDOW_PROMPT_STATS, sText_Stats, selStringXPos, 1, 0, 0);
+    }
+
     PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_INFO_RENTAL, gText_RentalPkmn, 0, 1, 0, 1);
     PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_INFO_TYPE, gText_TypeSlash, 0, 1, 0, 0);
     statsXPos = 6 + GetStringCenterAlignXOffset(FONT_NORMAL, gText_HP4, 42);
@@ -3341,6 +3410,33 @@ static void PrintPageNamesAndStats(void)
     PrintTextOnWindow(PSS_LABEL_WINDOW_MOVES_POWER_ACC, gText_Accuracy2, 0, 17, 0, 1);
     PrintTextOnWindow(PSS_LABEL_WINDOW_MOVES_APPEAL_JAM, gText_Appeal, 0, 1, 0, 1);
     PrintTextOnWindow(PSS_LABEL_WINDOW_MOVES_APPEAL_JAM, gText_Jam, 0, 17, 0, 1);
+}
+
+// Redraws the CANCEL or POKEDEX prompt when scrolling between eggs and non-eggs.
+static void PrintPokedexOrCancel(void)
+{
+    int stringXPos;
+    int iconXPos;
+
+    FillWindowPixelBuffer(PSS_LABEL_WINDOW_PROMPT_CANCEL, PIXEL_FILL(0));
+    if (!sMonSummaryScreen->summary.isEgg && FlagGet(FLAG_SYS_POKEDEX_GET) == TRUE)
+    {
+        stringXPos = GetStringRightAlignXOffset(FONT_NORMAL, gText_MenuPokedex, 62);
+        iconXPos = stringXPos - 16;
+        if (iconXPos < 0)
+            iconXPos = 0;
+        PrintAOrBButtonIcon(PSS_LABEL_WINDOW_PROMPT_CANCEL, FALSE, iconXPos);
+        PrintTextOnWindow(PSS_LABEL_WINDOW_PROMPT_CANCEL, gText_MenuPokedex, stringXPos, 1, 0, 0);
+    }
+    else
+    {
+        stringXPos = GetStringRightAlignXOffset(FONT_NORMAL, gText_Cancel2, 62);
+        iconXPos = stringXPos - 16;
+        if (iconXPos < 0)
+            iconXPos = 0;
+        PrintAOrBButtonIcon(PSS_LABEL_WINDOW_PROMPT_CANCEL, FALSE, iconXPos);
+        PrintTextOnWindow(PSS_LABEL_WINDOW_PROMPT_CANCEL, gText_Cancel2, stringXPos, 1, 0, 0);
+    }
 }
 
 static void PutPageWindowTilemaps(u8 page)
@@ -3371,6 +3467,7 @@ static void PutPageWindowTilemaps(u8 page)
         PutWindowTilemap(PSS_LABEL_WINDOW_BATTLE_MOVES_TITLE);
         if (sMonSummaryScreen->mode == SUMMARY_MODE_SELECT_MOVE)
         {
+            PutWindowTilemap(PSS_LABEL_WINDOW_PROMPT_STATS);
             if (sMonSummaryScreen->newMove != MOVE_NONE || sMonSummaryScreen->firstMoveIndex != MAX_MON_MOVES)
                 PutWindowTilemap(PSS_LABEL_WINDOW_MOVES_POWER_ACC);
         }
@@ -3383,6 +3480,7 @@ static void PutPageWindowTilemaps(u8 page)
         PutWindowTilemap(PSS_LABEL_WINDOW_CONTEST_MOVES_TITLE);
         if (sMonSummaryScreen->mode == SUMMARY_MODE_SELECT_MOVE)
         {
+            ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_STATS);
             if (sMonSummaryScreen->newMove != MOVE_NONE || sMonSummaryScreen->firstMoveIndex != MAX_MON_MOVES)
                 PutWindowTilemap(PSS_LABEL_WINDOW_MOVES_APPEAL_JAM);
         }
@@ -3419,6 +3517,7 @@ static void ClearPageWindowTilemaps(u8 page)
     case PSS_PAGE_BATTLE_MOVES:
         if (sMonSummaryScreen->mode == SUMMARY_MODE_SELECT_MOVE)
         {
+            ClearWindowTilemap(PSS_LABEL_WINDOW_PROMPT_STATS);
             if (sMonSummaryScreen->newMove != MOVE_NONE || sMonSummaryScreen->firstMoveIndex != MAX_MON_MOVES)
                 ClearWindowTilemap(PSS_LABEL_WINDOW_MOVES_POWER_ACC);
                 gSprites[sMonSummaryScreen->splitIconSpriteId].invisible = TRUE;
@@ -4795,4 +4894,148 @@ static void BufferStat(u8 *dst, s8 natureMod, u32 stat, u32 strId, u32 n)
 
     ConvertIntToDecimalStringN(txtPtr, stat, STR_CONV_MODE_RIGHT_ALIGN, n);
     DynamicPlaceholderTextUtil_SetPlaceholderPtr(strId, dst);
+}
+
+// Pokemon stats overlay for move-select screen
+// Draws HP/ATK/DEF/SPA/SPD/SPE in a 2x3 grid over the mon sprite area
+
+static const struct WindowTemplate sStatsOverlayWindowTemplate = {
+    .bg = 0,
+    .tilemapLeft = 0,
+    .tilemapTop = 4,
+    .width = 10,
+    .height = 8,
+    .paletteNum = 6,
+    .baseBlock = 680,
+};
+
+static const u8 sText_HP3[] = _("HP");
+static const u8 sText_Atk[] = _("ATK");
+static const u8 sText_Def[] = _("DEF");
+static const u8 sText_SpA[] = _("SpA");
+static const u8 sText_SpD[] = _("SpD");
+static const u8 sText_Spe[] = _("SPE");
+
+static void PrintStatWithNatureColor(u8 windowId, const u8 *label, u16 stat, s8 natureMod, u8 x, u8 y)
+{
+    u8 statStr[12];
+    static const u8 sColorNeutral[] = _("{COLOR}{01}");
+    static const u8 sColorUp[] = _("{COLOR}{05}");
+    static const u8 sColorDown[] = _("{COLOR}{08}");
+    u8 *ptr;
+    u8 colors[3] = {3, 1, 2}; // bg=3 (white), fg=1 (black), shadow=2 (gray)
+
+    // Print stat label in black on white bg using FONT_NARROW
+    AddTextPrinterParameterized4(windowId, FONT_NARROW, x, y, 0, 0, colors, 0, label);
+
+    // Build colored stat value
+    if (natureMod > 0)
+        ptr = StringCopy(statStr, sColorUp);
+    else if (natureMod < 0)
+        ptr = StringCopy(statStr, sColorDown);
+    else
+        ptr = StringCopy(statStr, sColorNeutral);
+
+    ConvertIntToDecimalStringN(ptr, stat, STR_CONV_MODE_RIGHT_ALIGN, 3);
+
+    // Print stat value right of label using FONT_NARROW
+    AddTextPrinterParameterized4(windowId, FONT_NARROW, x + 20, y, 0, 0, colors, 0, statStr);
+}
+
+static void ShowStatsOverlay(void)
+{
+    struct PokeSummary *sum = &sMonSummaryScreen->summary;
+    const s8 *natureMod;
+    u8 nature;
+
+    // Determine effective nature
+    nature = (sum->hiddenNature != HIDDEN_NATURE_NONE) ? sum->hiddenNature : sum->nature;
+    natureMod = gNatureStatTable[nature];
+
+    // Stop the pokemon animation so it returns static
+    StopPokemonAnimations();
+
+    // Hide the pokemon sprite
+    gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_MON]].invisible = TRUE;
+
+    // Hide the friendship icon if visible
+    if (sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_FRIENDSHIP] != SPRITE_NONE)
+        gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_FRIENDSHIP]].invisible = TRUE;
+
+    // Create the overlay window
+    if (sStatsOverlayWindowId == WINDOW_NONE)
+        sStatsOverlayWindowId = AddWindow(&sStatsOverlayWindowTemplate);
+
+    FillWindowPixelBuffer(sStatsOverlayWindowId, PIXEL_FILL(3));
+
+    // Layout: 2 columns x 3 rows + ability name using FONT_NARROW
+    // Window is 80px wide x 64px tall
+    // FONT_NARROW glyphs are ~5-6px wide, ~14px tall
+    #define COL1_X 3
+    #define COL2_X 43
+    #define ROW_H 14
+    #define ROW1_Y 2
+    #define ROW2_Y (ROW1_Y + ROW_H)
+    #define ROW3_Y (ROW1_Y + ROW_H * 2)
+    #define ABILITY_Y 45
+
+    // HP has no nature modifier
+    PrintStatWithNatureColor(sStatsOverlayWindowId, sText_HP3, sum->maxHP, 0, COL1_X, ROW1_Y);
+    PrintStatWithNatureColor(sStatsOverlayWindowId, sText_Atk, sum->atk, natureMod[STAT_ATK - 1], COL1_X, ROW2_Y);
+    PrintStatWithNatureColor(sStatsOverlayWindowId, sText_Def, sum->def, natureMod[STAT_DEF - 1], COL1_X, ROW3_Y);
+    PrintStatWithNatureColor(sStatsOverlayWindowId, sText_SpA, sum->spatk, natureMod[STAT_SPATK - 1], COL2_X, ROW1_Y);
+    PrintStatWithNatureColor(sStatsOverlayWindowId, sText_SpD, sum->spdef, natureMod[STAT_SPDEF - 1], COL2_X, ROW2_Y);
+    PrintStatWithNatureColor(sStatsOverlayWindowId, sText_Spe, sum->speed, natureMod[STAT_SPEED - 1], COL2_X, ROW3_Y);
+
+    // Print ability name centered below stats
+    {
+        u8 ability = GetAbilityBySpecies(sum->species, sum->abilityNum);
+        u8 abilityColors[3] = {3, 4, 2}; // bg=white, fg=dark gray, shadow=light gray
+        u8 abilityX = (80 - GetStringWidth(FONT_NARROW, gAbilityNames[ability], 0)) / 2;
+        AddTextPrinterParameterized4(sStatsOverlayWindowId, FONT_NARROW, abilityX, ABILITY_Y, 0, 0, abilityColors, 0, gAbilityNames[ability]);
+    }
+
+    #undef COL1_X
+    #undef COL2_X
+    #undef ROW_H
+    #undef ROW1_Y
+    #undef ROW2_Y
+    #undef ROW3_Y
+    #undef ABILITY_Y
+
+    PutWindowTilemap(sStatsOverlayWindowId);
+    CopyWindowToVram(sStatsOverlayWindowId, COPYWIN_FULL);
+    ScheduleBgCopyTilemapToVram(0);
+
+    sStatsOverlayVisible = TRUE;
+}
+
+static void HideStatsOverlay(void)
+{
+    // Show the pokemon sprite again
+    gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_MON]].invisible = FALSE;
+
+    // Show the friendship icon again if it exists
+    if (sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_FRIENDSHIP] != SPRITE_NONE)
+        gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_FRIENDSHIP]].invisible = FALSE;
+
+    // Remove the overlay window
+    if (sStatsOverlayWindowId != WINDOW_NONE)
+    {
+        ClearWindowTilemap(sStatsOverlayWindowId);
+        CopyWindowToVram(sStatsOverlayWindowId, COPYWIN_MAP);
+        RemoveWindow(sStatsOverlayWindowId);
+        sStatsOverlayWindowId = WINDOW_NONE;
+    }
+
+    ScheduleBgCopyTilemapToVram(0);
+    sStatsOverlayVisible = FALSE;
+}
+
+static void ToggleStatsOverlay(void)
+{
+    if (sStatsOverlayVisible)
+        HideStatsOverlay();
+    else
+        ShowStatsOverlay();
 }

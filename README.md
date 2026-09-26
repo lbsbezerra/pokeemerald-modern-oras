@@ -1,17 +1,28 @@
-# Pokémon Modern Emerald
+# POKÉMON MODERN EMERALD
 
 This is a decompilation of Pokémon Emerald, edited to be "Pokémon Modern Emerald".
 You can get more information about Modern Emerald at [Pokecommunity](https://www.pokecommunity.com/showthread.php?t=494005)
-You can get the hackrom documentation following [this link](https://docs.google.com/spreadsheets/d/1QEFJmFhfaZqgxSUnM7MFpufrnrRk_NMzNoNWl2m3y_0/edit#gid=414283818)
 
-# If you want to compile:
 
-Please follow [Pret's guide on how to build the rom](https://github.com/pret/pokeemerald/blob/master/INSTALL.md) but using this branch instead of theirs. 
-When compiling, **use the modern compiler** with the "make modern" command. 
-_Compiling using the old compiler won't work._
-The game was compiled using `(devkitARM release 62) 13.2.0`, but it _should_ work up to `release 65` without any issues. Higher versions may not work, so manual fixes might be required.
+# 🦀MODERN EMERALD EXPANDS!
+
+Official releases:
+* [Pokémon Modern Heart and Soul](https://github.com/resetes12/HNS_modern) by myself
+    * Experience Johto and Kanto, but now with enhancements, bug fixes, and other stuff.
+* Pokémon Modern FireRed & LeafGreen by myself
+    * _Soon_ ™️. Experience FRLG, but Modernized.
+
+Modern Emerald has been used as a base to create other hacks:
+* [Pokémon Heart and Soul](https://github.com/PokemonHnS-Development/pokemonHnS) by @lildill31
+    * Experience Johto and Kanto, but for the GBA!
+* [Pokémon Emerald Worped](https://github.com/worpbane/pokeemerald-worped/) by @worpbane
+
+Modern Emerald also has some small mods:
+* [Modern Emerald with ORAS Tilset](https://github.com/lbsbezerra/pokeemerald-modern-oras) by @lbsbezerra
+
 
 # 📃 DOCUMENTATION:
+
 [Documentation can be found online](https://docs.google.com/spreadsheets/d/1QEFJmFhfaZqgxSUnM7MFpufrnrRk_NMzNoNWl2m3y_0/edit?gid=1310408794#gid=1310408794)
 Includes:
 - Pokémon location and changes (plus an extra, more specific Pokémon location).
@@ -59,6 +70,7 @@ Features page:
 * Shiny Chance: 8192 (Emerald default) - 4096 (Gen VI+) - 2048 - 1024 - 512.
 * Shiny Colors: Enables or disables new shiny colored forms for 24 Pokémon.
 * Item Drops: Items held by wild Pokémon, when defeated, will be dropped and obtained by the player. Forget about catching it or using Thief!
+* Wondertrade: Wondertrade stations are available in the 1BF of every Pokécenter. If disabled, they will be available after beating the game.
 * Uncapped wondertrade: No 3-daily limit.
 * Easier Feebas: If enabled, Feebas have a 5% chance to appear around the whole Route 119.
 * Frontier bans: Decide if you want legendaries banned or not in Battle Frontier. If enabled, remember that the bans depend on your chosen difficulty!
@@ -109,8 +121,8 @@ Challenges page:
 
 
 **Pokémon related:**
-* Following Pokémon (Optional, with a second option to enable or not Big Followers like Rayquaza).
-* Unique surfing animations (Optional).
+* Following Pokémon _(Optional, with a second option to enable or not Big Followers like Rayquaza)_.
+* Unique surfing animations _(Optional)_.
 * 44 new Pokémon species, mostly from Generation 4, and a few Gen 9 (Annihilape, Dudunsparce, Farigiraf).
 * 1 new box space, for a total of 450 Pokémon box space.
 * Birch's bag can show shiny starters!
@@ -125,8 +137,8 @@ Challenges page:
 * Everstone works on male or female Pokémon and guarantees nature.
 * Gen. VIII Synchronize _(Optional)_.
 * Shuckle can make berry juice just like in Gen. II!! Yay?
-* Groudon has STAB with Fire moves, but retains its Ground-only typing.
-* Spinda has a 2% chance of multiplying by two the damage of moves.
+* Groudon has STAB with Fire moves, but retains its Ground-only typing _(Optional, "Pokémon stats" needs to be set to Modern)_.
+* Spinda has a 2% chance of multiplying by two the damage of moves _(Optional, "Pokémon stats" needs to be set to Modern)_.
 * Nature Mints are available to buy in the Flower Shop after the 4th Gym _(Optional)_, or after becoming champion if not enabled from the start.
 * Deoxys forms can be changed at Birth Island, using the meteorites.
 * All Hoenn and National Dex Pokémon need to be obtained to obtain the Completion Diploma, or it won't count as completed.
@@ -145,6 +157,7 @@ Challenges page:
 * IV Maximizer is available in Lylicove, after beating the game, with the option to set IVs to 30 or 31 to allow different Hidden Potentials. Needs a level 100 Pokémon.
 * A nurse NPC is available after beating the game to farm EXP. in Lilycove.
 * New battle backgrounds, completely optional, in the options menu.
+* x2 battles! Enable "Anim Speed" option in the options menu.
 * Faster battle intros. Enable "Fast Intros" option in the options menu.
 * Faster-paced battles. Enable "Fast Battles" option in the options menu.
 * Win streaks in the Battle Frontier multiply the amount of Battle Points obtained even more.
@@ -161,6 +174,7 @@ Challenges page:
 * New Pokédex! You can now see important information on the new "Stats" page. It's very, VERY useful, and it's like having the game documentation in-game.
 * The Pokédex can now be scrolled faster: if you hold left or right, it will advance like before, but without the need to keep pressing left and right.
 * The Pokédex can now be scrolled faster than faster! If you hold left or right AND you hold the R button, it will scroll even faster than explained above!
+* The Pokédex now registers Shiny Pokémon, which can be seen pressing the A button.
 * Faster trainer transitions ported from Fire Red.
 * Choose between holding L+R+A or holding B when entering a wild battle to instantly run, or pressing B when the battle has started to run away faster. _(Optional)_.
 * You can now register 2 key items: Pressing (as usual) and holding SELECT!
@@ -174,16 +188,18 @@ Challenges page:
 * The bag now holds up to 90 items, and item capacity has been upgraded to x999.
 * When the bag is full, items go to the PC.
 * You can change the ball your Pokémon is in using a different ball from the bag.
+* "Move" can be used from "Item" submenu in the Summary screen
 * Reusable repel prompt.
 * The time on the clock can be changed by pressing R, and time events should work. Can be also changed the official way by pressing R+B+LEFT on the main menu.
 * Three pages with additional options in the options menu.
 * New friendship and shiny indicator in the Summary Page of every Pokémon (ported from Heart and Soul)
+* Press SELECT while teaching a move to show your Pokémon Stats.
 * Debug menu can be enabled by everybody, so you can cheat or modify whatever you want. **BE MINDFUL THAT IT CAN BREAK YOUR SAVE IF USED INCORRECTLY!** Refer to the Faq to learn how.
 
 
 **Gameplay related:**
 * RNG is fixed and properly works.
-* Wonder Trade is available on the basement floor of every Pokémon Center, available after the 5th badge (unless you are doing a randomizer, which makes it available from the start, or a challenge, which enables WT after beating the game). The number of Wonder-trades is 3 per day, unless using the "Unlimited Wondertrades" option.
+* _(Optional, but gets enabled for every save after beating the game)_ Wonder Trade is available on the basement floor of every Pokémon Center, available after the 5th badge unless you are doing a randomizer, which makes it available from the start, or a challenge, which enables WT after beating the game. The number of Wonder-trades is 3 per day, unless using the "Unlimited Wondertrades" option.
 * Wonder Trade uses a tier system, so rare Pokémon are rare to obtain as well. 
 * 3 difficulty modes (EASY, NORMAL and HARD). Selected at the start of the game, can be changed anytime from the options menu (unless using the "Limit difficulty" option).
 
@@ -215,9 +231,10 @@ Challenges page:
 * Trainer Hill rewards have been greatly improved: You'll always get 20BP for each win and, if you finish within 10min or less, you can obtain Gamecube exclusive berries (Ganlon, Petaya, Salac & Apicot Berry) and up to 1.000.000$ (scales with time spent during the Trainer Hill challenge). 
 * Match and Acro Bike are now one. Change between them by pressing "R".
 * Easier fishing has been added to the options menu (FR/LG fishing).
+* Chain fishing AND Sweet Scent chaining!
 * All tickets are available to buy in the Battle Frontier.
 * Faster nurse Joy healing, and now with an even faster version in the options menu (with a confirmation sound).
-* A new item, the Big Nugget! It can be sold for a very high price. Available from Clamperl or Rich trainers (rematch only).
+* A new item, the Big Nugget! It can be sold for a very high price. Available from Rich trainers (rematch only).
 * You can check the Soot Sack to know how much ash you have.
 * Interacting with berry trees is faster.
 * Berry trees that are in rainy routes don't need to be watered, and berry trees don't decay.
@@ -237,15 +254,27 @@ Challenges page:
 * Mirage Island can be forced with a certain Pokémon in the party, apart from its unusual rate, and works even if they are sitting on the PC.
 
 **Sound related:**
-* Added all the music and sound effects from Pokémon Diamond, Pearl, Platinum, HeartGold, and SoulSilver.
+* Added all the music and sound effects from Pokémon Diamond, Pearl, Platinum, HeartGold, SoulSilver, Black and White.
 * You can listen to all this music using the combo "Right DPAD + Select + B" in the Title Screen.
 * All legendaries have their music swapped for something different using all the newly included tracks from the games mentioned above.
 * Option to disable or enable music.
 * Option to disable or enable Surf and Bike music.
-* Option to choose between different tracks for Wild Battles, Trainers and Frontier Trainers ("Hoenn", "Kanto 1", "Sinnoh", "Johto", "Kanto 2", "Random").
+* Option to choose between different tracks for Wild Battles, Trainers and Frontier Trainers ("Hoenn", "Kanto 1", "Sinnoh", "Johto", "Kanto 2", "Unova", and "Random").
 * Option to choose between "Gen 3", "DPPl", and "HGSS" sound effects.
 
-# 🔧QUICK FAQ FOR THIS REPO
+# 🔧 FOR DEVELOPERS:
+
+Please follow [Pret's guide on how to build the rom](https://github.com/pret/pokeemerald/blob/master/INSTALL.md) but using this branch instead of theirs. 
+
+When compiling, **use the modern compiler** with the "make modern" command. 
+_Compiling using the old compiler won't work._
+
+The game was compiled using `(devkitARM release 62) 13.2.0`, but it _should_ work up to `release 65` without any issues. Higher versions may not work, so manual fixes might be required.
+
+# 🗿 QUICK FAQ:
+
+**Can't open the repo in Porymap!**
+* This project is not yet compatible with Porymap 6. Use Porymap 5 instead.
 
 **I can't compile Modern Emerald!!**
 * First thing: When compiling, **you have to use the modern compiler** with the "make modern" command. The old compiler will never work.
@@ -256,3 +285,29 @@ Decompilation hack-roms may crash or have strange bugs if you are using other em
 
 **Help! PkHex / PKSM / Similar tools or apps can't open the savefile!**
 These programs rely on knowing where to find the data on the savefile, and Modern Emerald has modified certain parts of the savedata which makes it incompatible with these apps or tools. Use the debug menu to cheat, as it provides the same options, mostly.
+
+# 🤷‍♂️ AI DISCLAIMER
+
+* 99,9% of my code has been made by hand.
+    - Currently, only one commit has had some help from an AI.
+    - Contributors do not count towards this percetange. I do not control or limit any contributor.
+* Some text strings have been corrected or had their wording improved using AI tools.
+
+# 🪪 CREDITS
+
+* [Pret's Pokeemerald](https://github.com/pret/pokeemerald) for its base
+* Pret's Wiki Tutorials:
+    - TONS of their tutorials were used!
+* Repos:
+    - HGSS / DPPt / BW music from: 
+        - https://github.com/CyanSMP64/pokeemerald/tree/dppt_hgss_music 
+        - https://github.com/CyanSMP64/pokeemerald/tree/dppt_hgss_bw_music_old
+    -  Day/Night system / Followers:
+        - https://github.com/aarant/pokeemerald/tree/followers-expanded-id
+    - PHY/SP new icons and Stab indicator:
+        - https://github.com/worpbane/pokeemerald-worped/commits/battle-ui-rework/
+    - Many stuff was ported from HnS:
+        - https://github.com/PokemonHnS-Development/pokemonHnS
+* Contributors:
+   - Decap by @fanyx
+   - Tweaks and commits by [@aloven](https://github.com/aloven), [@pinkshellos](https://github.com/PinkShellos), [@insertCreativeName5](https://github.com/InsertCreativeName5). [@davidgfnet](https://github.com/davidgfnet), [@unique-github-username](https://github.com/unique-github-username), [@TixoRebel](https://github.com/TixoRebel), [@bfedie5](https://github.com/bfedie518) and [@deepCeadeus](https://github.com/deepCeadeus)

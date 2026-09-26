@@ -28,6 +28,7 @@
 #include "overworld.h"
 #include "party_menu.h"
 #include "pokeblock.h"
+#include "pokedex.h"
 #include "pokemon.h"
 #include "pokemon_storage_system.h"
 #include "random.h"
@@ -1661,6 +1662,26 @@ bool8 IsBadEggInParty(void)
     for (i = 0; i < partyCount; i++)
     {
         if (GetMonData(&gPlayerParty[i], MON_DATA_SANITY_IS_BAD_EGG) == TRUE)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+bool8 PlayerHasMESpeciesOrItem(void)
+{
+    u8 partyCount = CalculatePlayerPartyCount();
+    u8 i;
+
+    for (i = 0; i < partyCount; i++)
+    {
+        if ((GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, NULL) == ITEM_FERTILIZER)
+        || (GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, NULL) == ITEM_BIG_NUGGET)
+        || (GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, NULL) == ITEM_EXP_SHARE_SMALL)
+        || (GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, NULL) == ITEM_FAIRY_GEM)
+        || (GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, NULL) >= ITEM_ADAMANT_MINT && GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, NULL) <= ITEM_TIMID_MINT))
+            return TRUE;
+        if ((GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL) >= SPECIES_AMBIPOM && GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL) <= SPECIES_MOLTRES_GALAR))
             return TRUE;
     }
 
@@ -4372,6 +4393,8 @@ bool16 TryChangeDeoxysForm(void)
 
         SetMonData(&gPlayerParty[gSpecialVar_0x8004], MON_DATA_SPECIES, &targetSpecies);
         CalculateMonStats(&gPlayerParty[gSpecialVar_0x8004]);
+        GetSetPokedexFlag(SpeciesToNationalPokedexNum(targetSpecies), FLAG_SET_SEEN);
+        GetSetPokedexFlag(SpeciesToNationalPokedexNum(targetSpecies), FLAG_SET_CAUGHT);
         gSpecialVar_Result = TRUE;
         return TRUE;
     }

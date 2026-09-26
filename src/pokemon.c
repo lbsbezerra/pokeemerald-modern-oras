@@ -568,15 +568,15 @@ static const u16 sSpeciesToHoennPokedexNum[NUM_SPECIES - 1] =
     SPECIES_TO_HOENN(URSALUNA),
     SPECIES_TO_HOENN(KLEAVOR),
     SPECIES_TO_HOENN(URSALUNA_BLOODMOON),
-    //SPECIES_TO_HOENN(UNUSED_SPACE5),
-    //SPECIES_TO_HOENN(UNUSED_SPACE6),
     SPECIES_TO_HOENN(TEST),
-    //SPECIES_TO_HOENN(UNUSED_SPACE8),
-    //SPECIES_TO_HOENN(UNUSED_SPACE9),
-    //SPECIES_TO_HOENN(UNUSED_SPACE10),
-    //SPECIES_TO_HOENN(DEOXYS_ATTACK),
-    //SPECIES_TO_HOENN(DEOXYS_DEFENSE),
-    //SPECIES_TO_HOENN(DEOXYS_SPEED),
+    SPECIES_TO_HOENN(VICTINI),
+    //SPECIES_TO_HOENN(UNUSED_SPACE6),
+    SPECIES_TO_HOENN(ARTICUNO_GALAR),
+    SPECIES_TO_HOENN(ZAPDOS_GALAR),
+    SPECIES_TO_HOENN(MOLTRES_GALAR),
+    SPECIES_TO_HOENN(DEOXYS_ATTACK),
+    SPECIES_TO_HOENN(DEOXYS_DEFENSE),
+    SPECIES_TO_HOENN(DEOXYS_SPEED),
 };
 
 // Assigns all species to the National Dex Index (Summary No. for National Dex)
@@ -1034,15 +1034,15 @@ static const u16 sSpeciesToNationalPokedexNum[NUM_SPECIES - 1] =
     SPECIES_TO_NATIONAL(URSALUNA),
     SPECIES_TO_NATIONAL(KLEAVOR),
     SPECIES_TO_NATIONAL(URSALUNA_BLOODMOON),
-    //SPECIES_TO_NATIONAL(UNUSED_SPACE5),
-    //SPECIES_TO_NATIONAL(UNUSED_SPACE6),
     SPECIES_TO_NATIONAL(TEST),
-    //SPECIES_TO_NATIONAL(UNUSED_SPACE8),
-    //SPECIES_TO_NATIONAL(UNUSED_SPACE9),
-    //SPECIES_TO_NATIONAL(UNUSED_SPACE10),
-    //SPECIES_TO_NATIONAL(DEOXYS_ATTACK),
-    //SPECIES_TO_NATIONAL(DEOXYS_DEFENSE),
-    //SPECIES_TO_NATIONAL(DEOXYS_SPEED),
+    SPECIES_TO_NATIONAL(VICTINI),
+    //SPECIES_TO_NATIONAL(UNUSED_SPACE6),
+    SPECIES_TO_NATIONAL(ARTICUNO_GALAR),
+    SPECIES_TO_NATIONAL(ZAPDOS_GALAR),
+    SPECIES_TO_NATIONAL(MOLTRES_GALAR),
+    SPECIES_TO_NATIONAL(DEOXYS_ATTACK),
+    SPECIES_TO_NATIONAL(DEOXYS_DEFENSE),
+    SPECIES_TO_NATIONAL(DEOXYS_SPEED),
 };
 
 // Assigns all Hoenn Dex Indexes to a National Dex Index
@@ -1501,15 +1501,15 @@ static const u16 sHoennToNationalOrder[NUM_SPECIES - 1] =
     HOENN_TO_NATIONAL(URSALUNA),
     HOENN_TO_NATIONAL(KLEAVOR),
     HOENN_TO_NATIONAL(URSALUNA_BLOODMOON),
-    //HOENN_TO_NATIONAL(UNUSED_SPACE5),
-    //HOENN_TO_NATIONAL(UNUSED_SPACE6),
     HOENN_TO_NATIONAL(TEST),
-    //HOENN_TO_NATIONAL(UNUSED_SPACE8),
-    //HOENN_TO_NATIONAL(UNUSED_SPACE9),
-    //HOENN_TO_NATIONAL(UNUSED_SPACE10),
-    //HOENN_TO_NATIONAL(DEOXYS_ATTACK),
-    //HOENN_TO_NATIONAL(DEOXYS_DEFENSE),
-    //HOENN_TO_NATIONAL(DEOXYS_SPEED),
+    HOENN_TO_NATIONAL(VICTINI),
+    //HOENN_TO_NATIONAL(UNUSED_SPACE6),
+    HOENN_TO_NATIONAL(ARTICUNO_GALAR),
+    HOENN_TO_NATIONAL(ZAPDOS_GALAR),
+    HOENN_TO_NATIONAL(MOLTRES_GALAR),
+    HOENN_TO_NATIONAL(DEOXYS_ATTACK),
+    HOENN_TO_NATIONAL(DEOXYS_DEFENSE),
+    HOENN_TO_NATIONAL(DEOXYS_SPEED),
 };
 
 const struct SpindaSpot gSpindaSpotGraphics[] =
@@ -1995,12 +1995,12 @@ static const u8 sMonFrontAnimIdsTable[NUM_SPECIES - 1] =
     [SPECIES_URSALUNA - 1]      = ANIM_V_SHAKE,
     [SPECIES_URSALUNA_BLOODMOON - 1] = ANIM_V_SHAKE,
     [SPECIES_KLEAVOR - 1]       = ANIM_H_VIBRATE,
-    [SPECIES_UNUSED_SPACE5 - 1] = ANIM_H_VIBRATE,
+    [SPECIES_VICTINI - 1]       = ANIM_H_JUMPS,
     [SPECIES_UNUSED_SPACE6 - 1] = ANIM_H_VIBRATE,
     [SPECIES_TEST - 1]          = ANIM_ZIGZAG_FAST,
-    [SPECIES_UNUSED_SPACE8 - 1] = ANIM_H_VIBRATE,
-    [SPECIES_UNUSED_SPACE9 - 1] = ANIM_H_VIBRATE,
-    [SPECIES_UNUSED_SPACE10 - 1] = ANIM_H_VIBRATE,
+    [SPECIES_ARTICUNO_GALAR - 1] = ANIM_CIRCULAR_VIBRATE,
+    [SPECIES_ZAPDOS_GALAR - 1] = ANIM_GROW_VIBRATE,
+    [SPECIES_MOLTRES_GALAR - 1] = ANIM_V_SQUISH_AND_BOUNCE_SLOW,
 };
 
 static const u8 sMonAnimationDelayTable[NUM_SPECIES - 1] =
@@ -2922,12 +2922,12 @@ static const u8 gSpeciesMapping[NUM_SPECIES+1] =
     [SPECIES_URSALUNA - 1]      = EVO_TYPE_2,
     [SPECIES_URSALUNA_BLOODMOON - 1] = EVO_TYPE_2,
     [SPECIES_KLEAVOR - 1]       = EVO_TYPE_1,
-    //[SPECIES_UNUSED_SPACE5 - 1] = EVO_TYPE_LEGENDARY,
+    //[SPECIES_VICTINI - 1]       = EVO_TYPE_LEGENDARY,
     //[SPECIES_UNUSED_SPACE6 - 1] = EVO_TYPE_LEGENDARY,
     //[SPECIES_TEST - 1] = EVO_TYPE_LEGENDARY,
-    //[SPECIES_UNUSED_SPACE8 - 1] = EVO_TYPE_LEGENDARY,
-    //[SPECIES_UNUSED_SPACE9 - 1] = EVO_TYPE_LEGENDARY,
-    //[SPECIES_UNUSED_SPACE10 - 1] = EVO_TYPE_LEGENDARY,
+    //[SPECIES_ARTICUNO_GALAR]    = EVO_TYPE_LEGENDARY,
+    //[SPECIES_ZAPDOS_GALAR]      = EVO_TYPE_LEGENDARY,
+    //[SPECIES_MOLTRES_GALAR]     = EVO_TYPE_LEGENDARY,
     //[SPECIES_DEOXYS_ATTACK]     = EVO_TYPE_LEGENDARY,
     //[SPECIES_DEOXYS_DEFENSE]    = EVO_TYPE_LEGENDARY,
     //[SPECIES_DEOXYS_SPEED]      = EVO_TYPE_LEGENDARY,
@@ -3391,12 +3391,12 @@ static const u16 sRandomSpecies[] =
     SPECIES_URSALUNA           ,
     SPECIES_URSALUNA_BLOODMOON ,
     SPECIES_KLEAVOR            ,
-    //SPECIES_UNUSED_SPACE5    ,
+    //SPECIES_VICTINI            ,
     //SPECIES_UNUSED_SPACE6    ,
     //SPECIES_TEST             ,
-    //SPECIES_UNUSED_SPACE8    ,
-    //SPECIES_UNUSED_SPACE9    ,
-    //SPECIES_UNUSED_SPACE10   ,
+    //SPECIES_ARTICUNO_GALAR     ,
+    //SPECIES_ZAPDOS_GALAR       ,
+    //SPECIES_MOLTRES_GALAR      ,
     // SPECIES_EGG             ,
 };
 #define RANDOM_SPECIES_COUNT_LEGENDARY ARRAY_COUNT(sRandomSpeciesLegendary)
@@ -3855,12 +3855,12 @@ static const u16 sRandomSpeciesLegendary[] =
     SPECIES_URSALUNA           ,
     SPECIES_URSALUNA_BLOODMOON           ,
     SPECIES_KLEAVOR           ,
-    //SPECIES_UNUSED_SPACE5           ,
+    //SPECIES_VICTINI           ,
     //SPECIES_UNUSED_SPACE6           ,
     //SPECIES_TEST           ,
-    //SPECIES_UNUSED_SPACE8           ,
-    //SPECIES_UNUSED_SPACE9           ,
-    //SPECIES_UNUSED_SPACE10            ,
+    //SPECIES_ARTICUNO_GALAR     ,
+    //SPECIES_ZAPDOS_GALAR       ,
+    //SPECIES_MOLTRES_GALAR      ,
     //SPECIES_DEOXYS_ATTACK     ,
     //SPECIES_DEOXYS_DEFENSE    ,
     //SPECIES_DEOXYS_SPEED      ,
@@ -4192,23 +4192,23 @@ static const u16 sRandomSpeciesEvo1[] =
     SPECIES_SHELGON         , //= EVO_TYPE_1,
     SPECIES_METANG          , //= EVO_TYPE_1,
     SPECIES_CHIMECHO        , //= EVO_TYPE_1,
-    SPECIES_AMBIPOM           ,
-    SPECIES_FROSLASS          ,
-    SPECIES_GLACEON           ,
-    SPECIES_GLISCOR           ,
-    SPECIES_HONCHKROW         ,
-    SPECIES_LEAFEON           ,
-    SPECIES_LICKILICKY        ,
-    SPECIES_MISMAGIUS         ,
-    SPECIES_PROBOPASS         ,
-    SPECIES_SYLVEON           ,
-    SPECIES_TANGROWTH         ,
-    SPECIES_WEAVILE           ,
-    SPECIES_YANMEGA           ,
-    SPECIES_FARIGIRAF         ,
-    SPECIES_DUDUNSPARCE       ,
-    SPECIES_WYRDEER           ,
-    SPECIES_KLEAVOR           ,
+    SPECIES_AMBIPOM         , //= EVO_TYPE_1,
+    SPECIES_FROSLASS        , //= EVO_TYPE_1,
+    SPECIES_GLACEON         , //= EVO_TYPE_1,
+    SPECIES_GLISCOR         , //= EVO_TYPE_1,
+    SPECIES_HONCHKROW       , //= EVO_TYPE_1,
+    SPECIES_LEAFEON         , //= EVO_TYPE_1,
+    SPECIES_LICKILICKY      , //= EVO_TYPE_1,
+    SPECIES_MISMAGIUS       , //= EVO_TYPE_1,
+    SPECIES_PROBOPASS       , //= EVO_TYPE_1,
+    SPECIES_SYLVEON         , //= EVO_TYPE_1,
+    SPECIES_TANGROWTH       , //= EVO_TYPE_1,
+    SPECIES_WEAVILE         , //= EVO_TYPE_1,
+    SPECIES_YANMEGA         , //= EVO_TYPE_1,
+    SPECIES_FARIGIRAF       , //= EVO_TYPE_1,
+    SPECIES_DUDUNSPARCE     , //= EVO_TYPE_1,
+    SPECIES_WYRDEER         , //= EVO_TYPE_1,
+    SPECIES_KLEAVOR         , //= EVO_TYPE_1,
     //SPECIES_UNUSED_SPACE5           ,
     //SPECIES_UNUSED_SPACE6           ,
     //SPECIES_TEST           ,
@@ -4268,17 +4268,17 @@ static const u16 sRandomSpeciesEvo2[] =
     SPECIES_GARDEVOIR       , //= EVO_TYPE_2,
     SPECIES_SALAMENCE       , //= EVO_TYPE_2,
     SPECIES_METAGROSS       , //= EVO_TYPE_2,
-    SPECIES_DUSKNOIR          ,
-    SPECIES_ELECTIVIRE        ,
-    SPECIES_GALLADE           ,
-    SPECIES_MAGMORTAR         ,
-    SPECIES_MAGNEZONE         ,
-    SPECIES_MAMOSWINE         ,
-    SPECIES_PORYGON_Z         ,
-    SPECIES_RHYPERIOR         ,
-    SPECIES_ROSERADE          ,
-    SPECIES_TOGEKISS          ,
-    SPECIES_ANNIHILAPE        ,
+    SPECIES_DUSKNOIR          , //= EVO_TYPE_2,
+    SPECIES_ELECTIVIRE        , //= EVO_TYPE_2,
+    SPECIES_GALLADE           , //= EVO_TYPE_2,
+    SPECIES_MAGMORTAR         , //= EVO_TYPE_2,
+    SPECIES_MAGNEZONE         , //= EVO_TYPE_2,
+    SPECIES_MAMOSWINE         , //= EVO_TYPE_2,
+    SPECIES_PORYGON_Z         , //= EVO_TYPE_2,
+    SPECIES_RHYPERIOR         , //= EVO_TYPE_2,
+    SPECIES_ROSERADE          , //= EVO_TYPE_2,
+    SPECIES_TOGEKISS          , //= EVO_TYPE_2,
+    SPECIES_ANNIHILAPE        , //= EVO_TYPE_2,
     SPECIES_URSALUNA           ,
     SPECIES_URSALUNA_BLOODMOON           ,
     //SPECIES_UNUSED_SPACE5           ,
@@ -4312,10 +4312,14 @@ static const u16 sRandomSpeciesEvoLegendary[] =
     SPECIES_LATIOS                        , //= EVO_TYPE_LEGENDARY,
     SPECIES_JIRACHI                       , //= EVO_TYPE_LEGENDARY,
     SPECIES_DEOXYS                        , //= EVO_TYPE_LEGENDARY,
-    SPECIES_ARCEUS            ,
-    SPECIES_REGIDRAGO         ,
-    SPECIES_REGIELEKI         ,
-    SPECIES_REGIGIGAS         ,
+    SPECIES_ARCEUS                        , //= EVO_TYPE_LEGENDARY,
+    SPECIES_REGIDRAGO                     , //= EVO_TYPE_LEGENDARY,
+    SPECIES_REGIELEKI                     , //= EVO_TYPE_LEGENDARY,
+    SPECIES_REGIGIGAS                     , //= EVO_TYPE_LEGENDARY,
+    //SPECIES_VICTINI                       ,
+    //SPECIES_ARTICUNO_GALAR                ,
+    //SPECIES_ZAPDOS_GALAR                  ,
+    //SPECIES_MOLTRES_GALAR                 ,
     //SPECIES_DEOXYS_ATTACK     ,
     //SPECIES_DEOXYS_DEFENSE    ,
     //SPECIES_DEOXYS_SPEED      ,
@@ -4323,7 +4327,6 @@ static const u16 sRandomSpeciesEvoLegendary[] =
     //SPECIES_UNUSED_SPACE2           ,
     //SPECIES_UNUSED_SPACE3           ,
     //SPECIES_UNUSED_SPACE4           ,
-    //SPECIES_UNUSED_SPACE5           ,
     //SPECIES_UNUSED_SPACE6           ,
     //SPECIES_TEST           ,
     //SPECIES_UNUSED_SPACE8           ,
@@ -4931,6 +4934,12 @@ static const u16 sRandomValidMoves[MOVES_COUNT-1] =
     MOVE_PLAY_ROUGH,
     MOVE_MOONBLAST,
     MOVE_POISON_JAB,
+    MOVE_BLOOD_MOON,
+    MOVE_JUDGMENT,
+    MOVE_FREEZING_GLARE,
+    MOVE_THUNDEROUS_KICK,
+    MOVE_FIERY_WRATH,
+    MOVE_SEARING_SHOT,
 };
 //**********************
 
@@ -5053,9 +5062,6 @@ void CreateBoxMon(struct BoxPokemon *boxMon, u16 species, u8 level, u8 fixedIV, 
     }
     else // Player is the OT
     {
-        u32 rolls = 0;
-        u32 shinyRolls = 0;
-
         value = gSaveBlock2Ptr->playerTrainerId[0]
               | (gSaveBlock2Ptr->playerTrainerId[1] << 8)
               | (gSaveBlock2Ptr->playerTrainerId[2] << 16)
@@ -5312,7 +5318,8 @@ void CreateMonWithGenderNatureLetter(struct Pokemon *mon, u16 species, u8 level,
 }
 
 // This is only used to create Wally's Ralts.
-void CreateMaleMon(struct Pokemon *mon, u16 species, u8 level)
+// Forces female so it's consistent with Wally's later Gardevoir.
+void CreateFemaleMon(struct Pokemon *mon, u16 species, u8 level)
 {
     u32 personality;
     u32 otId;
@@ -5322,7 +5329,7 @@ void CreateMaleMon(struct Pokemon *mon, u16 species, u8 level)
         otId = Random32();
         personality = Random32();
     }
-    while (GetGenderFromSpeciesAndPersonality(species, personality) != MON_MALE);
+    while (GetGenderFromSpeciesAndPersonality(species, personality) != MON_FEMALE);
     CreateMon(mon, species, level, USE_RANDOM_IVS, TRUE, personality, OT_ID_PRESET, otId);
 }
 
@@ -5750,6 +5757,10 @@ void CreateEnemyEventMon(void)
     s32 species = gSpecialVar_0x8004;
     s32 level = gSpecialVar_0x8005;
     s32 itemId = gSpecialVar_0x8006;
+
+    //tx_randomizer_and_challenges
+    if (gSaveBlock1Ptr->tx_Random_Static)
+        species = GetSpeciesRandomSeeded(species, TX_RANDOM_T_STATIC, 0);
 
     ZeroEnemyPartyMons();
     CreateEventMon(&gEnemyParty[0], species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
@@ -6432,8 +6443,10 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
             if (attackerHoldEffect == sHoldEffectToType[i][0]
                 && type == sHoldEffectToType[i][1])
             {
-                attack = (attack * (attackerHoldEffectParam + 100)) / 100;
-                spAttack = (spAttack * (attackerHoldEffectParam + 100)) / 100;
+                if (IS_MOVE_SPECIAL(gCurrentMove))
+                    spAttack = (spAttack * (attackerHoldEffectParam + 100)) / 100;
+                else
+                    attack = (attack * (attackerHoldEffectParam + 100)) / 100;
                 break;
             }
     }
@@ -6768,9 +6781,9 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
         gBattleMovePower = (150 * gBattleMovePower) / 100;
     if (type == TYPE_BUG && attacker->ability == ABILITY_SWARM && attacker->hp <= (attacker->maxHP / 3))
         gBattleMovePower = (150 * gBattleMovePower) / 100;
-    if ((attacker->species == SPECIES_SPINDA) && ((Random() % 100) <= 2))
+    if ((attacker->species == SPECIES_SPINDA) && ((Random() % 100) <= 2) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 1))
         gBattleMovePower = (200 * gBattleMovePower) / 100;
-    if ((attacker->species == SPECIES_GROUDON) && (moveType == TYPE_FIRE))
+    if ((attacker->species == SPECIES_GROUDON) && (moveType == TYPE_FIRE) && (gSaveBlock1Ptr->tx_Mode_New_Stats == 1))
         gBattleMovePower = (150 * gBattleMovePower) / 100;
 
     // Self-destruct / Explosion cut defense in half
@@ -8261,7 +8274,8 @@ u8 GetAbilityBySpecies(u16 species, u8 abilityNum)
         else
             abilityNum = 1;
     }
-    if ((abilityNum == 0) && (species == SPECIES_ARTICUNO 
+    if ((abilityNum == 0) 
+           && (species == SPECIES_ARTICUNO 
             || species == SPECIES_ZAPDOS 
             || species == SPECIES_MOLTRES
             || species == SPECIES_MEWTWO
@@ -8269,11 +8283,21 @@ u8 GetAbilityBySpecies(u16 species, u8 abilityNum)
             || species == SPECIES_ENTEI
             || species == SPECIES_SUICUNE
             || species == SPECIES_HO_OH
-            || species == SPECIES_LUGIA)
+            || species == SPECIES_LUGIA
+            || species == SPECIES_DEOXYS_ATTACK
+            || species == SPECIES_DEOXYS_DEFENSE
+            || species == SPECIES_DEOXYS_SPEED)
             && (gSaveBlock1Ptr->tx_Mode_Legendary_Abilities == 0))
         gLastUsedAbility = gSpeciesInfo[species].abilities_old[0];
     else if ((abilityNum == 1)
-            && (species == SPECIES_NOCTOWL || species == SPECIES_YANMEGA)
+            && (species == SPECIES_NOCTOWL 
+             || species == SPECIES_YANMEGA
+             || species == SPECIES_CLAMPERL
+             || species == SPECIES_HUNTAIL
+             || species == SPECIES_GOREBYSS
+             || species == SPECIES_REGIROCK
+             || species == SPECIES_REGICE
+             || species == SPECIES_REGISTEEL)
             && (gSaveBlock1Ptr->tx_Mode_Modern_Types == 0))
         gLastUsedAbility = gSpeciesInfo[species].abilities_old[1];
     else if (abilityNum)
@@ -10507,10 +10531,10 @@ u16 GetBattleBGM(void)
         {
         case SPECIES_LATIOS:
         case SPECIES_LATIAS:
-            return MUS_BW_VS_LEGEND;
+            return BW_SEQ_BGM_VS_MOVEPOKE;
         default:
             // Fallback to existing behavior if species couldn't be read.
-            return MUS_BW_VS_LEGEND;
+            return BW_SEQ_BGM_VS_MOVEPOKE;
         }
     }
     else if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
@@ -10539,11 +10563,15 @@ u16 GetBattleBGM(void)
             else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 4)
                 return MUS_HG_VS_ROCKET;
             else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 5)
+                return BW_SEQ_BGM_VS_G_CIS;
+            else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 6)
             {
-                if((Random() % 3) == 1)
+                if((Random() % 4) == 1)
                     return MUS_DP_VS_GALACTIC_BOSS;
-                else if((Random() % 3) == 2)
+                else if((Random() % 4) == 2)
                     return MUS_HG_VS_ROCKET;
+                else if((Random() % 4) == 3)
+                    return BW_SEQ_BGM_VS_G_CIS;
                 else
                     return MUS_VS_AQUA_MAGMA_LEADER;
             }
@@ -10561,11 +10589,15 @@ u16 GetBattleBGM(void)
             else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 4)
                 return MUS_HG_VS_ROCKET;
             else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 5)
+                return BW_SEQ_BGM_VS_PLASMA;
+            else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 6)
             {
-                if((Random() % 3) == 1)
+                if((Random() % 4) == 1)
                     return MUS_DP_VS_GALACTIC;
-                else if((Random() % 3) == 2)
+                else if((Random() % 4) == 2)
                     return MUS_HG_VS_ROCKET;
+                else if((Random() % 4) == 3)
+                    return BW_SEQ_BGM_VS_PLASMA;
                 else
                     return MUS_VS_AQUA_MAGMA;
             }
@@ -10583,11 +10615,15 @@ u16 GetBattleBGM(void)
             else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 4)
                 return MUS_HG_VS_ROCKET;
             else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 5)
+                return BW_SEQ_BGM_VS_PLASMA;
+            else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 6)
             {
-                if((Random() % 3) == 1)
+                if((Random() % 4) == 1)
                     return MUS_DP_VS_GALACTIC_COMMANDER;
-                else if((Random() % 3) == 2)
+                else if((Random() % 4) == 2)
                     return MUS_HG_VS_ROCKET;
+                else if((Random() % 4) == 3)
+                    return BW_SEQ_BGM_VS_PLASMA;
                 else
                     return MUS_VS_AQUA_MAGMA;
             }
@@ -10604,15 +10640,19 @@ u16 GetBattleBGM(void)
             else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 4)
                 return MUS_HG_VS_GYM_LEADER_KANTO;
             else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 5)
+                return BW_SEQ_BGM_VS_GYMLEADER;
+            else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 6)
             {
-                if((Random() % 5) == 1)
+                if((Random() % 6) == 1)
                     return MUS_RG_VS_GYM_LEADER;
-                else if((Random() % 5) == 2)
+                else if((Random() % 6) == 2)
                     return MUS_DP_VS_GYM_LEADER;
-                else if((Random() % 5) == 3)
+                else if((Random() % 6) == 3)
                     return MUS_HG_VS_GYM_LEADER;
-                else if((Random() % 5) == 4)
+                else if((Random() % 6) == 4)
                     return MUS_HG_VS_GYM_LEADER_KANTO;
+                else if((Random() % 6) == 5)
+                    return BW_SEQ_BGM_VS_GYMLEADER;
                 else
                     return MUS_VS_GYM_LEADER;
             }
@@ -10629,13 +10669,17 @@ u16 GetBattleBGM(void)
             else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 4)
                 return MUS_HG_VS_CHAMPION;
             else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 5)
+                return BW_SEQ_BGM_VS_CHAMP;
+            else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 6)
             {
-                if((Random() % 4) == 1)
+                if((Random() % 5) == 1)
                     return MUS_RG_VS_CHAMPION;
-                else if((Random() % 4) == 2)
+                else if((Random() % 5) == 2)
                     return MUS_DP_VS_CHAMPION;
-                else if((Random() % 4) == 3)
+                else if((Random() % 5) == 3)
                     return MUS_HG_VS_CHAMPION;
+                else if((Random() % 5) == 4)
+                    return BW_SEQ_BGM_VS_CHAMP;
                 else
                     return MUS_VS_CHAMPION;
             }
@@ -10654,11 +10698,15 @@ u16 GetBattleBGM(void)
                 else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 4)
                     return MUS_HG_VS_RIVAL;
                 else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 5)
+                    return BW_SEQ_BGM_VS_RIVAL;
+                else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 6)
                 {
-                    if((Random() % 3) == 1)
+                    if((Random() % 4) == 1)
                         return MUS_DP_VS_RIVAL;
-                    else if((Random() % 3) == 2)
+                    else if((Random() % 4) == 2)
                         return MUS_HG_VS_RIVAL;
+                    else if((Random() % 4) == 3)
+                        return BW_SEQ_BGM_VS_RIVAL;
                     else
                         return MUS_VS_RIVAL;
                 }
@@ -10676,15 +10724,19 @@ u16 GetBattleBGM(void)
             else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 4)
                 return MUS_HG_VS_GYM_LEADER_KANTO;
             else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 5)
+                return BW_SEQ_BGM_VS_SHITENNO;
+            else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 6)
             {
-                if((Random() % 5) == 1)
+                if((Random() % 6) == 1)
                     return MUS_DP_VS_ELITE_FOUR;
-                else if((Random() % 5) == 2)
+                else if((Random() % 6) == 2)
                     return MUS_RG_VS_GYM_LEADER;
-                else if((Random() % 5) == 3)
+                else if((Random() % 6) == 3)
                     return MUS_HG_VS_GYM_LEADER;
-                else if((Random() % 5) == 4)
+                else if((Random() % 6) == 4)
                     return MUS_HG_VS_GYM_LEADER_KANTO;
+                else if((Random() % 6) == 5)
+                    return BW_SEQ_BGM_VS_SHITENNO;
                 else
                     return MUS_VS_ELITE_FOUR;
             }
@@ -10696,22 +10748,33 @@ u16 GetBattleBGM(void)
         case TRAINER_CLASS_FACTORY_HEAD:
         case TRAINER_CLASS_PIKE_QUEEN:
         case TRAINER_CLASS_PYRAMID_KING:
-            if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 0)
+            if (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 0)
                 return MUS_VS_FRONTIER_BRAIN;
-            else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 1)
+            else if (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 1)
                 return MUS_VS_FRONTIER_BRAIN;
-            else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 2)
+            else if (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 2)
                 return MUS_PL_VS_FRONTIER_BRAIN;
-            else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 3)
+            else if (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 3)
                 return MUS_HG_VS_FRONTIER_BRAIN;
-            else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 4)
+            else if (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 4)
                 return MUS_HG_VS_FRONTIER_BRAIN;
-            else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 5)
+            else if (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 5)
+                {
+                    if((Random() % 2) == 1)
+                        return BW_SEQ_BGM_VS_N;
+                    else
+                        return BW_SEQ_BGM_VS_N_2;
+                }
+            else if (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 6)
             {
-                if((Random() % 3) == 1)
+                if((Random() % 5) == 1)
                     return MUS_PL_VS_FRONTIER_BRAIN;
-                else if((Random() % 3) == 2)
+                else if((Random() % 5) == 2)
                     return MUS_HG_VS_FRONTIER_BRAIN;
+                else if((Random() % 5) == 3)
+                    return BW_SEQ_BGM_VS_N;
+                else if((Random() % 5) == 4)
+                    return BW_SEQ_BGM_VS_N_2;
                 else
                     return MUS_VS_FRONTIER_BRAIN;
             }
@@ -10730,15 +10793,21 @@ u16 GetBattleBGM(void)
                 else if (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 4)
                     return MUS_HG_VS_TRAINER_KANTO;
                 else if (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 5)
+                    return BW_SEQ_BGM_VS_SUBWAY_TRAINER;
+                else if (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 6)
                 {
-                    if((Random() % 5) == 1)
+                    if((Random() % 7) == 1)
                         return MUS_DP_VS_TRAINER;
-                    else if((Random() % 5) == 2)
+                    else if((Random() % 7) == 2)
                         return MUS_RG_VS_TRAINER;
-                    else if((Random() % 5) == 3)
+                    else if((Random() % 7) == 3)
                         return MUS_HG_VS_TRAINER;
-                    else if((Random() % 5) == 4)
+                    else if((Random() % 7) == 4)
                         return MUS_HG_VS_TRAINER_KANTO;
+                    else if((Random() % 7) == 5)
+                        return BW_SEQ_BGM_VS_SUBWAY_TRAINER;
+                    else if((Random() % 7) == 6)
+                        return BW_SEQ_BGM_VS_TRAINER;
                     else
                         return MUS_VS_TRAINER;
                 }
@@ -10757,15 +10826,19 @@ u16 GetBattleBGM(void)
                 else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 4)
                     return MUS_HG_VS_TRAINER_KANTO;
                 else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 5)
+                    return BW_SEQ_BGM_VS_TRAINER;
+                else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 6)
                 {
-                    if((Random() % 5) == 1)
+                    if((Random() % 6) == 1)
                         return MUS_DP_VS_TRAINER;
-                    else if((Random() % 5) == 2)
+                    else if((Random() % 6) == 2)
                         return MUS_RG_VS_TRAINER;
-                    else if((Random() % 5) == 3)
+                    else if((Random() % 6) == 3)
                         return MUS_HG_VS_TRAINER;
-                    else if((Random() % 5) == 4)
+                    else if((Random() % 6) == 4)
                         return MUS_HG_VS_TRAINER_KANTO;
+                    else if((Random() % 6) == 5)
+                        return BW_SEQ_BGM_VS_TRAINER;
                     else
                         return MUS_VS_TRAINER;
                 }
@@ -10785,15 +10858,19 @@ u16 GetBattleBGM(void)
         else if (gSaveBlock2Ptr->optionsWildBattleMusic == 4)
             return MUS_HG_VS_WILD_KANTO;
         else if (gSaveBlock2Ptr->optionsWildBattleMusic == 5)
+            return BW_SEQ_BGM_VS_NORAPOKE;
+        else if (gSaveBlock2Ptr->optionsWildBattleMusic == 6)
         {
-            if((Random() % 5) == 1)
+            if((Random() % 6) == 1)
                 return MUS_HG_VS_WILD_KANTO;
-            else if((Random() % 5) == 2)
+            else if((Random() % 6) == 2)
                 return MUS_RG_VS_WILD;
-            else if((Random() % 5) == 3)
+            else if((Random() % 6) == 3)
                 return MUS_DP_VS_WILD;
-            else if((Random() % 5) == 4)
+            else if((Random() % 6) == 4)
                 return MUS_HG_VS_WILD;
+            else if((Random() % 6) == 5)
+                return BW_SEQ_BGM_VS_NORAPOKE;
             else
                 return MUS_VS_WILD;
         }
@@ -11368,7 +11445,7 @@ void SetWildMonHeldItem(void)
         u16 rnd = Random() % 100;
         u16 species = GetMonData(&gEnemyParty[0], MON_DATA_SPECIES, 0);
         u16 chanceNoItem = 45;
-        u16 chanceNotRare = 90;
+        u16 chanceNotRare = 95;
         if (!GetMonData(&gPlayerParty[0], MON_DATA_SANITY_IS_EGG, 0)
             && GetMonAbility(&gPlayerParty[0]) == ABILITY_COMPOUND_EYES)
         {
@@ -11931,18 +12008,17 @@ u8 *MonSpritesGfxManager_GetSpritePtr(u8 managerId, u8 spriteNum)
 //******************* tx_randomizer_and_challenges
 void RandomizeTypeEffectivenessListEWRAM(u16 seed)
 {
-    u8 i;
+    u8 i, j;
     u8 stemp[RANDOM_TYPE_COUNT];
 
     memcpy(stemp, sOneTypeChallengeValidTypes, sizeof(sOneTypeChallengeValidTypes));
     ShuffleListU8(stemp, NELEMS(sOneTypeChallengeValidTypes), seed);
 
-    sTypeEffectivenessList[TYPE_MYSTERY] = TYPE_NORMAL;
-    for (i=0; i<NUMBER_OF_MON_TYPES; i++)
+    sTypeEffectivenessList[TYPE_MYSTERY] = TYPE_MYSTERY;
+    for (i = 0, j = 0; i < NUMBER_OF_MON_TYPES; i++)
     {
         if (i != TYPE_MYSTERY)
-            sTypeEffectivenessList[i] = stemp[i];
-
+            sTypeEffectivenessList[i] = stemp[j++];
     }
 }
 u8 GetTypeEffectivenessRandom(u8 type)
@@ -12092,7 +12168,9 @@ u8 GetTypeBySpecies(u16 species, u8 typeNum)
     || species == SPECIES_SWALOT                //-Normal
     || species == SPECIES_LUVDISC               //-Fairy
     || species == SPECIES_ELECTIVIRE            //-Fighting
-    || species == SPECIES_YANMEGA))             //+Flying, -Dragon
+    || species == SPECIES_YANMEGA               //+Flying, -Dragon
+    || species == SPECIES_HUNTAIL               //-Psychic
+    || species == SPECIES_GOREBYSS))            //-Dark
     {
         if (typeNum == 1)
             type = gSpeciesInfo[species].types_old[0];

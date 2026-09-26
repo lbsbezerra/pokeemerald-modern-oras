@@ -231,6 +231,8 @@ EWRAM_DATA u8 *gLinkBattleRecvBuffer = NULL;
 EWRAM_DATA struct BattleResources *gBattleResources = NULL;
 EWRAM_DATA u8 gActionSelectionCursor[MAX_BATTLERS_COUNT] = {0};
 EWRAM_DATA u8 gMoveSelectionCursor[MAX_BATTLERS_COUNT] = {0};
+EWRAM_DATA u8 gTargetSelectionCursor[MAX_BATTLERS_COUNT] = {0};
+EWRAM_DATA u8 gTargetSelectionMove[MAX_BATTLERS_COUNT] = {0};
 EWRAM_DATA u8 gBattlerStatusSummaryTaskId[MAX_BATTLERS_COUNT] = {0};
 EWRAM_DATA u8 gBattlerInMenuId = 0;
 EWRAM_DATA bool8 gDoingBattleAnim = FALSE;
@@ -249,6 +251,8 @@ EWRAM_DATA u16 gLastThrownBall = 0;
 EWRAM_DATA u16 gBallToDisplay = 0;
 EWRAM_DATA bool8 gLastUsedBallMenuPresent = FALSE;
 EWRAM_DATA u8 gItemLimit = 0;
+EWRAM_DATA bool8 gBattleSpeedDoubleTickActive = FALSE;
+EWRAM_DATA bool8 gBattleCaptureSuccessActive = FALSE;
 
 void (*gPreBattleCallback1)(void);
 void (*gBattleMainFunc)(void);
@@ -921,6 +925,7 @@ static void CB2_InitBattleInternal(void)
     gReservedSpritePaletteCount = MAX_BATTLERS_COUNT;
     SetVBlankCallback(VBlankCB_Battle);
     SetUpBattleVarsAndBirchZigzagoon();
+    gBattleCaptureSuccessActive = FALSE;
 
     if (gBattleTypeFlags & BATTLE_TYPE_MULTI && gBattleTypeFlags & BATTLE_TYPE_BATTLE_TOWER)
         SetMainCallback2(CB2_HandleStartMultiPartnerBattle);
@@ -2129,6 +2134,35 @@ void BattleMainCB2(void)
     UpdatePaletteFade();
     RunTasks();
 
+    if (gSaveBlock2Ptr->optionsBattleSpeed
+        && !(gBattleTypeFlags & BATTLE_TYPE_LINK)
+        && !gBattleCaptureSuccessActive
+        && !gPaletteFade.active)
+    {
+        bool8 ballActive = FALSE;
+        u8 i;
+        for (i = 0; i < gBattlersCount; i++)
+        {
+            if (gBattleSpritesDataPtr->healthBoxesData[i].ballAnimActive
+             || gBattleSpritesDataPtr->healthBoxesData[i].waitForCry)
+            {
+                ballActive = TRUE;
+                break;
+            }
+        }
+
+        gBattleSpeedDoubleTickActive = TRUE;
+        if (!ballActive && gBattleMainFunc != HandleTurnActionSelectionState)
+        {
+            for (gActiveBattler = 0; gActiveBattler < gBattlersCount; gActiveBattler++)
+                gBattlerControllerFuncs[gActiveBattler]();
+        }
+        AnimateSprites();
+        BuildOamBuffer();
+        RunTasks();
+        gBattleSpeedDoubleTickActive = FALSE;
+    }
+
     if (JOY_HELD(B_BUTTON) && gBattleTypeFlags & BATTLE_TYPE_RECORDED && RecordedBattle_CanStopPlayback())
     {
         // Player pressed B during recorded battle playback, end battle
@@ -2144,6 +2178,7 @@ static void FreeRestoreBattleData(void)
     gMain.callback1 = gPreBattleCallback1;
     gScanlineEffect.state = 3;
     gMain.inBattle = FALSE;
+    gBattleCaptureSuccessActive = FALSE;
     ZeroEnemyPartyMons();
     m4aSongNumStop(SE_LOW_HEALTH);
     FreeMonSpritesGfx();
@@ -3605,12 +3640,51 @@ void BeginBattleIntro(void)
     gBattleMainFunc = BattleIntroGetMonsData;
 }
 
+static bool8 IsPlayerStillChoosing(void)
+{
+    // STATE_WAIT_ACTION_CONFIRMED = 5 (from HandleTurnActionSelectionState enum)
+    #define STATE_CONFIRMED 5
+    u8 playerLeft = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT);
+    u8 playerRight = GetBattlerAtPosition(B_POSITION_PLAYER_RIGHT);
+
+    if (gBattleCommunication[playerLeft] != STATE_CONFIRMED)
+        return TRUE;
+    if (!(gAbsentBattlerFlags & gBitTable[playerRight])
+        && gBattleCommunication[playerRight] != STATE_CONFIRMED)
+        return TRUE;
+    return FALSE;
+    #undef STATE_CONFIRMED
+}
+
 static void BattleMainCB1(void)
 {
     gBattleMainFunc();
 
     for (gActiveBattler = 0; gActiveBattler < gBattlersCount; gActiveBattler++)
+    {
+        // In double battles during action selection, defer opponent controllers
+        // while any player battler hasn't confirmed their action yet.
+        // This prevents heavy AI computation from stalling player input.
+        if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
+            && GetBattlerSide(gActiveBattler) == B_SIDE_OPPONENT
+            && gBattleMainFunc == HandleTurnActionSelectionState
+            && IsPlayerStillChoosing())
+        {
+            continue;
+        }
         gBattlerControllerFuncs[gActiveBattler]();
+    }
+
+    // When player is done choosing in doubles, immediately dismiss the menu
+    // When player is done choosing in doubles, immediately dismiss the menu
+    // so the screen doesn't appear frozen during opponent AI computation.
+    if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE) && !IsPlayerStillChoosing()
+        && gBattle_BG0_Y != 0)
+    {
+        gBattle_BG0_X = 0;
+        gBattle_BG0_Y = 0;
+        BattlePutTextOnWindow(gText_EmptyString2, B_WIN_MSG);
+    }
 }
 
 static void BattleStartClearSetData(void)
@@ -3641,6 +3715,13 @@ static void BattleStartClearSetData(void)
         gLastPrintedMoves[i] = MOVE_NONE;
         gBattleResources->flags->flags[i] = 0;
         gPalaceSelectionBattleScripts[i] = 0;
+        if ((gSaveBlock2Ptr->optionsCursorMemory) == 0)
+        {
+            gTargetSelectionCursor[i] = 0xFF;
+            gTargetSelectionMove[i] = 0xFF;
+            gActionSelectionCursor[i] = 0;
+            gMoveSelectionCursor[i] = 0;
+        }
     }
 
     for (i = 0; i < 2; i++)
@@ -3788,6 +3869,8 @@ void SwitchInClearSetData(void)
 
     gActionSelectionCursor[gActiveBattler] = 0;
     gMoveSelectionCursor[gActiveBattler] = 0;
+    if ((gSaveBlock2Ptr->optionsCursorMemory) == 0)
+        gTargetSelectionCursor[gActiveBattler] = 0xFF;
 
     ptr = (u8 *)&gDisableStructs[gActiveBattler];
     for (i = 0; i < sizeof(struct DisableStruct); i++)
@@ -3870,6 +3953,8 @@ void FaintClearSetData(void)
 
     gActionSelectionCursor[gActiveBattler] = 0;
     gMoveSelectionCursor[gActiveBattler] = 0;
+    if ((gSaveBlock2Ptr->optionsCursorMemory) == 0)
+        gTargetSelectionCursor[gActiveBattler] = 0xFF;
 
     ptr = (u8 *)&gDisableStructs[gActiveBattler];
     for (i = 0; i < sizeof(struct DisableStruct); i++)
@@ -4192,7 +4277,6 @@ static void BattleIntroSafariQuickRun(void)
             if ((JOY_HELD(R_BUTTON)) && (JOY_HELD(L_BUTTON)))
             {
                 PlaySE(SE_FLEE);
-                gBattlerAttacker = gBattlerByTurnOrder[gCurrentTurnActionNumber];
                 gBattleOutcome = B_OUTCOME_RAN;
                 gBattleMainFunc = HandleEndTurn_RanFromBattle;
                 return;
@@ -4216,7 +4300,6 @@ static void BattleIntroSafariQuickRun(void)
 
                 sSafariRunHoldCounter = 0;
                 PlaySE(SE_FLEE);
-                gBattlerAttacker = gBattlerByTurnOrder[gCurrentTurnActionNumber];
                 gBattleOutcome = B_OUTCOME_RAN;
                 gBattleMainFunc = HandleEndTurn_RanFromBattle;
                 return;
@@ -4932,7 +5015,6 @@ static void HandleTurnActionSelectionState(void)
                     {
                         BtlController_EmitChooseItem(BUFFER_A, gBattleStruct->battlerPartyOrders[gActiveBattler]);
                         MarkBattlerForControllerExec(gActiveBattler);
-                        gItemLimit++;
                        }
                     break;
                 case B_ACTION_SWITCH:
@@ -5127,6 +5209,7 @@ static void HandleTurnActionSelectionState(void)
                     else
                     {
                         gLastUsedItem = (gBattleBufferB[gActiveBattler][1] | (gBattleBufferB[gActiveBattler][2] << 8));
+                        gItemLimit++;
                         gBattleCommunication[gActiveBattler]++;
                     }
                     break;
@@ -5237,6 +5320,19 @@ static void HandleTurnActionSelectionState(void)
                     gHitMarker |= HITMARKER_RUN;
                     gChosenActionByBattler[gActiveBattler] = B_ACTION_RUN;
                     gBattleCommunication[gActiveBattler] = STATE_WAIT_ACTION_CONFIRMED_STANDBY;
+
+                    // In doubles, also forfeit for the partner so the battle ends immediately
+                    if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
+                    {
+                        u8 partner = GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gActiveBattler)));
+                        gChosenActionByBattler[partner] = B_ACTION_RUN;
+                        gBattleCommunication[partner] = STATE_WAIT_ACTION_CONFIRMED;
+
+                        // Skip opponent AI and go straight to turn execution
+                        gBattlerAttacker = gActiveBattler;
+                        gBattleOutcome = B_OUTCOME_FORFEITED;
+                        gBattleMainFunc = HandleEndTurn_RanFromBattle;
+                    }
                 }
                 else
                 {
@@ -5704,9 +5800,9 @@ static void HandleEndTurn_BattleWon(void)
                 PlayBGM(MUS_VICTORY_GYM_LEADER);
             else if (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 2)
                 PlayBGM(MUS_PL_VICTORY_FRONTIER_BRAIN);
-            else if((gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 3) || (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 4))
+            else if((gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 3) || (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 4)  || (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 5))
                 PlayBGM(MUS_HG_VICTORY_FRONTIER_BRAIN);
-            else if (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 5)
+            else if (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 6)
             {
                 if((Random() % 3) == 1)
                     PlayBGM(MUS_PL_VICTORY_FRONTIER_BRAIN);
@@ -5725,11 +5821,15 @@ static void HandleEndTurn_BattleWon(void)
             else if((gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 3) || (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 4))
                 PlayBGM(MUS_HG_VICTORY_TRAINER);
             else if (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 5)
+                PlayBGM(BW_SEQ_BGM_WIN2);
+            else if (gSaveBlock2Ptr->optionsFrontierTrainerBattleMusic == 6)
             {
-                if((Random() % 3) == 1)
+                if((Random() % 4) == 1)
                     PlayBGM(MUS_DP_VICTORY_TRAINER);
-                else if((Random() % 3) == 2)
+                else if((Random() % 4) == 2)
                     PlayBGM(MUS_HG_VICTORY_TRAINER);
+                else if((Random() % 4) == 3)
+                    PlayBGM(BW_SEQ_BGM_WIN2);
                 else
                     PlayBGM(MUS_VICTORY_TRAINER);
             }  
@@ -5744,14 +5844,22 @@ static void HandleEndTurn_BattleWon(void)
         {
         case TRAINER_CLASS_ELITE_FOUR:
             {
-                if ((gSaveBlock2Ptr->optionsTrainerBattleMusic == 0) || (gSaveBlock2Ptr->optionsTrainerBattleMusic == 1) || (gSaveBlock2Ptr->optionsTrainerBattleMusic == 3) || (gSaveBlock2Ptr->optionsTrainerBattleMusic == 4))
+                if ((gSaveBlock2Ptr->optionsTrainerBattleMusic == 0) || (gSaveBlock2Ptr->optionsTrainerBattleMusic == 1))
                     PlayBGM(MUS_VICTORY_LEAGUE);
                 else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 2)
                     PlayBGM(MUS_DP_VICTORY_ELITE_FOUR);
+                else if ((gSaveBlock2Ptr->optionsTrainerBattleMusic == 3) || (gSaveBlock2Ptr->optionsTrainerBattleMusic == 4))
+                    PlayBGM(MUS_HG_VICTORY_GYM_LEADER);
                 else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 5)
+                    PlayBGM(BW_SEQ_BGM_WIN3);
+                else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 6)
                     {
-                        if((Random() % 2) == 1)
+                        if((Random() % 4) == 1)
                             PlayBGM(MUS_DP_VICTORY_ELITE_FOUR);
+                        else if((Random() % 4) == 2)
+                            PlayBGM(MUS_HG_VICTORY_GYM_LEADER);
+                        else if((Random() % 4) == 3)
+                            PlayBGM(BW_SEQ_BGM_WIN3);
                         else
                             PlayBGM(MUS_VICTORY_LEAGUE);
                     }
@@ -5759,14 +5867,22 @@ static void HandleEndTurn_BattleWon(void)
             break;
         case TRAINER_CLASS_CHAMPION:
             {
-                if ((gSaveBlock2Ptr->optionsTrainerBattleMusic == 0) || (gSaveBlock2Ptr->optionsTrainerBattleMusic == 1) || (gSaveBlock2Ptr->optionsTrainerBattleMusic == 3) || (gSaveBlock2Ptr->optionsTrainerBattleMusic == 4))
+                if ((gSaveBlock2Ptr->optionsTrainerBattleMusic == 0) || (gSaveBlock2Ptr->optionsTrainerBattleMusic == 1))
                     PlayBGM(MUS_VICTORY_LEAGUE);
                 else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 2)
                     PlayBGM(MUS_DP_VICTORY_CHAMPION);
+                else if ((gSaveBlock2Ptr->optionsTrainerBattleMusic == 3) || (gSaveBlock2Ptr->optionsTrainerBattleMusic == 4))
+                    PlayBGM(MUS_HG_VICTORY_GYM_LEADER);
                 else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 5)
+                    PlayBGM(BW_SEQ_BGM_WIN5);
+                else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 6)
                     {
-                        if((Random() % 2) == 1)
+                        if((Random() % 4) == 1)
                             PlayBGM(MUS_DP_VICTORY_CHAMPION);
+                        else if((Random() % 4) == 2)
+                            PlayBGM(MUS_HG_VICTORY_GYM_LEADER);
+                        else if((Random() % 4) == 3)
+                            PlayBGM(BW_SEQ_BGM_WIN5);
                         else
                             PlayBGM(MUS_VICTORY_LEAGUE);
                     }
@@ -5784,9 +5900,13 @@ static void HandleEndTurn_BattleWon(void)
                 else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 2)
                     PlayBGM(MUS_DP_VICTORY_GALACTIC);
                 else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 5)
+                    PlayBGM(BW_SEQ_BGM_WIN6);
+                else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 6)
                     {
-                        if((Random() % 2) == 1)
+                        if((Random() % 3) == 1)
                             PlayBGM(MUS_DP_VICTORY_GALACTIC);
+                        else if((Random() % 3) == 2)
+                            PlayBGM(BW_SEQ_BGM_WIN6);
                         else
                             PlayBGM(MUS_VICTORY_AQUA_MAGMA);
                     }
@@ -5801,11 +5921,15 @@ static void HandleEndTurn_BattleWon(void)
                 else if((gSaveBlock2Ptr->optionsTrainerBattleMusic == 3) || (gSaveBlock2Ptr->optionsTrainerBattleMusic == 4))
                     PlayBGM(MUS_HG_VICTORY_GYM_LEADER);
                 else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 5)
+                    PlayBGM(BW_SEQ_BGM_WIN3);
+                else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 6)
                     {
-                        if((Random() % 3) == 1)
+                        if((Random() % 4) == 1)
                             PlayBGM(MUS_DP_VICTORY_GYM_LEADER);
-                        else if((Random() % 3) == 2)
+                        else if((Random() % 4) == 2)
                             PlayBGM(MUS_HG_VICTORY_GYM_LEADER);
+                        else if((Random() % 4) == 3)
+                            PlayBGM(BW_SEQ_BGM_WIN3);
                         else
                             PlayBGM(MUS_VICTORY_GYM_LEADER);
                     }
@@ -5820,11 +5944,15 @@ static void HandleEndTurn_BattleWon(void)
                 else if((gSaveBlock2Ptr->optionsTrainerBattleMusic == 3) || (gSaveBlock2Ptr->optionsTrainerBattleMusic == 4))
                     PlayBGM(MUS_HG_VICTORY_TRAINER);
                 else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 5)
+                    PlayBGM(BW_SEQ_BGM_WIN2);
+                else if (gSaveBlock2Ptr->optionsTrainerBattleMusic == 6)
                 {
-                    if((Random() % 3) == 1)
+                    if((Random() % 4) == 1)
                         PlayBGM(MUS_DP_VICTORY_TRAINER);
-                    else if((Random() % 3) == 2)
+                    else if((Random() % 4) == 2)
                         PlayBGM(MUS_HG_VICTORY_TRAINER);
+                    else if((Random() % 4) == 3)
+                        PlayBGM(BW_SEQ_BGM_WIN2);
                     else
                         PlayBGM(MUS_VICTORY_TRAINER);
                 }  
@@ -6038,6 +6166,16 @@ static void FreeResetData_ReturnToOvOrDoEvolutions(void)
 {
     if (!gPaletteFade.active)
     {
+        // Reset sweet scent chain: preserve only on sweet scent encounter win/catch
+        if (!gIsSweetScentEncounter || (gBattleOutcome != B_OUTCOME_WON && gBattleOutcome != B_OUTCOME_CAUGHT))
+            gSweetScentChainStreak = 0;
+        gIsSweetScentEncounter = FALSE;
+
+        // Reset fishing chain: preserve only on fishing encounter win/catch
+        if (!gIsFishingEncounter || (gBattleOutcome != B_OUTCOME_WON && gBattleOutcome != B_OUTCOME_CAUGHT))
+            gChainFishingStreak = 0;
+        gIsFishingEncounter = FALSE;
+      
         ResetSpriteData();
         if (gLeveledUpInBattle == 0 || (gBattleOutcome != B_OUTCOME_WON && gBattleOutcome != B_OUTCOME_CAUGHT))
         {

@@ -249,7 +249,7 @@ static const struct WindowTemplate sStandardBattleWindowTemplates[] =
         .bg = 0,
         .tilemapLeft = 21,
         .tilemapTop = 57, //57 is second row
-        .width = 4,
+        .width = 5,
         .height = 2,
         .paletteNum = 5,
         .baseBlock = 0x02F0,
@@ -506,7 +506,7 @@ static const struct WindowTemplate sBattleArenaWindowTemplates[] =
         .bg = 0,
         .tilemapLeft = 21,
         .tilemapTop = 57, //57 is second row
-        .width = 4,
+        .width = 5,
         .height = 2,
         .paletteNum = 5,
         .baseBlock = 0x02F0,
@@ -1265,6 +1265,21 @@ void DrawMainBattleBackground(void)
                 LoadCompressedPalette(gBattleTerrainPalette_Frontier_2, BG_PLTT_ID(2), 3 * PLTT_SIZE_4BPP);
             }
             break;
+        }
+    }
+
+    // Brighten battle terrain night palettes when Bright Nights is on
+    if (gSaveBlock2Ptr->optionsBrighterNights
+        && !(gMapHeader.mapType == MAP_TYPE_INDOOR)
+        && ((gLocalTime.hours >= 0 && gLocalTime.hours < 6) || (gLocalTime.hours >= 21 && gLocalTime.hours < 24)))
+    {
+        // Blend BG palettes 2-4 (terrain) toward a warm dark tone to lift blacks without hazing
+        // Apply to both buffers so NORMAL_FADE (pokeball open, move anims) restores correctly
+        BlendPalettes(0x1C, 3, RGB(10, 10, 14));
+        {
+            u16 i;
+            for (i = BG_PLTT_ID(2); i < BG_PLTT_ID(5); i++)
+                gPlttBufferUnfaded[i] = gPlttBufferFaded[i];
         }
     }
 }

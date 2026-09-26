@@ -567,6 +567,8 @@ static u32 sItemIconGfxBuffer[98];
 EWRAM_DATA static u8 sPreviousBoxOption = 0;
 EWRAM_DATA static struct ChooseBoxMenu *sChooseBoxMenu = NULL;
 EWRAM_DATA static struct PokemonStorageSystemData *sStorage = NULL;
+EWRAM_DATA static u32 sSavedFollowerPersonality = 0;
+EWRAM_DATA static u32 sSavedFollowerOtId = 0;
 EWRAM_DATA static bool8 sInPartyMenu = 0;
 EWRAM_DATA static u8 sCurrentBoxOption = 0;
 EWRAM_DATA static u8 sDepositBoxId = 0;
@@ -579,6 +581,7 @@ EWRAM_DATA static s8 sCursorPosition = 0;
 EWRAM_DATA static bool8 sIsMonBeingMoved = 0;
 EWRAM_DATA static u8 sMovingMonOrigBoxId = 0;
 EWRAM_DATA static u8 sMovingMonOrigBoxPos = 0;
+EWRAM_DATA static bool8 sMovingMonWasDesignatedFollower = FALSE;
 EWRAM_DATA static bool8 sAutoActionOn = 0;
 
 // Main tasks
@@ -1700,6 +1703,25 @@ static void CreateMainMenu(u8 whichMenu, s16 *windowIdPtr)
 
 static void CB2_ExitPokeStorage(void)
 {
+    // Reconcile designated follower: find the mon by identity in the current party
+    if (sSavedFollowerPersonality != 0)
+    {
+        u8 i;
+        bool8 found = FALSE;
+        for (i = 0; i < PARTY_SIZE; i++)
+        {
+            if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) != SPECIES_NONE
+                && GetMonData(&gPlayerParty[i], MON_DATA_PERSONALITY) == sSavedFollowerPersonality
+                && GetMonData(&gPlayerParty[i], MON_DATA_OT_ID) == sSavedFollowerOtId)
+            {
+                gSaveBlock1Ptr->designatedFollower = i + 1;
+                found = TRUE;
+                break;
+            }
+        }
+        if (!found)
+            gSaveBlock1Ptr->designatedFollower = 0; // Mon was deposited/traded
+    }
     sPreviousBoxOption = GetCurrentBoxOption();
     gFieldCallback = FieldTask_ReturnToPcMenu;
     SetMainCallback2(CB2_ReturnToField);
@@ -2009,6 +2031,18 @@ void EnterPokeStorage(u8 boxOption)
 {
     ResetTasks();
     sCurrentBoxOption = boxOption;
+    // Save designated follower identity for reconciliation on exit
+    if (gSaveBlock1Ptr->designatedFollower != 0 && gSaveBlock1Ptr->designatedFollower <= PARTY_SIZE)
+    {
+        u8 slot = gSaveBlock1Ptr->designatedFollower - 1;
+        sSavedFollowerPersonality = GetMonData(&gPlayerParty[slot], MON_DATA_PERSONALITY);
+        sSavedFollowerOtId = GetMonData(&gPlayerParty[slot], MON_DATA_OT_ID);
+    }
+    else
+    {
+        sSavedFollowerPersonality = 0;
+        sSavedFollowerOtId = 0;
+    }
     sStorage = Alloc(sizeof(*sStorage));
     if (sStorage == NULL)
     {
@@ -6440,9 +6474,15 @@ static void RefreshDisplayMon(void)
 static void SetMovingMonData(u8 boxId, u8 position)
 {
     if (boxId == TOTAL_BOXES_COUNT)
+    {
+        sMovingMonWasDesignatedFollower = (gSaveBlock1Ptr->designatedFollower == position + 1);
         sStorage->movingMon = gPlayerParty[sCursorPosition];
+    }
     else
+    {
+        sMovingMonWasDesignatedFollower = FALSE;
         BoxMonAtToMon(boxId, position, &sStorage->movingMon);
+    }
 
     PurgeMonOrBoxMon(boxId, position);
     sMovingMonOrigBoxId = boxId;
@@ -6534,6 +6574,9 @@ static void SetPlacedMonData(u8 boxId, u8 position)
             SetBoxMonData(&sStorage->movingMon.box, MON_DATA_BOX_AILMENT, &value);
         }
         gPlayerParty[position] = sStorage->movingMon;
+        // If this mon was the designated follower, update to its new party slot
+        if (sMovingMonWasDesignatedFollower)
+            gSaveBlock1Ptr->designatedFollower = position + 1;
     }
     else
     {
@@ -6551,6 +6594,9 @@ static void SetPlacedMonData(u8 boxId, u8 position)
                 BoxMonRestorePP(&sStorage->movingMon.box);
             }
         SetBoxMonAt(boxId, position, &sStorage->movingMon.box);
+        // Clear designated follower if this mon was the designated one being deposited
+        if (sMovingMonWasDesignatedFollower)
+            gSaveBlock1Ptr->designatedFollower = 0;
     }
 }
 
@@ -6574,6 +6620,8 @@ static void SetShiftedMonData(u8 boxId, u8 position)
     SetDisplayMonData(&sStorage->movingMon, MODE_PARTY);
     sMovingMonOrigBoxId = boxId;
     sMovingMonOrigBoxPos = position;
+    // The displaced mon is now the moving mon — it's not the designated follower
+    sMovingMonWasDesignatedFollower = FALSE;
 }
 
 static bool8 TryStorePartyMonInBox(u8 boxId)
@@ -6977,6 +7025,10 @@ s16 CompactPartySlots(void)
 {
     s16 retVal = -1;
     u16 i, last;
+    u8 slotMap[PARTY_SIZE];
+
+    for (i = 0; i < PARTY_SIZE; i++)
+        slotMap[i] = PARTY_SIZE; // Mark as removed
 
     for (i = 0, last = 0; i < PARTY_SIZE; i++)
     {
@@ -6985,6 +7037,7 @@ s16 CompactPartySlots(void)
         {
             if (i != last)
                 gPlayerParty[last] = gPlayerParty[i];
+            slotMap[i] = last;
             last++;
         }
         else if (retVal == -1)
@@ -6994,6 +7047,20 @@ s16 CompactPartySlots(void)
     }
     for (; last < PARTY_SIZE; last++)
         ZeroMonData(&gPlayerParty[last]);
+
+    // Update designated follower slot to track compaction (0=none, 1-6=slot+1)
+    // Skip if a mon is currently being moved (it will be placed back)
+    if (!sIsMonBeingMoved)
+    {
+        u8 df = gSaveBlock1Ptr->designatedFollower;
+        if (df != 0 && df <= PARTY_SIZE)
+        {
+            if (slotMap[df - 1] >= PARTY_SIZE)
+                gSaveBlock1Ptr->designatedFollower = 0; // Mon was removed
+            else
+                gSaveBlock1Ptr->designatedFollower = slotMap[df - 1] + 1;
+        }
+    }
 
     return retVal;
 }

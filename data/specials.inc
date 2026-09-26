@@ -570,4 +570,6 @@ gSpecials::
 	def_special SwitchMonAbility
 	def_special DoSlidingPuzzle
     def_special NameRival
+    def_special Special_OpenChallengeViewer
+	def_special PlayerHasMESpeciesOrItem
 

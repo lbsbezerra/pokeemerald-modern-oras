@@ -3931,6 +3931,21 @@ static void Task_LoadInfoScreen(u8 taskId)
         CopyWindowToVram(WIN_INFO, COPYWIN_FULL);
         CopyBgTilemapBufferToVram(1);
         CopyBgTilemapBufferToVram(2);
+        // Reload BG3 tilemap to fix corruption between init cases.
+        {
+            extern const u32 gPokedexPlusHGSS_ScreenInfo_Tilemap[];
+            LZ77UnCompWram(gPokedexPlusHGSS_ScreenInfo_Tilemap, GetBgTilemapBuffer(3));
+        }
+        if (GetShinySeenFlag(sPokedexListItem->dexNum))
+        {
+            u16 *buf = (u16 *)GetBgTilemapBuffer(3);
+            buf[9 * 32 + 14] = 208; buf[9 * 32 + 15] = 209;
+            buf[9 * 32 + 16] = 210; buf[9 * 32 + 17] = 211;
+            buf[10 * 32 + 14] = 212; buf[10 * 32 + 15] = 213;
+            buf[10 * 32 + 16] = 214; buf[10 * 32 + 17] = 215;
+            buf[11 * 32 + 14] = 216; buf[11 * 32 + 15] = 217;
+            buf[11 * 32 + 16] = 218; buf[11 * 32 + 17] = 219;
+        }
         CopyBgTilemapBufferToVram(3);
         gMain.state++;
         break;
@@ -4038,6 +4053,12 @@ static void FreeInfoScreenWindowAndBgBuffers(void)
 
 static void Task_HandleInfoScreenInput(u8 taskId)
 {
+    // Fix BG3 tilemap entries corrupted by stale DMA writes each VBlank.
+    // Write directly to VRAM since the RAM buffer gets re-corrupted every frame.
+    // mapBaseIndex 15 for BG3 on the info screen.
+    *(vu16 *)(BG_SCREEN_ADDR(15) + 553 * 2) = 65;   // row 17 col 9: background fill
+    *(vu16 *)(BG_SCREEN_ADDR(15) + 628 * 2) = 111;  // row 19 col 20: border
+
     if (gTasks[taskId].tScrolling)
     {
         // Scroll up/down
@@ -4072,7 +4093,7 @@ static void Task_HandleInfoScreenInput(u8 taskId)
             sPokedexView->isShowingShiny = !sPokedexView->isShowingShiny;
 
             if (sPokedexView->isShowingShiny)
-                palData = GetMonSpritePalFromSpeciesAndPersonality(species, 0, 0); // otId=0, personality=0 forces shiny
+                palData = GetMonSpritePalFromSpeciesAndPersonality(species, 0, 0x00010001); // otId=0, personality with shinyValue=0 and non-zero to pass shiny check
             else
                 palData = gMonPaletteTable[species].data;
 
@@ -4085,12 +4106,25 @@ static void Task_HandleInfoScreenInput(u8 taskId)
 
     if ((JOY_NEW(DPAD_RIGHT) || (JOY_NEW(R_BUTTON) && gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_LR)))
     {
-        sPokedexView->selectedScreen = AREA_SCREEN;
-        StopMonSpriteAnimation(gTasks[taskId].tMonSpriteId);
-        BeginNormalPaletteFade(0xFFFFFFEB, 0, 0, 0x10, RGB_BLACK);
-        sPokedexView->screenSwitchState = 1;
-        gTasks[taskId].func = Task_SwitchScreensFromInfoScreen;
-        PlaySE(SE_PIN);
+        if (gMain.inBattle)
+        {
+            // Skip AREA screen in battle (tiles are garbled from battle VRAM state)
+            sPokedexView->selectedScreen = STATS_SCREEN;
+            StopMonSpriteAnimation(gTasks[taskId].tMonSpriteId);
+            BeginNormalPaletteFade(0xFFFFFFEB, 0, 0, 0x10, RGB_BLACK);
+            sPokedexView->screenSwitchState = 4;
+            gTasks[taskId].func = Task_SwitchScreensFromInfoScreen;
+            PlaySE(SE_PIN);
+        }
+        else
+        {
+            sPokedexView->selectedScreen = AREA_SCREEN;
+            StopMonSpriteAnimation(gTasks[taskId].tMonSpriteId);
+            BeginNormalPaletteFade(0xFFFFFFEB, 0, 0, 0x10, RGB_BLACK);
+            sPokedexView->screenSwitchState = 1;
+            gTasks[taskId].func = Task_SwitchScreensFromInfoScreen;
+            PlaySE(SE_PIN);
+        }
     }
 
 }
@@ -4112,6 +4146,9 @@ static void Task_SwitchScreensFromInfoScreen(u8 taskId)
             break;
         case 3:
             gTasks[taskId].func = Task_LoadSizeScreen;
+            break;
+        case 4:
+            gTasks[taskId].func = Task_LoadStatsScreen;
             break;
         }
     }
@@ -4261,6 +4298,7 @@ void OpenPokedexInfoScreen(u16 species, void (*returnCallback)(void))
 //*        Area screen               *
 //*                                  *
 //************************************
+#define tSkipCry         data[3]
 static void Task_LoadAreaScreen(u8 taskId)
 {
     switch (gMain.state)
@@ -4307,6 +4345,7 @@ static void Task_SwitchScreensFromAreaScreen(u8 taskId)
         {
         case 1:
         default:
+            gTasks[taskId].tSkipCry = FALSE;
             gTasks[taskId].func = Task_LoadInfoScreen;
             break;
         case 2:
@@ -4346,7 +4385,7 @@ static void Task_ExitAreaScreenToExternal(u8 taskId)
     }
 }
 
-
+#undef tSkipCry
 
 //************************************
 //*                                  *
@@ -4634,6 +4673,15 @@ static void PrintInfoScreenTextSmall(const u8* str, u8 left, u8 top)
     color[0] = TEXT_COLOR_TRANSPARENT;
     color[1] = TEXT_DYNAMIC_COLOR_6;
     color[2] = TEXT_COLOR_LIGHT_GRAY;
+
+    AddTextPrinterParameterized4(0, 0, left, top, 0, 0, color, 0, str);
+}
+static void PrintInfoScreenTextSmallGray(const u8* str, u8 left, u8 top)
+{
+    u8 color[3];
+    color[0] = TEXT_COLOR_TRANSPARENT;
+    color[1] = TEXT_DYNAMIC_COLOR_5;
+    color[2] = TEXT_COLOR_DARK_GRAY;
 
     AddTextPrinterParameterized4(0, 0, left, top, 0, 0, color, 0, str);
 }
@@ -6574,7 +6622,10 @@ static void Task_SwitchScreensFromStatsScreen(u8 taskId)
         case 1:
             FreeAllWindowBuffers();
             InitWindows(sInfoScreen_WindowTemplates);
-            gTasks[taskId].func = Task_LoadAreaScreen;
+            if (gMain.inBattle)
+                gTasks[taskId].func = Task_LoadInfoScreen;
+            else
+                gTasks[taskId].func = Task_LoadAreaScreen;
             break;
         case 2:
             gTasks[taskId].func = Task_LoadCryScreen;
@@ -6777,7 +6828,19 @@ static void Task_LoadEvolutionScreen(u8 taskId)
         GetSeenFlagTargetSpecies();
         if (sPokedexView->sEvoScreenData.numAllEvolutions != 0 && sPokedexView->sEvoScreenData.numSeen != 0)
         {
-            sPokedexView->sEvoScreenData.arrowSpriteId = CreateSprite(&sSpriteTemplate_Arrow, 7, 58, 0);
+            // Find first seen entry for initial arrow position
+            u8 initPos = 0;
+            u8 j;
+            for (j = 0; j < sPokedexView->sEvoScreenData.numAllEvolutions; j++)
+            {
+                if (sPokedexView->sEvoScreenData.seen[j] == TRUE)
+                {
+                    initPos = j;
+                    break;
+                }
+            }
+            sPokedexView->sEvoScreenData.menuPos = initPos;
+            sPokedexView->sEvoScreenData.arrowSpriteId = CreateSprite(&sSpriteTemplate_Arrow, 7, 58 + 9 * initPos, 0);
             gSprites[sPokedexView->sEvoScreenData.arrowSpriteId].animNum = 2;
         }
         gMain.state++;
@@ -6838,38 +6901,42 @@ static void Task_HandleEvolutionScreenInput(u8 taskId)
     }
     #endif
 
-    if (sPokedexView->sEvoScreenData.numAllEvolutions != 0 && sPokedexView->sEvoScreenData.numSeen != 0)
+    if (sPokedexView->sEvoScreenData.numAllEvolutions != 0)
     {
         u8 i;
         u8 base_y = 58;
         u8 base_y_offset = 9;
         u8 pos = sPokedexView->sEvoScreenData.menuPos;
         u8 max = sPokedexView->sEvoScreenData.numAllEvolutions;
-        if (JOY_NEW(DPAD_DOWN))
+        if (sPokedexView->sEvoScreenData.numSeen > 1 && JOY_NEW(DPAD_DOWN))
         {
             while (TRUE)
             {
                 pos += 1;
                 if (pos >= max)
                     pos = 0;
-
                 if (sPokedexView->sEvoScreenData.seen[pos] == TRUE)
                     break;
             }
             gSprites[sPokedexView->sEvoScreenData.arrowSpriteId].y = base_y + base_y_offset * pos;
             sPokedexView->sEvoScreenData.menuPos = pos;
         }
-        else if (JOY_NEW(DPAD_UP))
+        else if (sPokedexView->sEvoScreenData.numSeen > 1 && JOY_NEW(DPAD_UP))
         {
-            if (sPokedexView->sEvoScreenData.menuPos == 0)
-                sPokedexView->sEvoScreenData.menuPos = sPokedexView->sEvoScreenData.numAllEvolutions - 1;
-            else
-                sPokedexView->sEvoScreenData.menuPos -= 1;
-
-            gSprites[sPokedexView->sEvoScreenData.arrowSpriteId].y = base_y + base_y_offset * sPokedexView->sEvoScreenData.menuPos;
+            while (TRUE)
+            {
+                if (pos == 0)
+                    pos = max - 1;
+                else
+                    pos -= 1;
+                if (sPokedexView->sEvoScreenData.seen[pos] == TRUE)
+                    break;
+            }
+            gSprites[sPokedexView->sEvoScreenData.arrowSpriteId].y = base_y + base_y_offset * pos;
+            sPokedexView->sEvoScreenData.menuPos = pos;
         }
 
-        if (JOY_NEW(A_BUTTON))
+        if (JOY_NEW(A_BUTTON) && sPokedexView->sEvoScreenData.seen[sPokedexView->sEvoScreenData.menuPos])
         {
             if (sPokedexView->isSearchResults && sPokedexView->originalSearchSelectionNum == 0)
                 sPokedexView->originalSearchSelectionNum = sPokedexListItem->dexNum;
@@ -6941,7 +7008,10 @@ static void HandleTargetSpeciesPrint(u8 taskId, u16 targetSpecies, u16 previousT
     else
         StringCopy(gStringVar3, gText_ThreeQuestionMarks); //show questionmarks instead of name
     StringExpandPlaceholders(gStringVar3, gText_EVO_Name); //evolution mon name
-    PrintInfoScreenTextSmall(gStringVar3, base_x, base_y + base_y_offset*base_i); //evolution mon name
+    if (seen)
+        PrintInfoScreenTextSmall(gStringVar3, base_x, base_y + base_y_offset*base_i); //evolution mon name
+    else
+        PrintInfoScreenTextSmallGray(gStringVar3, base_x, base_y + base_y_offset*base_i); //gray for unseen
 
     //Print mon icon in the top row
     if (isEevee)
@@ -6969,13 +7039,14 @@ static void HandleTargetSpeciesPrint(u8 taskId, u16 targetSpecies, u16 previousT
 static void CreateCaughtBallEvolutionScreen(u16 targetSpecies, u8 x, u8 y, u16 unused)
 {
     bool8 owned = GetSetPokedexFlag(SpeciesToNationalPokedexNum(targetSpecies), FLAG_GET_CAUGHT);
+    bool8 seen = GetSetPokedexFlag(SpeciesToNationalPokedexNum(targetSpecies), FLAG_GET_SEEN);
     if (owned)
         BlitBitmapToWindow(0, sCaughtBall_Gfx, x, y-1, 8, 16);
-    else
+    else if (seen)
     {
-        //FillWindowPixelRect(0, PIXEL_FILL(0), x, y, 8, 16); //not sure why this was even here
         PrintInfoScreenTextSmall(gText_OneDash, x+1, y-1);
     }
+    // Unseen: show nothing (no dash, no ball)
 }
 
 static void HandlePreEvolutionSpeciesPrint(u8 taskId, u16 preSpecies, u16 species, u8 base_x, u8 base_y, u8 base_y_offset, u8 base_i)
@@ -7002,7 +7073,10 @@ static void HandlePreEvolutionSpeciesPrint(u8 taskId, u16 preSpecies, u16 specie
     }
     #endif
 
-    PrintInfoScreenTextSmall(gStringVar3, base_x, base_y + base_y_offset*base_i); //evolution mon name
+    if (seen)
+        PrintInfoScreenTextSmall(gStringVar3, base_x, base_y + base_y_offset*base_i);
+    else
+        PrintInfoScreenTextSmallGray(gStringVar3, base_x, base_y + base_y_offset*base_i);
 
     if (base_i < 3)
     {
@@ -7313,7 +7387,10 @@ static u8 PrintEvolutionTargetSpeciesAndMethod(u8 taskId, u16 species, u8 depth,
             StringExpandPlaceholders(gStringVar4, gText_EVO_UNKNOWN );
             break;
         }//Switch end
-        PrintInfoScreenTextSmall(gStringVar4, base_x + depth_x*depth+base_x_offset, base_y + base_y_offset*base_i); //Print actual instructions
+        if (GetSetPokedexFlag(SpeciesToNationalPokedexNum(targetSpecies), FLAG_GET_SEEN))
+            PrintInfoScreenTextSmall(gStringVar4, base_x + depth_x*depth+base_x_offset, base_y + base_y_offset*base_i); //Print actual instructions
+        else
+            PrintInfoScreenTextSmallGray(gStringVar4, base_x + depth_x*depth+base_x_offset, base_y + base_y_offset*base_i); //Gray for unseen
 
         depth_i += PrintEvolutionTargetSpeciesAndMethod(taskId, targetSpecies, depth+1, base_i+1);
     }//For loop end
@@ -7885,7 +7962,7 @@ static void Task_HandleCryScreenInput(u8 taskId)
         if (JOY_NEW(DPAD_RIGHT)
          || (JOY_NEW(R_BUTTON) && gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_LR))
         {
-            if (!sPokedexListItem->owned)
+            if (!sPokedexListItem->owned || gMain.inBattle)
             {
                 PlaySE(SE_FAILURE);
             }
